@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom'
 
 export default function Settings() {
   const navigate = useNavigate()
+  const user = useSubscriptionStore((state) => state.user)
+  const signInWithGoogle = useSubscriptionStore((state) => state.signInWithGoogle)
+  const signOut = useSubscriptionStore((state) => state.signOut)
   const resetSubscriptions = useSubscriptionStore((state) => state.resetSubscriptions)
   const isDarkMode = useSubscriptionStore((state) => state.isDarkMode)
   const toggleDarkMode = useSubscriptionStore((state) => state.toggleDarkMode)
@@ -33,6 +36,32 @@ export default function Settings() {
       {/* Unified Settings Card */}
       <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:border md:border-tertiary dark:md:border-slate-700 overflow-hidden transition-colors divide-y divide-tertiary dark:divide-slate-700">
         
+        {/* 사용자 계정 설정 */}
+        <div className="py-6 md:p-6 flex items-center justify-between transition-colors">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-dark dark:text-white">계정</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {user ? `${user.email} 계정으로 로그인됨` : '로그인하여 데이터를 동기화하세요.'}
+            </p>
+          </div>
+          {user ? (
+            <button
+              onClick={signOut}
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all"
+            >
+              로그아웃
+            </button>
+          ) : (
+            <button
+              onClick={signInWithGoogle}
+              className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+            >
+              <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+              구글 로그인
+            </button>
+          )}
+        </div>
+
         {/* 테마 설정 */}
         {/* 테마 설정 */}
         <div className="py-4 md:p-6 flex items-center justify-between transition-colors">

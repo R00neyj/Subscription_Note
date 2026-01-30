@@ -1,56 +1,117 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-
-const SAMPLE_DATA = [
-  { id: 1, service_name: 'Netflix', categories: ['OTT'], billing_date: '매달 15일', price: 17000, payment_method: '현대카드', status: 'active' },
-  { id: 2, service_name: 'YouTube Premium', categories: ['OTT'], billing_date: '매달 20일', price: 14900, payment_method: '카카오뱅크', status: 'active' },
-  { id: 3, service_name: 'Adobe Creative Cloud', categories: ['Work'], billing_date: '매달 5일', price: 62000, payment_method: '법인카드', status: 'active' },
-  { id: 4, service_name: 'Coupang WOW', categories: ['Shopping'], billing_date: '매달 1일', price: 4990, payment_method: '쿠페이', status: 'active' },
-  { id: 5, service_name: 'Notion', categories: ['Work'], billing_date: '매달 10일', price: 12000, payment_method: '법인카드', status: 'disable' },
-]
+import { supabase } from '../lib/supabase'
 
 const useSubscriptionStore = create(
   persist(
-    (set) => ({
-      subscriptions: SAMPLE_DATA,
+    (set, get) => ({
+      subscriptions: [],
       searchQuery: '',
+      isLoading: false,
+      user: null,
 
-      // Actions
-      setSearchQuery: (query) => set({ searchQuery: query }),
+      // Auth Actions
+      setUser: (user) => set({ user }),
       
-      addSubscription: (subscription) => set((state) => ({
-        subscriptions: [
-          ...state.subscriptions,
-          { ...subscription, id: Date.now() } // Simple ID generation
-        ]
-      })),
-
-      updateSubscription: (id, updates) => set((state) => ({
-        subscriptions: state.subscriptions.map((sub) =>
-          sub.id === id ? { ...sub, ...updates } : sub
-        )
-      })),
-
-      removeSubscription: (id) => set((state) => ({
-        subscriptions: state.subscriptions.filter((sub) => sub.id !== id)
-      })),
-      
-      resetSubscriptions: () => set({ subscriptions: [] }),
-
-      // Modal State (UI only, not persisted)
-      modal: {
-        isOpen: false,
-        data: null // null for create, object for update
+      signInWithGoogle: async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin
+          }
+        })
+        if (error) console.error('Error signing in:', error)
       },
 
-      openModal: (data = null) => set(() => ({ 
-        modal: { isOpen: true, data } 
-      })),
+      signOut: async () => {
+        const { error } = await supabase.auth.signOut()
+        if (!error) {
+          set({ user: null, subscriptions: [] })
+        }
+      },
 
-      closeModal: () => set(() => ({ 
-        modal: { isOpen: false, data: null } 
-      })),
+      // Cloud Actions
+      fetchSubscriptions: async () => {
+        const currentUser = get().user
+        if (!currentUser) return
 
+        set({ isLoading: true })
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', currentUser.id) // 본인의 데이터만 가져옴
+          .order('created_at', { ascending: true })
+        
+        if (!error && data) {
+          set({ subscriptions: data, isLoading: false })
+        } else {
+          set({ isLoading: false })
+        }
+      },
+
+      addSubscription: async (subscription) => {
+        const currentUser = get().user
+        if (!currentUser) return
+
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .insert([{ ...subscription, user_id: currentUser.id }])
+          .select()
+        
+        if (!error && data) {
+          set((state) => ({ subscriptions: [...state.subscriptions, data[0]] }))
+        }
+      },
+
+      updateSubscription: async (id, updates) => {
+        const { error } = await supabase
+          .from('subscriptions')
+          .update(updates)
+          .eq('id', id)
+        
+        if (!error) {
+          set((state) => ({
+            subscriptions: state.subscriptions.map((sub) =>
+              sub.id === id ? { ...sub, ...updates } : sub
+            )
+          }))
+        }
+      },
+
+      removeSubscription: async (id) => {
+        const { error } = await supabase
+          .from('subscriptions')
+          .delete()
+          .eq('id', id)
+        
+        if (!error) {
+          set((state) => ({
+            subscriptions: state.subscriptions.filter((sub) => sub.id !== id)
+          }))
+        }
+      },
+      
+      resetSubscriptions: async () => {
+        const { error } = await supabase
+          .from('subscriptions')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
+        
+        if (!error) {
+          set({ subscriptions: [] })
+        }
+      },
+
+      // UI State
+      searchQuery: '',
+      setSearchQuery: (query) => set({ searchQuery: query }),
+
+      // Modal State
+      modal: { isOpen: false, data: null },
+      openModal: (data = null) => set(() => ({ modal: { isOpen: true, data } })),
+      closeModal: () => set(() => ({ modal: { isOpen: false, data: null } })),
+
+      // Theme State
       isDarkMode: false,
       toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 
@@ -66,24 +127,9 @@ const useSubscriptionStore = create(
       resetTutorial: () => set({ hasSeenTutorial: false, isTutorialOpen: true, currentStep: 0 }),
     }),
     {
-      name: 'subscription-storage', // unique name for localStorage key
-      version: 1, // Add version for migration
+      name: 'subscription-storage',
       storage: createJSONStorage(() => localStorage),
-      migrate: (persistedState, version) => {
-        if (version === 0) {
-          // Migration from version 0 to 1: category (string) -> categories (array)
-          const state = persistedState
-          state.subscriptions = state.subscriptions.map(sub => ({
-            ...sub,
-            categories: sub.category ? [sub.category] : (sub.categories || []),
-            category: undefined // remove old field
-          }))
-          return state
-        }
-        return persistedState
-      },
       partialize: (state) => ({ 
-        subscriptions: state.subscriptions,
         isDarkMode: state.isDarkMode,
         hasSeenTutorial: state.hasSeenTutorial
       }), 

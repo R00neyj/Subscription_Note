@@ -8,17 +8,18 @@
 -   **프레임워크:** React (v19)
 -   **빌드 도구:** Vite (v7)
 -   **언어:** JavaScript (ES Modules)
--   **상태 관리:** Zustand (Persist middleware 사용)
--   **스타일링:** Tailwind CSS v4, Lucide React (아이콘)
--   **라우팅:** React Router v7
+-   **상태 관리:** Zustand (Persist middleware 사용, Supabase 연동).
+-   **스타일링:** Tailwind CSS v4, Lucide React (아이콘).
+-   **라우팅:** React Router v7.
+-   **백엔드/인증:** Supabase (Cloud DB, Google OAuth 연동).
 
 ## 프로젝트 구조
 
 -   `src/`: 소스 코드
-    -   `App.jsx`: 다크 모드 클래스(`dark`) 제어 및 라우팅 설정.
-    -   `main.jsx`: 진입점(Entry point).
-    -   `assets/`: 정적 자원.
+    -   `lib/`: 외부 라이브러리 설정 (`supabase.js`, `utils.js`).
     -   `components/`: 재사용 가능한 UI 컴포넌트.
+        -   `TutorialGuide.jsx`: SVG Mask 기반의 인터랙티브 온보딩 가이드.
+        -   `FloatingActionButton.jsx`: 모바일 전용 추가 버튼 (스크롤 애니메이션).
         -   `Layout.jsx`: 사이드바 네비게이션 및 메인 영역 레이아웃 (`max-w-[1440px]`).
         -   `Header.jsx`: 상단 헤더 (검색 기능).
         -   `Navigation.jsx`: 사이드바 네비게이션 (다크 모드 토글 포함).
@@ -45,14 +46,24 @@
     -   컬럼별 오름차순/내림차순 정렬 지원.
 
 -   **구독 관리 (CRUD)**:
-    -   모달을 통한 구독 추가 및 수정.
+    -   모달을 통한 구독 추가 및 수정 (PC 16px 폰트 최적화).
     -   구독 상태 토글 (활성/비활성).
-    -   삭제 기능.
+    -   데이터 삭제 및 전체 초기화.
+
+-   **클라우드 동기화 및 인증**:
+    -   **구글 로그인**: Supabase Auth를 통한 소셜 로그인 지원.
+    -   **보안 (RLS)**: Row Level Security를 적용하여 본인 데이터만 접근 가능.
+    -   **실시간 연동**: 기기 간 데이터 자동 동기화.
+
+-   **온보딩 튜토리얼**:
+    -   **SVG Mask 스포트라이트**: 주요 기능을 강조하는 전문적인 가이드 UI.
+    -   **동적 타겟팅**: PC 사이드바와 모바일 FAB 등 기기별 최적화된 하이라이트 위치 제공.
 
 -   **UI/UX**:
-    -   **다크 모드**: 시스템 설정과 무관하게 버튼으로 토글 가능 (네비게이션 바 하단).
-    -   **반응형 레이아웃**: Tailwind CSS 기반의 유연한 디자인.
-    -   **일관된 스타일**: 헤더 및 테이블 보더 색상 등 다크 모드 최적화.
+    -   **다크 모드**: 시스템 설정 연동 및 수동 토글 지원.
+    -   **플랫 디자인**: 모든 그림자(shadow)를 제거한 미니멀하고 현대적인 UI.
+    -   **반응형 레이아웃**: 모바일 상단 고정 헤더 및 하단 네비게이션 최적화.
+    -   **PWA**: 설치 가능한 웹 앱 (맞춤형 아이콘, 데스크탑/모바일 전용 스크린샷 포함).
 
 ## 개발 워크플로우
 
