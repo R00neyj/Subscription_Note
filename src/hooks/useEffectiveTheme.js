@@ -19,5 +19,12 @@ export function useEffectiveTheme() {
     return () => mediaQuery.removeEventListener('change', update)
   }, [themeMode])
 
+  useEffect(() => {
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', isDark ? '#0F172A' : '#F8FAFC')
+    }
+  }, [isDark])
+
   return isDark
 }
