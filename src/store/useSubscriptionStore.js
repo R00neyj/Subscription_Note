@@ -14,10 +14,12 @@ const useSubscriptionStore = create(
       setUser: (user) => set({ user }),
       
       signInWithGoogle: async () => {
+        const redirectUrl = window.location.origin
+        console.log('Attempting to sign in with redirect URL:', redirectUrl)
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin
+            redirectTo: redirectUrl
           }
         })
         if (error) console.error('Error signing in:', error)

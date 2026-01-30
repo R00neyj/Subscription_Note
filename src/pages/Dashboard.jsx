@@ -239,7 +239,7 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <div className="w-full h-[100px] flex items-center justify-center bg-tertiary rounded-[24px] text-dark/40">
+              <div className="w-full h-[100px] flex items-center justify-center bg-tertiary dark:bg-slate-900 rounded-[24px] text-dark/40 dark:text-slate-500">
                 구독 데이터가 없습니다.
               </div>
             )}
