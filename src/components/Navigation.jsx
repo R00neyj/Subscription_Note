@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
+import { useEffectiveTheme } from '../hooks/useEffectiveTheme'
 
 const navItems = [
   { path: '/', activeIcon: '/name=home, fill=true.svg', inactiveIcon: '/name=home, fill=false.svg', label: '홈' },
@@ -11,8 +12,19 @@ const navItems = [
 export default function Navigation() {
   const location = useLocation()
   const openModal = useSubscriptionStore((state) => state.openModal)
-  const isDarkMode = useSubscriptionStore((state) => state.isDarkMode)
-  const toggleDarkMode = useSubscriptionStore((state) => state.toggleDarkMode)
+  const themeMode = useSubscriptionStore((state) => state.themeMode) || 'system'
+  const setThemeMode = useSubscriptionStore((state) => state.setThemeMode)
+  const isDark = useEffectiveTheme()
+
+  const toggleDarkMode = () => {
+    if (themeMode === 'dark') setThemeMode('light')
+    else if (themeMode === 'light') setThemeMode('dark')
+    else {
+      // system
+      if (isDark) setThemeMode('light')
+      else setThemeMode('dark')
+    }
+  }
 
   return (
     <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-colors duration-300">
@@ -75,7 +87,7 @@ export default function Navigation() {
         className="hidden md:flex justify-center items-center w-12 h-12 rounded-full border border-dark/20 dark:border-white/20 cursor-pointer hover:bg-white/50 dark:hover:bg-slate-700 transition-colors"
       >
         <img 
-          src={isDarkMode ? "/darkMode=true, fill=true.svg" : "/darkMode=false, fill=false.svg"} 
+          src={isDark ? "/darkMode=true, fill=true.svg" : "/darkMode=false, fill=false.svg"} 
           alt="Dark Mode" 
           className="w-6 h-6 dark:invert" 
         />

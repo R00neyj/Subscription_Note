@@ -2,13 +2,14 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import { X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useEffectiveTheme } from '../hooks/useEffectiveTheme'
 
 export default function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const searchQuery = useSubscriptionStore((state) => state.searchQuery)
   const setSearchQuery = useSubscriptionStore((state) => state.setSearchQuery)
-  const isDarkMode = useSubscriptionStore((state) => state.isDarkMode)
+  const isDark = useEffectiveTheme()
 
   // Sync searchQuery with URL if we are on search page
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function Header() {
       <div className="flex flex-row items-center p-0 gap-[8px] w-fit h-[48px] shrink-0">
         <div className="w-[48px] h-[48px] bg-white dark:bg-slate-800 rounded-lg border border-blue-50 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
             <img 
-              src={isDarkMode ? "/logo_d.svg" : "/favicon.svg"} 
+              src={isDark ? "/logo_d.svg" : "/favicon.svg"} 
               alt="Logo" 
               className="w-[42px] h-[42px]" 
             />

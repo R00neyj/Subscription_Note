@@ -9,12 +9,13 @@ import SearchResults from './pages/SearchResults'
 import TutorialGuide from './components/TutorialGuide'
 import useSubscriptionStore from './store/useSubscriptionStore'
 import { supabase } from './lib/supabase'
+import { useEffectiveTheme } from './hooks/useEffectiveTheme'
 
 export default function App() {
-  const isDarkMode = useSubscriptionStore((state) => state.isDarkMode)
   const fetchSubscriptions = useSubscriptionStore((state) => state.fetchSubscriptions)
   const user = useSubscriptionStore((state) => state.user)
   const setUser = useSubscriptionStore((state) => state.setUser)
+  const isDark = useEffectiveTheme()
 
   useEffect(() => {
     // 1. 현재 세션 확인 및 구독
@@ -31,18 +32,20 @@ export default function App() {
 
   useEffect(() => {
     // 2. 유저가 있을 때만 데이터 로드
-    if (user) {
+    // user 객체 전체가 아닌 user.id를 의존성으로 하여 불필요한 재실행 방지
+    if (user?.id) {
       fetchSubscriptions()
     }
-  }, [user, fetchSubscriptions])
+  }, [user?.id, fetchSubscriptions])
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark')
+    const root = document.documentElement
+    if (isDark) {
+      root.classList.add('dark')
     } else {
-      document.documentElement.classList.remove('dark')
+      root.classList.remove('dark')
     }
-  }, [isDarkMode])
+  }, [isDark])
 
   return (
     <BrowserRouter>
