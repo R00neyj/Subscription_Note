@@ -1,126 +1,81 @@
 # 프로젝트 컨텍스트: Sub-list Dashboard
 
 ## 프로젝트 개요
-이 프로젝트는 **React**와 **Vite**를 사용하여 구축된 웹 애플리케이션입니다. 현재 Vite 템플릿 구조를 기반으로 초기 설정 단계에 있으며, 대시보드 애플리케이션으로 개발될 예정입니다.
+이 프로젝트는 **React**와 **Vite**를 사용하여 구축된 웹 애플리케이션입니다. 구독 서비스를 관리하는 대시보드 애플리케이션으로, **다크 모드**를 지원하며 반응형 웹 디자인이 적용되어 있습니다.
 
 ## 기술 스택
 
 -   **프레임워크:** React (v19)
-
 -   **빌드 도구:** Vite (v7)
-
 -   **언어:** JavaScript (ES Modules)
-
--   **린팅:** ESLint
-
--   **스타일링:** Tailwind CSS v4
-
-
+-   **상태 관리:** Zustand (Persist middleware 사용)
+-   **스타일링:** Tailwind CSS v4, Lucide React (아이콘)
+-   **라우팅:** React Router v7
 
 ## 프로젝트 구조
 
--   `src/`: 소스 코드가 위치합니다.
-
-    -   `App.jsx`: 메인 애플리케이션 컴포넌트입니다.
-
-    -   `main.jsx`: App을 렌더링하는 진입점(Entry point)입니다.
-
-    -   `assets/`: 이미지와 같은 정적 자원을 보관합니다.
-
-    -   `components/`: 재사용 가능한 UI 컴포넌트 (Table, Header, Modal 등).
-
+-   `src/`: 소스 코드
+    -   `App.jsx`: 다크 모드 클래스(`dark`) 제어 및 라우팅 설정.
+    -   `main.jsx`: 진입점(Entry point).
+    -   `assets/`: 정적 자원.
+    -   `components/`: 재사용 가능한 UI 컴포넌트.
+        -   `Layout.jsx`: 사이드바 네비게이션 및 메인 영역 레이아웃 (`max-w-[1440px]`).
+        -   `Header.jsx`: 상단 헤더 (검색 기능).
+        -   `Navigation.jsx`: 사이드바 네비게이션 (다크 모드 토글 포함).
+        -   `SubscriptionTable.jsx`: 구독 목록 테이블 (정렬 및 행 클릭 이벤트).
+        -   `SubscriptionModal.jsx`: 구독 추가/수정 모달.
     -   `constants/`: 상수 데이터 (`categories.js` 등).
-
-    -   `store/`: Zustand 스토어 (`useSubscriptionStore.js`).
-
-    -   `pages/`: 페이지 컴포넌트 (`Dashboard.jsx`, `SubscriptionList.jsx`).
-
--   `public/`: 공용 정적 자원 폴더입니다.
-
--   `vite.config.js`: Vite 설정 파일입니다.
-
--   `eslint.config.js`: ESLint 설정 파일입니다.
-
-
+    -   `store/`: Zustand 스토어 (`useSubscriptionStore.js` - 데이터 및 테마 상태 관리).
+    -   `pages/`: 페이지 컴포넌트.
+        -   `Dashboard.jsx`: 요약 카드, 차트, 최근 목록.
+        -   `SubscriptionList.jsx`: 전체 구독 목록 및 필터링.
+        -   `Calendar.jsx`: 결제 달력 (예정).
+        -   `Settings.jsx`: 설정 (데이터 초기화 등).
 
 ## 주요 기능 및 UI
 
--   **대시보드**: 구독 요약, 카테고리별 지출 차트, 최근 구독 리스트(정렬 가능).
+-   **대시보드**:
+    -   구독 요약 (총 구독료, 구독 수, 최대 지출 항목).
+    -   카테고리별 지출 비중 바 차트 및 범례.
+    -   최근 구독 리스트 (상위 5개).
 
--   **구독 목록**: 카테고리 필터링(탭), 다중 컬럼 정렬(서비스명, 금액 등), 테이블 뷰.
+-   **구독 목록**:
+    -   카테고리별 필터링 (탭).
+    -   테이블 뷰: 서비스명, 카테고리, 결제일, **결제 수단**, 금액, 상태 표시.
+    -   컬럼별 오름차순/내림차순 정렬 지원.
 
--   **구독 관리**: 모달을 통한 추가/수정/삭제. (상태 토글 스위치, 그리드 형태 카테고리 선택)
+-   **구독 관리 (CRUD)**:
+    -   모달을 통한 구독 추가 및 수정.
+    -   구독 상태 토글 (활성/비활성).
+    -   삭제 기능.
 
-
+-   **UI/UX**:
+    -   **다크 모드**: 시스템 설정과 무관하게 버튼으로 토글 가능 (네비게이션 바 하단).
+    -   **반응형 레이아웃**: Tailwind CSS 기반의 유연한 디자인.
+    -   **일관된 스타일**: 헤더 및 테이블 보더 색상 등 다크 모드 최적화.
 
 ## 개발 워크플로우
-
-
 
 ### 주요 명령어
 
 -   **개발 서버 시작:**
-
     ```bash
-
     npm run dev
-
     ```
-
-    HMR(Hot Module Replacement)이 적용된 로컬 개발 서버를 시작합니다.
-
-
 
 -   **프로덕션 빌드:**
-
     ```bash
-
     npm run build
-
     ```
-
-    프로덕션 배포를 위해 애플리케이션을 빌드합니다.
-
-
 
 -   **코드 린트:**
-
     ```bash
-
     npm run lint
-
     ```
-
-    ESLint를 실행하여 코드 품질과 스타일 문제를 확인합니다.
-
-
-
--   **프로덕션 빌드 미리보기:**
-
-    ```bash
-
-    npm run preview
-
-    ```
-
-    프로덕션 빌드 결과를 로컬에서 미리 확인합니다.
-
-
 
 ## 개발 규칙
 
--   **컴포넌트 구조:** 함수형 컴포넌트와 Hooks를 사용합니다 (예: `App.jsx`의 `useState` 사용).
-
--   **스타일링:** Tailwind CSS를 주력으로 사용하며, 복잡한 로직이 필요한 경우 `cn` 유틸리티를 활용합니다.
-
--   **설정:** 빌드 설정은 `vite.config.js`를, 린팅 규칙은 `eslint.config.js`를 따릅니다.
-
-
-
-## Gemini를 위한 참고 사항
-
--   새로운 기능을 추가할 때는 `src/components/`와 같이 구조화된 방식으로 새 컴포넌트를 생성하는 것을 권장합니다.
-
--   기존 린팅 규칙을 준수해야 합니다.
-
--   React 19를 사용하므로 최신 React 패턴을 활용하십시오.
+-   **컴포넌트 구조:** 함수형 컴포넌트와 Hooks 사용.
+-   **스타일링:** Tailwind CSS 활용. 다크 모드 스타일(`dark:`) 적극 활용.
+-   **상태 관리:** 전역 상태는 Zustand 스토어 사용, 로컬 UI 상태는 `useState` 사용.
+-   **데이터 지속성:** `localStorage`를 통해 구독 데이터와 테마 설정 유지.

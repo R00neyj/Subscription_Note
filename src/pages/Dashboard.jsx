@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Header from '../components/Header'
 import SubscriptionTable from '../components/SubscriptionTable'
 import SectionHeader from '../components/SectionHeader'
@@ -31,10 +31,22 @@ export default function Dashboard() {
   
   // Store Data
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
+  const isTutorialOpen = useSubscriptionStore((state) => state.isTutorialOpen)
+  const setTutorialOpen = useSubscriptionStore((state) => state.setTutorialOpen)
+  const hasSeenTutorial = useSubscriptionStore((state) => state.hasSeenTutorial)
+
+  useEffect(() => {
+    // 튜토리얼을 보지 않았다면 자동으로 시작 (약간의 지연 후)
+    if (!hasSeenTutorial && !isTutorialOpen) {
+      const timer = setTimeout(() => setTutorialOpen(true), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [hasSeenTutorial, isTutorialOpen, setTutorialOpen])
 
   // Sort Logic (Same as SubscriptionList)
   const sortedSubscriptions = useMemo(() => {
     let data = [...subscriptions]
+
     if (sortConfig.key) {
       data.sort((a, b) => {
         let aValue = a[sortConfig.key]
@@ -49,6 +61,7 @@ export default function Dashboard() {
             bValue = getDay(bValue)
             return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
         }
+        // Handle strings (service_name, category, payment_method)
         if (typeof aValue === 'string') {
           return sortConfig.direction === 'asc' 
             ? aValue.localeCompare(bValue) 
@@ -91,7 +104,11 @@ export default function Dashboard() {
     if (activeSubs.length === 0) return []
 
     const grouped = activeSubs.reduce((acc, sub) => {
-      const cat = sub.category || 'Etc'
+      // Use the first category if multiple exist, fallback to single category or 'Etc'
+      const cat = (sub.categories && sub.categories.length > 0) 
+        ? sub.categories[0] 
+        : (sub.category || 'Etc')
+      
       acc[cat] = (acc[cat] || 0) + sub.price
       return acc
     }, {})
@@ -111,45 +128,48 @@ export default function Dashboard() {
   }, [subscriptions])
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col min-h-full">
       <Header />
       
-      <div className="bg-white dark:bg-slate-800 rounded-[48px] p-8 md:p-[42px] flex-1 shadow-sm flex flex-col gap-[16px] items-start overflow-clip w-full transition-colors duration-300">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 md:p-[42px] flex flex-col gap-[16px] items-start w-full transition-colors duration-300">
         {/* Title Section */}
         <div className="flex justify-start w-full">
            <SectionHeader title="월간 구독 리포트" />
         </div>
 
         {/* Summary Cards */}
-        <div className="flex flex-wrap gap-[10px] items-start w-full">
-          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[24px] p-6 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-            <p className="text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">총 구독료</p>
+        <div id="step-summary" className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-[10px] items-start w-full">
+          {/* 총 구독료 */}
+          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">총 구독료</p>
             <div className="flex items-center gap-[3px]">
-              <span className="text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
                 {totalCost.toLocaleString()}
               </span>
               <div className="pt-1">
-                <span className="text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">원</span>
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">원</span>
               </div>
             </div>
           </div>
           
-          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[24px] p-6 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-             <p className="text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">구독중인 서비스</p>
+          {/* 구독중인 서비스 */}
+          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+             <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">구독중인 서비스</p>
             <div className="flex items-center gap-[3px]">
-              <span className="text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
                 {activeCount}
               </span>
               <div className="pt-1">
-                <span className="text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">개</span>
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">개</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[24px] p-6 flex flex-col items-start gap-1 min-w-[200px] w-fit shrink-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-             <p className="text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">가장 지출이 큰 곳</p>
+          {/* 가장 지출이 큰 곳 */}
+          <div className="col-span-2 md:col-auto bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:min-w-[200px] md:w-fit transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+             <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">가장 지출이 큰 곳</p>
             <div className="flex items-center gap-[3px]">
-              <span className="text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4] whitespace-nowrap">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4] whitespace-nowrap">
                 {maxExpenseService}
               </span>
             </div>
@@ -157,7 +177,7 @@ export default function Dashboard() {
         </div>
 
         {/* Subscription Table */}
-        <div className="flex flex-col gap-4 mt-4 w-full">
+        <div id="step-recent" className="flex flex-col gap-4 mt-4 w-full">
             <SubscriptionTable 
               data={sortedSubscriptions.slice(0, 5)} 
               onRowClick={(item) => openModal(item)}
@@ -189,7 +209,7 @@ export default function Dashboard() {
                       onMouseEnter={() => setHoveredCategory(item.id)}
                       onMouseLeave={() => setHoveredCategory(null)}
                     >
-                      <div className={cn("shrink-0 size-[24px]", item.color)} />
+                      <div className={cn("shrink-0 size-[24px] rounded-[8px]", item.color)} />
                       <p className="font-medium text-[16px] text-black dark:text-white tracking-[-0.48px]">
                         {item.label} ({Math.round(item.percentage)}%)
                       </p>
