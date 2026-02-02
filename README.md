@@ -47,7 +47,7 @@ npm run dev
 
 ## 📸 스크린샷
 
-_(여기에 스크린샷 이미지를 추가할 수 있습니다)_
+![](/public/Screenshot.png)
 
 ## 📄 라이선스
 
