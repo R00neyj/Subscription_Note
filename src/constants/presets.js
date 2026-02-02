@@ -131,6 +131,10 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "젯브레인 올 프로덕트", nameEn: "JetBrains All Products", price: 35000, category: "Work" },
   { nameKo: "재피어 스타터", nameEn: "Zapier Starter", price: 29000, category: "Work" }, // 약 $19.99
   { nameKo: "그래머리 프리미엄", nameEn: "Grammarly Premium", price: 17500, category: "Work" }, // 약 $12
+  { nameKo: "넷리파이 퍼스널", nameEn: "Netlify Personal", price: 13000, category: "Work" },
+  { nameKo: "넷리파이 프로", nameEn: "Netlify Pro", price: 29000, category: "Work" },
+  { nameKo: "넷리파이 비즈니스", nameEn: "Netlify Business", price: 144000, category: "Work" },
+  { nameKo: "넷리파이 빌드 추가 (1개)", nameEn: "Netlify Add-on Concurrent Build", price: 58000, category: "Work" },
 
   // Cloud
   { nameKo: "구글 원 베이직 (100GB)", nameEn: "Google One Basic 100GB", price: 2400, category: "Cloud" },
@@ -179,4 +183,15 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "패스트캠퍼스", nameEn: "Fast Campus", price: 29000, category: "Etc" },
   { nameKo: "어니스트플라워", nameEn: "Honest Flower", price: 15000, category: "Etc" },
   { nameKo: "베이컨박스", nameEn: "Bacon Box", price: 34900, category: "Etc" },
+
+  // kakao
+  // 이모티콘 및 커스텀
+  { nameKo: "카카오톡 이모티콘 플러스", nameEn: "Emoticon Plus", price: 6900, category: "Etc" },
+  { nameKo: "카카오톡 톡서랍 플러스 (100GB)", nameEn: "Talk Drawer Plus 100GB", price: 2500, category: "Cloud" },
+  { nameKo: "카카오톡 톡서랍 플러스 (250GB)", nameEn: "Talk Drawer Plus 250GB", price: 4900, category: "Cloud" },
+  { nameKo: "카카오톡 톡서랍 플러스 (1TB)", nameEn: "Talk Drawer Plus 1TB", price: 11900, category: "Cloud" },
+
+  // 2026 신규 서비스
+  { nameKo: "카카오톡 광고 프리 (베이직)", nameEn: "KakaoTalk Ad-Free Basic", price: 2900, category: "Etc" },
+  { nameKo: "카카오톡 멤버십 (통합)", nameEn: "Kakao Universe Membership", price: 9900, category: "Etc" },
 ];

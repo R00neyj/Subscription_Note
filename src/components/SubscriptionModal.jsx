@@ -144,7 +144,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
               <input 
                 required
                 type="text" 
-                maxLength="20"
+                maxLength="30"
                 placeholder="예: 넷플릭스, 유튜브 프리미엄"
                 className="w-full h-[56px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                 value={formData.service_name}

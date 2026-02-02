@@ -8,13 +8,25 @@ export default function InstallPrompt() {
 
   useEffect(() => {
     if (isInstallable) {
-      // 3초 뒤에 배너 표시 (너무 바로 뜨면 거부감)
-      const timer = setTimeout(() => setIsVisible(true), 3000)
-      return () => clearTimeout(timer)
+      // 24시간 체크 로직
+      const lastDismissed = localStorage.getItem('installPromptDismissedAt')
+      const now = Date.now()
+      const isExpired = !lastDismissed || (now - parseInt(lastDismissed) > 24 * 60 * 60 * 1000)
+
+      if (isExpired) {
+        // 3초 뒤에 배너 표시 (너무 바로 뜨면 거부감)
+        const timer = setTimeout(() => setIsVisible(true), 3000)
+        return () => clearTimeout(timer)
+      }
     } else {
       setIsVisible(false)
     }
   }, [isInstallable])
+
+  const handleDismiss = () => {
+    localStorage.setItem('installPromptDismissedAt', Date.now().toString())
+    setIsVisible(false)
+  }
 
   if (!isVisible) return null
 
@@ -39,7 +51,7 @@ export default function InstallPrompt() {
             설치
           </button>
           <button 
-            onClick={() => setIsVisible(false)}
+            onClick={handleDismiss}
             className="p-1 hover:bg-white/20 dark:hover:bg-dark/10 rounded-full transition-colors cursor-pointer"
           >
             <X size={16} />

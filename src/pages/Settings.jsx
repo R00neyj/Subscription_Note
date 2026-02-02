@@ -2,6 +2,7 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import { cn } from '../lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { Github } from 'lucide-react'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
 
@@ -123,7 +124,6 @@ export default function Settings() {
         </div>
 
         {/* 튜토리얼 다시보기 */}
-        {/* 테마 설정 */}
         <div className="py-4 md:p-6 flex items-center justify-between transition-colors">
           <div className="space-y-1">
             <h3 className="text-lg font-bold text-dark dark:text-white">튜토리얼 가이드</h3>
@@ -135,6 +135,23 @@ export default function Settings() {
           >
             다시보기
           </button>
+        </div>
+
+        {/* GitHub 리포지토리 */}
+        <div className="py-4 md:p-6 flex items-center justify-between transition-colors">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-dark dark:text-white">오픈 소스</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">GitHub에서 소스 코드를 확인하세요.</p>
+          </div>
+          <a
+            href="https://github.com/R00neyj/Subscription_Note"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Github size={18} />
+            GitHub
+          </a>
         </div>
 
         {/* 데이터 초기화 */}
