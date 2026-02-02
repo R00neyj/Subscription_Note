@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { X, Trash2 } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
-import { cn } from '../lib/utils'
+import { SUBSCRIPTION_PRESETS } from '../constants/presets'
+import { cn, sanitizeInput } from '../lib/utils'
 
 export default function SubscriptionModal({ isOpen, onClose, initialData = null }) {
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
@@ -11,34 +12,85 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
   
   const [formData, setFormData] = useState({
     service_name: initialData?.service_name || '',
-    categories: initialData?.categories || (initialData?.category ? [initialData.category] : ['OTT']),
+    category: initialData?.category || initialData?.categories?.[0] || 'OTT',
     billing_date: initialData?.billing_date.replace(/[^0-9]/g, '') || '',
     price: initialData?.price || '',
     payment_method: initialData?.payment_method || '',
     status: initialData?.status || 'active'
   })
 
+  // Autocomplete State
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const wrapperRef = useRef(null)
+
+  // Click outside to close suggestions
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [wrapperRef])
+
+  // Reset form when modal opens or initialData changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        service_name: initialData?.service_name || '',
+        category: initialData?.category || initialData?.categories?.[0] || 'OTT',
+        billing_date: initialData?.billing_date?.replace(/[^0-9]/g, '') || '',
+        price: initialData?.price || '',
+        payment_method: initialData?.payment_method || '',
+        status: initialData?.status || 'active'
+      })
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }, [isOpen, initialData])
+
   if (!isOpen) return null
 
-  const toggleCategory = (categoryId) => {
-    setFormData(prev => {
-      const current = prev.categories
-      if (current.includes(categoryId)) {
-        // Prevent deselecting if it's the only one
-        if (current.length <= 1) return prev
-        return { ...prev, categories: current.filter(id => id !== categoryId) }
-      } else {
-        return { ...prev, categories: [...current, categoryId] }
-      }
-    })
+  const handleNameChange = (e) => {
+    const value = sanitizeInput(e.target.value)
+    setFormData({ ...formData, service_name: value })
+
+    if (value.trim().length > 0) {
+      const filtered = SUBSCRIPTION_PRESETS.filter(preset => 
+        preset.nameKo.toLowerCase().includes(value.toLowerCase()) ||
+        preset.nameEn.toLowerCase().includes(value.toLowerCase())
+      )
+      setSuggestions(filtered)
+      setShowSuggestions(true)
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  const handleSelectSuggestion = (preset) => {
+    setFormData(prev => ({
+      ...prev,
+      service_name: preset.nameKo,
+      price: preset.price,
+      category: preset.category
+    }))
+    setShowSuggestions(false)
+  }
+
+  const handleCategoryChange = (categoryId) => {
+    setFormData(prev => ({ ...prev, category: categoryId }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!formData.service_name || !formData.price || formData.categories.length === 0) return
+    if (!formData.service_name || !formData.price || !formData.category) return
     
     const payload = {
       ...formData,
+      categories: [formData.category], // Compatibility with array-based views
       price: Number(formData.price),
       billing_date: `매달 ${formData.billing_date}일`,
       payment_method: formData.payment_method || '미지정'
@@ -60,9 +112,14 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
     }
   }
 
+  const isFormValid = formData.service_name.trim() !== '' && 
+                      formData.price !== '' && 
+                      formData.billing_date !== '' &&
+                      formData.category !== ''
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-300">
-      <div className="bg-white dark:bg-slate-800 w-full max-w-[480px] rounded-[32px] overflow-hidden border border-tertiary dark:border-slate-700 animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh] transition-colors duration-300">
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4 transition-opacity duration-300">
+      <div className="bg-white dark:bg-slate-800 w-full md:max-w-[480px] h-full md:h-auto rounded-none md:rounded-[32px] overflow-hidden border-none md:border border-tertiary dark:border-slate-700 animate-in fade-in slide-in-from-bottom-10 md:zoom-in duration-200 flex flex-col max-h-none md:max-h-[90vh] transition-colors duration-300">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-tertiary dark:border-slate-700 shrink-0">
           <h2 className="text-[22px] font-bold text-dark dark:text-white tracking-tight">
@@ -70,7 +127,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
           </h2>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-tertiary dark:hover:bg-slate-700 rounded-full transition-colors"
+            className="p-2 hover:bg-tertiary dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
           >
             <X className="w-6 h-6 text-dark dark:text-white" />
           </button>
@@ -79,17 +136,61 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
         {/* Modal Body - Scrollable */}
         <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            {/* Service Name */}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">서비스 명</label>
+            {/* Service Name with Autocomplete */}
+            <div className="flex flex-col gap-2 relative" ref={wrapperRef}>
+              <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
+                서비스 명 <span className="text-red-500">*</span>
+              </label>
               <input 
                 required
                 type="text" 
+                maxLength="20"
                 placeholder="예: 넷플릭스, 유튜브 프리미엄"
                 className="w-full h-[56px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                 value={formData.service_name}
-                onChange={(e) => setFormData({ ...formData, service_name: e.target.value })}
+                onChange={handleNameChange}
+                onFocus={() => {
+                   if (formData.service_name.trim().length > 0) {
+                      const filtered = SUBSCRIPTION_PRESETS.filter(preset => 
+                        preset.nameKo.toLowerCase().includes(formData.service_name.toLowerCase()) ||
+                        preset.nameEn.toLowerCase().includes(formData.service_name.toLowerCase())
+                      )
+                      setSuggestions(filtered)
+                      setShowSuggestions(true)
+                   }
+                }}
+                autoComplete="off"
               />
+              
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-slate-800 border border-tertiary dark:border-slate-600 rounded-[16px] shadow-lg max-h-[200px] overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar">
+                  {suggestions.map((preset, index) => (
+                    <li 
+                      key={index}
+                      onClick={() => handleSelectSuggestion(preset)}
+                      className="px-6 py-3 hover:bg-tertiary dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between border-b border-tertiary/50 dark:border-slate-700/50 last:border-none group"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-bold text-dark dark:text-white text-[14px] md:text-[16px]">
+                          {preset.nameKo}
+                        </span>
+                        <span className="text-[11px] md:text-[12px] text-dark/40 dark:text-slate-400 font-medium">
+                          {preset.nameEn}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-[10px] md:text-[11px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
+                          {preset.category}
+                        </span>
+                        <span className="text-[13px] md:text-[14px] font-bold text-dark/60 dark:text-slate-300">
+                          {preset.price.toLocaleString()}원
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Status Toggle */}
@@ -105,7 +206,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                   status: formData.status === 'active' ? 'disable' : 'active' 
                 })}
                 className={cn(
-                  "relative w-[76px] h-[32px] rounded-full transition-all duration-300 flex items-center px-1 shrink-0",
+                  "relative w-[76px] h-[32px] rounded-full transition-all duration-300 flex items-center px-1 shrink-0 cursor-pointer",
                   formData.status === 'active' ? "bg-[#34C759]" : "bg-gray-200 dark:bg-slate-600"
                 )}
               >
@@ -126,16 +227,18 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
 
             {/* Category Selection (Grid Layout) */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">카테고리 (복수 선택 가능)</label>
+              <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
+                카테고리 <span className="text-red-500">*</span>
+              </label>
               <div className="grid grid-cols-3 gap-2">
                 {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => toggleCategory(cat.id)}
+                    onClick={() => handleCategoryChange(cat.id)}
                     className={cn(
-                      "h-[48px] rounded-[12px] font-bold text-[14px] md:text-[16px] transition-all border-2",
-                      formData.categories.includes(cat.id)
+                      "h-[48px] rounded-[12px] font-bold text-[14px] md:text-[16px] transition-all border-2 cursor-pointer",
+                      formData.category === cat.id
                         ? "bg-primary text-white border-primary"
                         : "bg-tertiary dark:bg-slate-700 text-dark/60 dark:text-slate-300 border-transparent hover:bg-tertiary/80 dark:hover:bg-slate-600 hover:text-dark dark:hover:text-white"
                     )}
@@ -149,10 +252,13 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
             <div className="grid grid-cols-2 gap-4">
               {/* Price */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">월 결제 금액</label>
+                <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
+                  월 결제 금액 <span className="text-red-500">*</span>
+                </label>
                 <input 
                   required
                   type="number" 
+                  maxLength="12"
                   placeholder="금액 입력"
                   className="w-full h-[56px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                   value={formData.price}
@@ -162,7 +268,9 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
 
               {/* Billing Date */}
                <div className="flex flex-col gap-2">
-                <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">결제일 (매달)</label>
+                <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
+                  결제일 (매달) <span className="text-red-500">*</span>
+                </label>
                 <input 
                   required
                   type="number" 
@@ -181,10 +289,11 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
               <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">결제 수단</label>
               <input 
                 type="text" 
+                maxLength="20"
                 placeholder="예: 현대카드, 카카오뱅크"
                 className="w-full h-[56px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                 value={formData.payment_method}
-                onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, payment_method: sanitizeInput(e.target.value) })}
               />
             </div>
 
@@ -194,14 +303,20 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                 <button 
                   type="button"
                   onClick={handleDelete}
-                  className="h-[64px] px-6 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[24px] font-bold text-lg md:text-[20px] hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center justify-center shrink-0"
+                  className="h-[64px] px-6 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[24px] font-bold text-lg md:text-[20px] hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
                 >
                   <Trash2 className="w-6 h-6" />
                 </button>
                )}
               <button 
                 type="submit"
-                className="flex-1 h-[64px] bg-primary hover:bg-primary/90 text-white rounded-[24px] font-bold text-lg md:text-[20px] transition-all"
+                disabled={!isFormValid}
+                className={cn(
+                  "flex-1 h-[64px] rounded-[24px] font-bold text-lg md:text-[20px] transition-all",
+                  isFormValid 
+                    ? "bg-primary hover:bg-primary/90 text-white cursor-pointer" 
+                    : "bg-gray-200 dark:bg-slate-700 text-dark/30 dark:text-slate-500 cursor-not-allowed"
+                )}
               >
                 {initialData ? '수정 완료' : '추가 완료'}
               </button>

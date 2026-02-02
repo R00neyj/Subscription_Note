@@ -3,13 +3,15 @@ import Header from '../components/Header'
 import SubscriptionTable from '../components/SubscriptionTable'
 import SectionHeader from '../components/SectionHeader'
 import { ChevronRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
+import NotificationBanner from '../components/NotificationBanner'
+import { checkUpcomingPayments } from '../lib/notificationUtils'
 
 const CATEGORY_COLORS = {
   OTT: 'bg-[#2563EB]',     // Primary Blue
-  Work: 'bg-[#111111]',    // Dark
+  Work: 'bg-[#64748B]',    // Cool Gray (Slate-500)
   Music: 'bg-[#FFD233]',   // Yellow
   Shopping: 'bg-[#FF5E57]',// Red
   Cloud: 'bg-[#33D9B2]',   // Teal
@@ -26,7 +28,9 @@ const TEXT_COLORS = {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [hoveredCategory, setHoveredCategory] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
   
   // Store Data
@@ -43,10 +47,23 @@ export default function Dashboard() {
     }
   }, [hasSeenTutorial, isTutorialOpen, setTutorialOpen])
 
+  const handleCategoryClick = (categoryId) => {
+    setSelectedCategory(prev => prev === categoryId ? null : categoryId)
+  }
+
   // Sort Logic (Same as SubscriptionList)
   const sortedSubscriptions = useMemo(() => {
     let data = [...subscriptions]
 
+    // 1. Filter by Selected Category
+    if (selectedCategory) {
+      data = data.filter(sub => 
+        sub.category === selectedCategory || 
+        (sub.categories && sub.categories.includes(selectedCategory))
+      )
+    }
+
+    // 2. Sort
     if (sortConfig.key) {
       data.sort((a, b) => {
         let aValue = a[sortConfig.key]
@@ -69,9 +86,12 @@ export default function Dashboard() {
         }
         return 0
       })
+    } else {
+      // Default: Sort by newest (created_at descending)
+      data.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
     }
     return data
-  }, [subscriptions, sortConfig])
+  }, [subscriptions, sortConfig, selectedCategory])
 
   const handleSort = (key) => {
     setSortConfig((current) => ({
@@ -90,11 +110,21 @@ export default function Dashboard() {
     state.subscriptions.filter(sub => sub.status === 'active').length
   )
 
-  const maxExpenseService = useSubscriptionStore((state) => {
+  const maxExpenseItem = useSubscriptionStore((state) => {
     const subs = state.subscriptions.filter(sub => sub.status === 'active')
-    if (subs.length === 0) return '-'
-    return subs.sort((a, b) => b.price - a.price)[0]?.service_name || '-'
+    if (subs.length === 0) return null
+    return subs.sort((a, b) => b.price - a.price)[0]
   })
+
+  // Upcoming Payments Info (Tomorrow)
+  const upcomingInfo = useMemo(() => {
+    const items = checkUpcomingPayments(subscriptions)
+    if (items.length === 0) return null
+    return {
+      count: items.length,
+      totalPrice: items.reduce((acc, cur) => acc + cur.price, 0)
+    }
+  }, [subscriptions])
   
   const openModal = useSubscriptionStore((state) => state.openModal)
 
@@ -130,6 +160,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-full">
       <Header />
+      <NotificationBanner />
       
       <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 md:p-[42px] flex flex-col gap-[16px] items-start w-full transition-colors duration-300">
         {/* Title Section */}
@@ -141,7 +172,7 @@ export default function Dashboard() {
         <div id="step-summary" className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-[10px] items-start w-full">
           {/* 총 구독료 */}
           <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-            <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">총 구독료</p>
+            <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">총 구독료</p>
             <div className="flex items-center gap-[3px]">
               <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
                 {totalCost.toLocaleString()}
@@ -154,7 +185,7 @@ export default function Dashboard() {
           
           {/* 구독중인 서비스 */}
           <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-             <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">구독중인 서비스</p>
+             <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">구독중인 서비스</p>
             <div className="flex items-center gap-[3px]">
               <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
                 {activeCount}
@@ -166,76 +197,102 @@ export default function Dashboard() {
           </div>
 
           {/* 가장 지출이 큰 곳 */}
-          <div className="col-span-2 md:col-auto bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:min-w-[200px] md:w-fit transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-             <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">가장 지출이 큰 곳</p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4] whitespace-nowrap">
-                {maxExpenseService}
+          <div 
+            onClick={() => maxExpenseItem && openModal(maxExpenseItem)}
+            className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:min-w-[200px] md:w-[240px] transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
+          >
+             <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">가장 지출이 큰 곳</p>
+            <div className="flex items-center gap-[3px] w-full overflow-hidden">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4] truncate block w-full" title={maxExpenseItem?.service_name || '-'}>
+                {maxExpenseItem?.service_name || '-'}
               </span>
             </div>
           </div>
+
+          {/* 곧 결제될 구독 (배너형) */}
+          {upcomingInfo && (
+            <div 
+              onClick={() => navigate('/calendar')}
+              className="col-span-2 w-full bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-[20px] md:rounded-[24px] px-5 py-4 md:py-5 flex items-center justify-between transition-all duration-300 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer group mt-2"
+            >
+              <div className="flex items-center gap-3 md:gap-4 text-primary">
+                <span className="text-[15px] md:text-[19px] font-bold tracking-tight">
+                  내일 결제 예정: 총 {upcomingInfo.count}건
+                </span>
+                <span className="text-primary/30 font-light">|</span>
+                <span className="text-[15px] md:text-[19px] font-bold tracking-tight">
+                  합계 {upcomingInfo.totalPrice.toLocaleString()}원
+                </span>
+              </div>
+              <ChevronRight className="text-primary group-hover:translate-x-1 transition-transform" size={24} />
+            </div>
+          )}
         </div>
 
-        {/* Subscription Table */}
-        <div id="step-recent" className="flex flex-col gap-4 mt-4 w-full">
-            <SubscriptionTable 
-              data={sortedSubscriptions.slice(0, 5)} 
-              onRowClick={(item) => openModal(item)}
-              sortConfig={sortConfig}
-              onSort={handleSort}
-            />
-            
-            <Link to="/list" className="self-center flex items-center gap-1 px-4 py-2 bg-background dark:bg-slate-700 rounded-xl text-dark dark:text-white font-medium hover:bg-tertiary dark:hover:bg-slate-600 transition-colors group">
-              더 보기
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-        </div>
-        
         {/* Chart Section */}
-         <div className="mt-8 flex flex-col items-start w-full">
+         <div id="step-chart" className="mt-8 flex flex-col items-start w-full">
             <SectionHeader title="카테고리별 비중" className="mb-4" />
             
             {categoryData.length > 0 ? (
               <div className="w-full">
                 {/* Legend */}
                 <div className="flex flex-wrap gap-6 mb-4 justify-start">
-                  {categoryData.map((item) => (
-                    <div 
-                      key={item.id}
-                      className={cn(
-                        "flex items-center gap-2 cursor-pointer transition-opacity duration-200",
-                        hoveredCategory && hoveredCategory !== item.id ? "opacity-30" : "opacity-100"
-                      )}
-                      onMouseEnter={() => setHoveredCategory(item.id)}
-                      onMouseLeave={() => setHoveredCategory(null)}
-                    >
-                      <div className={cn("shrink-0 size-[24px] rounded-[8px]", item.color)} />
-                      <p className="font-medium text-[16px] text-black dark:text-white tracking-[-0.48px]">
-                        {item.label} ({Math.round(item.percentage)}%)
-                      </p>
-                    </div>
-                  ))}
+                  {categoryData.map((item) => {
+                    const isSelected = selectedCategory === item.id
+                    const isDimmed = selectedCategory && !isSelected
+                    const isHovered = hoveredCategory === item.id
+                    
+                    return (
+                      <div 
+                        key={item.id}
+                        onClick={() => handleCategoryClick(item.id)}
+                        className={cn(
+                          "flex items-center gap-2 cursor-pointer transition-all duration-200",
+                          isDimmed && "opacity-30",
+                          !selectedCategory && hoveredCategory && !isHovered && "opacity-30"
+                        )}
+                        onMouseEnter={() => setHoveredCategory(item.id)}
+                        onMouseLeave={() => setHoveredCategory(null)}
+                      >
+                        <div className={cn("shrink-0 size-[24px] rounded-[8px]", item.color, isSelected && "ring-2 ring-offset-2 ring-primary dark:ring-offset-slate-800")} />
+                        <p className={cn(
+                          "font-medium text-[16px] tracking-[-0.48px]",
+                          isSelected ? "text-primary dark:text-blue-400 font-bold" : "text-black dark:text-white"
+                        )}>
+                          {item.label} ({Math.round(item.percentage)}%)
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 {/* Bar Chart */}
                 <div className="h-[42px] w-full rounded-full flex overflow-hidden">
-                  {categoryData.map((item) => (
-                    <div 
-                      key={item.id}
-                      className={cn(
-                        "h-full flex items-center justify-center font-bold text-xs transition-all duration-200 cursor-pointer overflow-hidden whitespace-nowrap",
-                        item.color,
-                        item.textColor,
-                        hoveredCategory && hoveredCategory !== item.id ? "opacity-30" : "opacity-100"
-                      )}
-                      style={{ width: `${item.percentage}%` }}
-                      onMouseEnter={() => setHoveredCategory(item.id)}
-                      onMouseLeave={() => setHoveredCategory(null)}
-                      title={`${item.label}: ${Math.round(item.percentage)}%`}
-                    >
-                      {item.percentage > 5 && `${Math.round(item.percentage)}%`}
-                    </div>
-                  ))}
+                  {categoryData.map((item) => {
+                    const isSelected = selectedCategory === item.id
+                    const isDimmed = selectedCategory && !isSelected
+                    const isHovered = hoveredCategory === item.id
+
+                    return (
+                      <div 
+                        key={item.id}
+                        onClick={() => handleCategoryClick(item.id)}
+                        className={cn(
+                          "h-full flex items-center justify-center font-bold text-xs transition-all duration-200 cursor-pointer overflow-hidden whitespace-nowrap",
+                          item.color,
+                          item.textColor,
+                          isDimmed && "opacity-30",
+                          !selectedCategory && hoveredCategory && !isHovered && "opacity-30"
+                        )}
+                        style={{ width: `${item.percentage}%` }}
+                        onMouseEnter={() => setHoveredCategory(item.id)}
+                        onMouseLeave={() => setHoveredCategory(null)}
+                        title={`${item.label}: ${Math.round(item.percentage)}%`}
+                      >
+                        {item.percentage > 5 && `${Math.round(item.percentage)}%`}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             ) : (
@@ -244,6 +301,44 @@ export default function Dashboard() {
               </div>
             )}
          </div>
+
+        {/* Subscription Table */}
+        <div id="step-recent" className="flex flex-col gap-4 mt-8 w-full">
+            <div className="flex items-center justify-between w-full">
+              <h3 className="text-lg font-bold text-dark dark:text-white">
+                {selectedCategory ? `${selectedCategory} 목록` : '최근 구독 내역'}
+              </h3>
+            </div>
+            
+            {sortedSubscriptions.length > 0 ? (
+              <SubscriptionTable 
+                data={selectedCategory ? sortedSubscriptions : sortedSubscriptions.slice(0, 5)} 
+                onRowClick={(item) => openModal(item)}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+              />
+            ) : (
+              <div className="w-full h-[100px] flex items-center justify-center bg-tertiary/50 dark:bg-slate-800/50 rounded-[16px] text-dark/40 dark:text-slate-500">
+                해당 카테고리의 구독이 없습니다.
+              </div>
+            )}
+            
+            {!selectedCategory && (
+              <Link to="/list" className="self-center flex items-center gap-1 px-4 py-2 bg-background dark:bg-slate-700 rounded-xl text-dark dark:text-white font-medium hover:bg-tertiary dark:hover:bg-slate-600 transition-colors group cursor-pointer">
+                더 보기
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )}
+            
+            {selectedCategory && (
+              <button 
+                onClick={() => setSelectedCategory(null)}
+                className="self-center flex items-center gap-1 px-4 py-2 bg-background dark:bg-slate-700 rounded-xl text-dark dark:text-white font-medium hover:bg-tertiary dark:hover:bg-slate-600 transition-colors cursor-pointer"
+              >
+                전체 목록 보기
+              </button>
+            )}
+        </div>
 
       </div>
     </div>

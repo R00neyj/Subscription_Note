@@ -58,17 +58,17 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
               onClick={() => onRowClick && onRowClick(item)}
             >
               {/* 순번 */}
-              <td className="w-[6%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[12px] md:text-[16px] tracking-[-0.02em] leading-[1.4]">
+              <td className="w-[6%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[13px] md:text-[17px] tracking-[-0.02em] leading-[1.4]">
                 {index + 1}
               </td>
               
               {/* 서비스명 */}
               <td className="w-[28%] border-r border-black/10 dark:border-slate-700 px-6">
                 <div className="flex items-center gap-2 justify-start">
-                  <div className="w-[24px] h-[24px] rounded-[6px] bg-[#DBEAFE] dark:bg-slate-700 flex items-center justify-center text-[10px] md:text-[14px] font-medium text-black dark:text-white shrink-0 tracking-[-0.04em] transition-colors">
+                  <div className="w-[24px] h-[24px] rounded-[6px] bg-[#DBEAFE] dark:bg-slate-700 flex items-center justify-center text-[12px] md:text-[15px] font-medium text-black dark:text-white shrink-0 tracking-[-0.04em] transition-colors">
                     {item.service_name.charAt(0)}
                   </div>
-                  <p className="font-medium text-black dark:text-white text-[13px] md:text-[16px] tracking-[-0.04em] leading-[1.4] truncate">
+                  <p className="font-medium text-black dark:text-white text-[14px] md:text-[17px] tracking-[-0.04em] leading-[1.4] truncate">
                     {item.service_name}
                   </p>
                 </div>
@@ -78,13 +78,13 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
               <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center px-1">
                  <div className="flex flex-wrap items-center justify-center gap-1">
                     {item.categories?.map((cat) => (
-                      <div key={cat} className="inline-flex items-center justify-center px-2 py-[4px] min-h-[24px] rounded-[45px] bg-[rgba(37,99,235,0.1)] dark:bg-slate-700 text-black dark:text-white text-[10px] md:text-[12px] font-medium tracking-[-0.04em] leading-[1.2] transition-colors whitespace-nowrap">
+                      <div key={cat} className="inline-flex items-center justify-center px-2 py-[4px] min-h-[24px] rounded-[45px] bg-[rgba(37,99,235,0.1)] dark:bg-slate-700 text-black dark:text-white text-[12px] md:text-[14px] font-medium tracking-[-0.04em] leading-[1.2] transition-colors whitespace-nowrap">
                         {cat}
                       </div>
                     ))}
                     {/* Fallback for old data if any */}
                     {!item.categories && item.category && (
-                      <div className="inline-flex items-center justify-center px-2 py-[4px] min-h-[24px] rounded-[45px] bg-[rgba(37,99,235,0.1)] dark:bg-slate-700 text-black dark:text-white text-[10px] md:text-[12px] font-medium tracking-[-0.04em] leading-[1.2] transition-colors whitespace-nowrap">
+                      <div className="inline-flex items-center justify-center px-2 py-[4px] min-h-[24px] rounded-[45px] bg-[rgba(37,99,235,0.1)] dark:bg-slate-700 text-black dark:text-white text-[12px] md:text-[14px] font-medium tracking-[-0.04em] leading-[1.2] transition-colors whitespace-nowrap">
                         {item.category}
                       </div>
                     )}
@@ -92,17 +92,17 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
               </td>
 
               {/* 결제일 */}
-              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[13px] md:text-[16px] tracking-[-0.04em] leading-[1.4]">
+              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[14px] md:text-[17px] tracking-[-0.04em] leading-[1.4]">
                 {item.billing_date}
               </td>
 
               {/* 결제 수단 */}
-              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[13px] md:text-[16px] tracking-[-0.04em] leading-[1.4]">
+              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[14px] md:text-[17px] tracking-[-0.04em] leading-[1.4]">
                 {item.payment_method}
               </td>
 
               {/* 금액 */}
-              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[13px] md:text-[16px] tracking-[-0.04em] leading-[1.4]">
+              <td className="w-[15%] border-r border-black/10 dark:border-slate-700 text-center font-medium text-black dark:text-white text-[14px] md:text-[17px] tracking-[-0.04em] leading-[1.4]">
                 {item.price.toLocaleString()}원
               </td>
 

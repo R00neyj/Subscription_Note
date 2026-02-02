@@ -9,7 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'favicon.svg', '720p_screenshot.png', 'narrow_screenshot.png'],
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', '*.svg', '*.png'],
       manifest: {
         name: '구독노트 - 스마트한 구독 관리',
         short_name: '구독노트',

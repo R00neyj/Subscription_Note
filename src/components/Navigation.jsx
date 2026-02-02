@@ -6,6 +6,7 @@ import { useEffectiveTheme } from '../hooks/useEffectiveTheme'
 const navItems = [
   { path: '/', activeIcon: '/name=home, fill=true.svg', inactiveIcon: '/name=home, fill=false.svg', label: '홈' },
   { path: '/list', activeIcon: '/name=subscribe, fill=true.svg', inactiveIcon: '/name=subscribe, fill=false.svg', label: '구독목록' },
+  { path: '/calendar', activeIcon: '/name=calendar, fill=true.svg', inactiveIcon: '/name=calendar, fill=false.svg', label: '캘린더' },
   { path: '/settings', activeIcon: '/name=settings, fill=true.svg', inactiveIcon: '/name=settings, fill=false.svg', label: '설정' },
 ]
 
@@ -33,7 +34,7 @@ export default function Navigation() {
         <button 
           id="step-add-pc"
           onClick={() => openModal()}
-          className="hidden md:flex justify-center items-center w-[56px] h-[56px] bg-primary rounded-[12px] p-0 transition-colors hover:bg-accent-2" 
+          className="hidden md:flex justify-center items-center w-[56px] h-[56px] bg-primary rounded-[12px] p-0 transition-colors hover:bg-accent-2 cursor-pointer" 
           style={{ padding: '16px 13px' }}
         >
           <div className="relative w-6 h-6 flex items-center justify-center">
@@ -50,7 +51,7 @@ export default function Navigation() {
                 key={item.path}
                 id={item.path === '/settings' ? 'step-settings-mobile' : undefined}
                 to={item.path}
-                className="flex flex-col items-center w-[56px] h-[65px] py-[6px] gap-[4px] transition-all group"
+                className="flex flex-col items-center w-[56px] h-[65px] py-[6px] gap-[4px] transition-all group cursor-pointer"
               >
                 {/* size-56 (Icon Container) */}
                 <div className={cn(

@@ -80,7 +80,7 @@ const useSubscriptionStore = create(
           .from('subscriptions')
           .select('*')
           .eq('user_id', currentUser.id) // 본인의 데이터만 가져옴
-          .order('created_at', { ascending: true })
+          .order('created_at', { ascending: false }) // 최신순으로 가져옴
         
         if (!error && data) {
           set({ subscriptions: data, isLoading: false })
@@ -92,7 +92,7 @@ const useSubscriptionStore = create(
       addSubscription: async (subscription) => {
         const currentUser = get().user
         
-        // Optimistic update / Local-only update
+        // Optimistic update
         const tempId = crypto.randomUUID()
         const newSub = { 
           ...subscription, 
@@ -101,26 +101,24 @@ const useSubscriptionStore = create(
           created_at: new Date().toISOString()
         }
 
-        // 먼저 로컬 상태 업데이트
-        set((state) => ({ subscriptions: [...state.subscriptions, newSub] }))
+        // 로컬 상태에 즉시 추가 (최신순이므로 앞에 추가)
+        set((state) => ({ subscriptions: [newSub, ...state.subscriptions] }))
 
         // 로그인 상태라면 서버에 저장
         if (currentUser) {
-          const { data, error } = await supabase
+          const { error } = await supabase
             .from('subscriptions')
             .insert([{ ...subscription, user_id: currentUser.id }])
-            .select()
           
-          if (!error && data) {
-            // 서버에서 생성된 ID로 교체 (Optional: 간단하게는 목록 재조회를 할 수도 있지만, UX를 위해 ID 교체)
-            set((state) => ({
-              subscriptions: state.subscriptions.map(sub => 
-                sub.id === tempId ? data[0] : sub
-              )
-            }))
+          if (!error) {
+            // 서버에 성공적으로 저장되면 전체 목록을 다시 불러와 ID 및 생성일자 동기화
+            await get().fetchSubscriptions()
           } else {
-            // 에러 발생 시 롤백 로직이 필요할 수 있으나, 여기서는 일단 콘솔 출력
             console.error('Failed to sync addSubscription:', error)
+            // 에러 발생 시 롤백 (로컬에서 추가했던 항목 제거)
+            set((state) => ({
+              subscriptions: state.subscriptions.filter(sub => sub.id !== tempId)
+            }))
           }
         }
       },
@@ -142,7 +140,11 @@ const useSubscriptionStore = create(
             .update(updates)
             .eq('id', id)
           
-          if (error) console.error('Failed to sync updateSubscription:', error)
+          if (!error) {
+            await get().fetchSubscriptions()
+          } else {
+            console.error('Failed to sync updateSubscription:', error)
+          }
         }
       },
 
@@ -161,7 +163,12 @@ const useSubscriptionStore = create(
             .delete()
             .eq('id', id)
           
-          if (error) console.error('Failed to sync removeSubscription:', error)
+          if (!error) {
+            // 삭제 시에도 정합성을 위해 재조회 (선택 사항)
+            await get().fetchSubscriptions()
+          } else {
+            console.error('Failed to sync removeSubscription:', error)
+          }
         }
       },
       
@@ -204,6 +211,10 @@ const useSubscriptionStore = create(
       setCurrentStep: (step) => set({ currentStep: step }),
       completeTutorial: () => set({ hasSeenTutorial: true, isTutorialOpen: false, currentStep: 0 }),
       resetTutorial: () => set({ hasSeenTutorial: false, isTutorialOpen: true, currentStep: 0 }),
+
+      // Notification Settings
+      notificationsEnabled: true,
+      setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
     }),
     {
       name: 'subscription-storage',
@@ -212,7 +223,8 @@ const useSubscriptionStore = create(
         subscriptions: state.subscriptions,
         user: state.user,
         themeMode: state.themeMode,
-        hasSeenTutorial: state.hasSeenTutorial
+        hasSeenTutorial: state.hasSeenTutorial,
+        notificationsEnabled: state.notificationsEnabled
       }), 
     }
   )

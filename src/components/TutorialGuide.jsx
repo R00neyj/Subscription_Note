@@ -15,6 +15,11 @@ const TUTORIAL_STEPS = [
     target: "#step-summary",
   },
   {
+    title: "카테고리 분석",
+    description: "지출 비중을 차트로 확인하고, 클릭하여 해당 카테고리만 모아볼 수 있어요.",
+    target: "#step-chart",
+  },
+  {
     title: "구독 목록",
     description: "현재 활성화된 구독 서비스들을 확인하고 정렬하거나 상세 내용을 볼 수 있습니다.",
     target: "#step-recent",
@@ -34,6 +39,7 @@ const TUTORIAL_STEPS = [
 export default function TutorialGuide() {
   const { isTutorialOpen, currentStep, setCurrentStep, completeTutorial } = useSubscriptionStore()
   const [coords, setCoords] = useState(null)
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0, placement: 'bottom' })
 
   useEffect(() => {
     if (!isTutorialOpen) return
@@ -52,6 +58,19 @@ export default function TutorialGuide() {
             width: rect.width + (padding * 2),
             height: rect.height + (padding * 2),
           })
+
+          // Tooltip Positioning Logic
+          const isBottom = rect.bottom > window.innerHeight * 0.7 // 화면 하단부에 있으면 위로 띄움
+          const tooltipHeight = 200 // 대략적인 툴팁 높이 예상값 (여유있게)
+          
+          setTooltipPos({
+            top: isBottom 
+              ? rect.top - padding - 12 // Target 위쪽
+              : rect.bottom + padding + 12, // Target 아래쪽
+            left: rect.left + (rect.width / 2),
+            placement: isBottom ? 'top' : 'bottom'
+          })
+
         } else {
           setCoords(null)
         }
@@ -150,22 +169,33 @@ export default function TutorialGuide() {
       {/* Tooltip Content */}
       <div 
         className={cn(
-          "absolute pointer-events-auto transition-all duration-500 w-[280px] md:w-[320px] bg-white dark:bg-slate-800 rounded-2xl border border-tertiary dark:border-slate-700 p-6",
-          !coords 
-            ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
-            : (coords.top > window.innerHeight / 2 
-                ? "bottom-[calc(100vh-" + (coords.top - 20) + "px)] left-1/2 -translate-x-1/2 md:left-[calc(" + (coords.left + coords.width/2) + "px)] md:-translate-x-1/2"
-                : "top-[calc(" + (coords.top + coords.height + 20) + "px)] left-1/2 -translate-x-1/2 md:left-[calc(" + (coords.left + coords.width/2) + "px)] md:-translate-x-1/2")
+          "absolute pointer-events-auto transition-all duration-500 ease-in-out md:w-[320px] bg-white dark:bg-slate-800 rounded-2xl border border-tertiary dark:border-slate-700 p-6 shadow-xl",
+          window.innerWidth < 768 ? "left-4 right-4" : (!coords && "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2")
         )}
+        style={window.innerWidth < 768 ? {
+          // Mobile Smooth Transition Logic
+          top: !coords 
+            ? '50%' // Step 1: Center
+            : (currentStep === 4 || currentStep === 5 ? '0%' : '100%'),
+          transform: !coords
+            ? 'translateY(-50%)'
+            : (currentStep === 4 || currentStep === 5 
+                ? 'translateY(32px)' 
+                : 'translateY(-100%) translateY(-32px)')
+        } : (coords ? {
+          top: tooltipPos.top,
+          left: tooltipPos.left,
+          transform: `translateX(-50%) ${tooltipPos.placement === 'top' ? 'translateY(-100%)' : ''}`
+        } : {})}
       >
         <button 
           onClick={completeTutorial}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
         >
           <X size={20} />
         </button>
 
-        <div className="space-y-4">
+        <div className="space-y-4 animate-fade-slide-in" key={currentStep}>
           <div className="space-y-1">
             <span className="text-xs font-bold text-primary px-2 py-1 bg-primary/10 rounded-full">
               Step {currentStep + 1} of {TUTORIAL_STEPS.length}
@@ -185,7 +215,7 @@ export default function TutorialGuide() {
               disabled={currentStep === 0}
               className={cn(
                 "flex items-center gap-1 text-sm font-medium transition-colors",
-                currentStep === 0 ? "text-slate-300 dark:text-slate-600 cursor-not-allowed" : "text-slate-600 dark:text-slate-400 hover:text-primary"
+                currentStep === 0 ? "text-slate-300 dark:text-slate-600 cursor-not-allowed" : "text-slate-600 dark:text-slate-400 hover:text-primary cursor-pointer"
               )}
             >
               <ChevronLeft size={16} /> 이전
@@ -193,7 +223,7 @@ export default function TutorialGuide() {
 
             <button
               onClick={handleNext}
-              className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md shadow-primary/20"
+              className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md shadow-primary/20 cursor-pointer"
             >
               {currentStep === TUTORIAL_STEPS.length - 1 ? (
                 <>시작하기 <Check size={16} /></>

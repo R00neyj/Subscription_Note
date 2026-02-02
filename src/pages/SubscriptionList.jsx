@@ -7,7 +7,7 @@ import { cn } from '../lib/utils'
 import SectionHeader from '../components/SectionHeader'
 
 export default function SubscriptionList() {
-  const [selectedCategories, setSelectedCategories] = useState(['all'])
+  const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   
@@ -16,30 +16,7 @@ export default function SubscriptionList() {
 
   // Toggle Category Logic
   const toggleCategory = (categoryId) => {
-    if (categoryId === 'all') {
-      setSelectedCategories(['all'])
-      return
-    }
-
-    setSelectedCategories((prev) => {
-      let next = [...prev]
-      
-      // If 'all' was selected, remove it first
-      if (next.includes('all')) {
-        next = [categoryId]
-      } else {
-        if (next.includes(categoryId)) {
-          // Remove if already selected
-          next = next.filter(id => id !== categoryId)
-          // If nothing left, go back to 'all'
-          if (next.length === 0) next = ['all']
-        } else {
-          // Add if not selected
-          next.push(categoryId)
-        }
-      }
-      return next
-    })
+    setSelectedCategory(categoryId)
   }
 
   // Filter and Sort subscriptions
@@ -47,10 +24,10 @@ export default function SubscriptionList() {
     let data = [...subscriptions]
     
     // 1. Category Filter
-    if (!selectedCategories.includes('all')) {
+    if (selectedCategory !== 'all') {
       data = data.filter(sub => 
-        sub.categories?.some(cat => selectedCategories.includes(cat)) ||
-        (sub.category && selectedCategories.includes(sub.category))
+        sub.category === selectedCategory || 
+        sub.categories?.includes(selectedCategory)
       )
     }
 
@@ -85,7 +62,7 @@ export default function SubscriptionList() {
     }
 
     return data
-  }, [subscriptions, selectedCategories, sortConfig])
+  }, [subscriptions, selectedCategory, sortConfig])
 
   const handleSort = (key) => {
     setSortConfig((current) => ({
@@ -118,11 +95,7 @@ export default function SubscriptionList() {
                 className="flex items-center justify-between w-[96px] h-[36px] bg-tertiary dark:bg-slate-700 border border-transparent dark:border-slate-600 text-dark dark:text-white font-bold text-[13px] px-3 rounded-full outline-none transition-all cursor-pointer"
               >
                 <span className="truncate mr-1">
-                  {selectedCategories.includes('all') 
-                    ? '전체' 
-                    : selectedCategories.length === 1 
-                      ? CATEGORIES.find(c => c.id === selectedCategories[0])?.label 
-                      : `${CATEGORIES.find(c => c.id === selectedCategories[0])?.label}..`}
+                  {CATEGORIES.find(c => c.id === selectedCategory)?.label}
                 </span>
                 <svg className={cn("h-4 w-4 transition-transform duration-200 shrink-0", isDropdownOpen && "rotate-180")} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -142,14 +115,14 @@ export default function SubscriptionList() {
                             setIsDropdownOpen(false)
                           }}
                           className={cn(
-                            "w-full px-4 py-3 text-left text-[14px] font-medium transition-colors flex items-center justify-between",
-                            selectedCategories.includes(cat.id) 
+                            "w-full px-4 py-3 text-left text-[14px] font-medium transition-colors flex items-center justify-between cursor-pointer",
+                            selectedCategory === cat.id
                               ? "bg-primary text-white" 
                               : "text-dark dark:text-slate-300 hover:bg-tertiary dark:hover:bg-slate-700"
                           )}
                         >
                           <span>{cat.label}</span>
-                          {selectedCategories.includes(cat.id) && (
+                          {selectedCategory === cat.id && (
                             <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                           )}
                         </button>
@@ -167,8 +140,8 @@ export default function SubscriptionList() {
                   key={cat.id}
                   onClick={() => toggleCategory(cat.id)}
                   className={cn(
-                    "px-4 py-2 rounded-full text-[14px] font-bold transition-colors whitespace-nowrap",
-                    selectedCategories.includes(cat.id)
+                    "px-4 py-2 rounded-full text-[14px] font-bold transition-colors whitespace-nowrap cursor-pointer",
+                    selectedCategory === cat.id
                       ? "bg-primary text-white"
                       : "bg-tertiary dark:bg-slate-700 text-dark/60 dark:text-slate-300 hover:bg-tertiary/80 dark:hover:bg-slate-600 hover:text-dark dark:hover:text-white"
                   )}
@@ -183,11 +156,9 @@ export default function SubscriptionList() {
         {/* Summary Card */}
         <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] p-4 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
           <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.02em] leading-[1.4]">
-            {selectedCategories.includes('all') 
+            {selectedCategory === 'all' 
               ? '총 구독료' 
-              : selectedCategories.length === 1 
-                ? `${CATEGORIES.find(c => c.id === selectedCategories[0])?.label} 구독료`
-                : `${CATEGORIES.find(c => c.id === selectedCategories[0])?.label} 외 ${selectedCategories.length - 1} 구독료`}
+              : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} 구독료`}
           </p>
           <div className="flex items-center gap-[3px]">
             <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.02em] leading-[1.4]">

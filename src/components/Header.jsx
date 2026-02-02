@@ -63,7 +63,7 @@ export default function Header() {
         {searchQuery && (
           <button 
             onClick={handleClear}
-            className="p-1 hover:bg-black/5 rounded-full transition-colors"
+            className="p-1 hover:bg-black/5 rounded-full transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-dark/40 dark:text-white/40" />
           </button>

@@ -7,6 +7,7 @@ import Calendar from './pages/Calendar'
 import Settings from './pages/Settings'
 import SearchResults from './pages/SearchResults'
 import TutorialGuide from './components/TutorialGuide'
+import InstallPrompt from './components/InstallPrompt'
 import useSubscriptionStore from './store/useSubscriptionStore'
 import { supabase } from './lib/supabase'
 import { useEffectiveTheme } from './hooks/useEffectiveTheme'
@@ -50,6 +51,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <TutorialGuide />
+      <InstallPrompt />
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />

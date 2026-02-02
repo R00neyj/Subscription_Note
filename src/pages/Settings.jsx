@@ -2,6 +2,8 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import { cn } from '../lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import Header from '../components/Header'
+import SectionHeader from '../components/SectionHeader'
 
 export default function Settings() {
   const navigate = useNavigate()
@@ -15,6 +17,8 @@ export default function Settings() {
   const themeMode = useSubscriptionStore((state) => state.themeMode) || 'system'
   const setThemeMode = useSubscriptionStore((state) => state.setThemeMode)
   const resetTutorial = useSubscriptionStore((state) => state.resetTutorial)
+  const notificationsEnabled = useSubscriptionStore((state) => state.notificationsEnabled)
+  const setNotificationsEnabled = useSubscriptionStore((state) => state.setNotificationsEnabled)
 
   const handleReset = () => {
     if (confirmText === '초기화') {
@@ -31,16 +35,15 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-[800px] mx-auto p-0">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[32px] md:text-[42px] font-bold text-dark dark:text-white tracking-[-0.04em] leading-[1.2]">
-          설정
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400">앱의 환경설정 및 데이터를 관리합니다.</p>
-      </div>
+    <div className="flex flex-col min-h-full">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 md:p-[42px] flex flex-col items-start w-full transition-colors duration-300">
+        <div className="flex flex-col gap-1 w-full pt-10 pb-6 md:pt-0 md:pb-0">
+          <SectionHeader title="설정" />
+          <p className="text-slate-500 dark:text-slate-400 ml-1">앱의 환경설정 및 데이터를 관리합니다.</p>
+        </div>
 
-      {/* Unified Settings Card */}
-      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:border md:border-tertiary dark:md:border-slate-700 overflow-hidden transition-colors divide-y divide-tertiary dark:divide-slate-700">
+        {/* Unified Settings Card */}
+        <div className="w-full bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:border md:border-tertiary dark:md:border-slate-700 overflow-hidden transition-colors divide-y divide-tertiary dark:divide-slate-700 mt-4">
         
         {/* 사용자 계정 설정 */}
         <div className="py-6 md:p-6 flex items-center justify-between transition-colors">
@@ -53,14 +56,14 @@ export default function Settings() {
           {user ? (
             <button
               onClick={signOut}
-              className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
             >
               로그아웃
             </button>
           ) : (
             <button
               onClick={signInWithGoogle}
-              className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
               구글 로그인
@@ -68,8 +71,30 @@ export default function Settings() {
           )}
         </div>
 
+        {/* 알림 설정 */}
+        <div className="py-4 md:p-6 flex items-center justify-between transition-colors">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-dark dark:text-white">알림 설정</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">결제 예정일 하루 전에 알림을 받습니다.</p>
+          </div>
+          <button
+            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            className={cn(
+              "relative w-[52px] h-[32px] rounded-full transition-colors duration-300 cursor-pointer",
+              notificationsEnabled ? "bg-primary" : "bg-slate-200 dark:bg-slate-600"
+            )}
+          >
+            <div 
+              className={cn(
+                "absolute top-[2px] left-[2px] w-[28px] h-[28px] bg-white rounded-full shadow-sm transition-transform duration-300",
+                notificationsEnabled ? "translate-x-[20px]" : "translate-x-0"
+              )} 
+            />
+          </button>
+        </div>
+
         {/* 테마 설정 */}
-        {/* 테마 설정 */}
+
         <div className="py-4 md:p-6 flex items-center justify-between transition-colors">
           <div className="space-y-1">
             <h3 className="text-lg font-bold text-dark dark:text-white">테마 설정</h3>
@@ -85,9 +110,9 @@ export default function Settings() {
                 key={option.value}
                 onClick={() => setThemeMode(option.value)}
                 className={cn(
-                  "px-3 py-1.5 text-sm font-bold rounded-lg transition-all",
+                  "px-3 py-1.5 text-sm font-bold rounded-lg transition-all cursor-pointer",
                   themeMode === option.value
-                    ? "bg-white dark:bg-slate-600 text-primary shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                    ? "bg-white dark:bg-slate-500 text-primary dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10"
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 )}
               >
@@ -106,7 +131,7 @@ export default function Settings() {
           </div>
           <button
             onClick={handleRestartTutorial}
-            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all"
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
           >
             다시보기
           </button>
@@ -122,7 +147,7 @@ export default function Settings() {
             {!showResetConfirm && (
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="px-4 py-2 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all"
+                className="px-4 py-2 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all cursor-pointer"
               >
                 초기화
               </button>
@@ -151,7 +176,7 @@ export default function Settings() {
                     setShowResetConfirm(false)
                     setConfirmText('')
                   }}
-                  className="px-4 h-10 text-slate-500 dark:text-slate-400 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all"
+                  className="px-4 h-10 text-slate-500 dark:text-slate-400 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
                 >
                   취소
                 </button>
@@ -161,7 +186,7 @@ export default function Settings() {
                   className={cn(
                     "px-6 h-10 rounded-lg text-sm font-bold transition-all",
                     confirmText === '초기화'
-                      ? "bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-500/20"
+                      ? "bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-500/20 cursor-pointer"
                       : "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
                   )}
                 >
@@ -173,5 +198,6 @@ export default function Settings() {
         </div>
       </div>
     </div>
-  )
+  </div>
+)
 }
