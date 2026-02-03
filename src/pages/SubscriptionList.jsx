@@ -155,17 +155,17 @@ export default function SubscriptionList() {
 
         {/* Summary Card */}
         <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] p-4 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-          <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 tracking-[-0.02em] leading-[1.4]">
+          <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 leading-[1.4]">
             {selectedCategory === 'all' 
               ? '총 구독료' 
               : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} 구독료`}
           </p>
           <div className="flex items-center gap-[3px]">
-            <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.02em] leading-[1.4]">
+            <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
               {totalCost.toLocaleString()}
             </span>
             <div className="pt-1">
-              <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.02em] leading-[1.4]">원</span>
+              <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
             </div>
           </div>
         </div>

@@ -44,7 +44,7 @@ export default function Header() {
               className="w-[42px] h-[42px]" 
             />
         </div>
-        <p className="font-bold text-[22px] leading-[140%] text-[#1E293B] dark:text-white whitespace-nowrap text-center tracking-[-0.02em]">
+        <p className="font-bold text-[22px] leading-[140%] text-[#1E293B] dark:text-white whitespace-nowrap text-center">
           구독노트
         </p>
       </div>
@@ -55,7 +55,7 @@ export default function Header() {
         <input 
           type="text" 
           placeholder=" 내 구독목록을 검색해보세요 " 
-          className="bg-transparent border-none outline-none text-[15px] md:text-[18px] leading-[140%] text-dark dark:text-white placeholder:text-dark/50 dark:placeholder:text-white/50 w-full tracking-[-0.02em]"
+          className="bg-transparent border-none outline-none text-[15px] md:text-[18px] leading-[140%] text-dark dark:text-white placeholder:text-dark/50 dark:placeholder:text-white/50 w-full"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleSearch}

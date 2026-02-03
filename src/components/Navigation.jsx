@@ -69,7 +69,7 @@ export default function Navigation() {
                 </div>
                 {/* Label */}
                 <span className={cn(
-                  "w-[56px] h-[17px] text-[12px] leading-[1.4] text-center tracking-[-0.02em] whitespace-nowrap",
+                  "w-[56px] h-[17px] text-[12px] leading-[1.4] text-center whitespace-nowrap",
                   isActive ? "font-bold" : "font-medium",
                   "text-[#111111] dark:text-white"
                 )}>

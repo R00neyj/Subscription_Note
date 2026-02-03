@@ -51,7 +51,7 @@ export default function FloatingActionButton() {
       )}
     >
       <Plus className="w-6 h-6 shrink-0 stroke-[3px]" />
-      <span className="font-bold text-[16px] leading-[24px] tracking-[0.15px]">
+      <span className="font-bold text-[16px] leading-[24px]">
         추가
       </span>
     </button>

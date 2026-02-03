@@ -122,7 +122,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
       <div className="bg-white dark:bg-slate-800 w-full md:max-w-[480px] h-full md:h-auto rounded-none md:rounded-[32px] overflow-hidden border-none md:border border-tertiary dark:border-slate-700 animate-in fade-in slide-in-from-bottom-10 md:zoom-in duration-200 flex flex-col max-h-none md:max-h-[90vh] transition-colors duration-300">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-tertiary dark:border-slate-700 shrink-0">
-          <h2 className="text-[22px] font-bold text-dark dark:text-white tracking-tight">
+          <h2 className="text-[22px] font-bold text-dark dark:text-white">
             {initialData ? '구독 정보 수정' : '구독 추가하기'}
           </h2>
           <button 

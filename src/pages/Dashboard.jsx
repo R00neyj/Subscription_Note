@@ -172,26 +172,26 @@ export default function Dashboard() {
         <div id="step-summary" className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-[10px] items-start w-full">
           {/* 총 구독료 */}
           <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-            <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">총 구독료</p>
+            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">총 구독료</p>
             <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
                 {totalCost.toLocaleString()}
               </span>
               <div className="pt-1">
-                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">원</span>
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
               </div>
             </div>
           </div>
           
           {/* 구독중인 서비스 */}
           <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-             <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">구독중인 서비스</p>
+             <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">구독중인 서비스</p>
             <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
                 {activeCount}
               </span>
               <div className="pt-1">
-                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 tracking-[-0.54px] leading-[1.4]">개</span>
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">개</span>
               </div>
             </div>
           </div>
@@ -201,9 +201,9 @@ export default function Dashboard() {
             onClick={() => maxExpenseItem && openModal(maxExpenseItem)}
             className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:min-w-[200px] md:w-[240px] transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
           >
-             <p className="text-[14px] md:text-[18px] font-bold text-primary tracking-[-0.54px] leading-[1.4]">가장 지출이 큰 곳</p>
+             <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">가장 지출이 큰 곳</p>
             <div className="flex items-center gap-[3px] w-full overflow-hidden">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white tracking-[-0.84px] leading-[1.4] truncate block w-full" title={maxExpenseItem?.service_name || '-'}>
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4] truncate block w-full" title={maxExpenseItem?.service_name || '-'}>
                 {maxExpenseItem?.service_name || '-'}
               </span>
             </div>
@@ -216,11 +216,11 @@ export default function Dashboard() {
               className="col-span-2 w-full bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-[20px] md:rounded-[24px] px-5 py-4 md:py-5 flex items-center justify-between transition-all duration-300 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer group mt-2"
             >
               <div className="flex items-center gap-3 md:gap-4 text-primary">
-                <span className="text-[15px] md:text-[19px] font-bold tracking-tight">
+                <span className="text-[15px] md:text-[19px] font-bold">
                   내일 결제 예정: 총 {upcomingInfo.count}건
                 </span>
                 <span className="text-primary/30 font-light">|</span>
-                <span className="text-[15px] md:text-[19px] font-bold tracking-tight">
+                <span className="text-[15px] md:text-[19px] font-bold">
                   합계 {upcomingInfo.totalPrice.toLocaleString()}원
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function Dashboard() {
                       >
                         <div className={cn("shrink-0 size-[24px] rounded-[8px]", item.color, isSelected && "ring-2 ring-offset-2 ring-primary dark:ring-offset-slate-800")} />
                         <p className={cn(
-                          "font-medium text-[16px] tracking-[-0.48px]",
+                          "font-medium text-[16px]",
                           isSelected ? "text-primary dark:text-blue-400 font-bold" : "text-black dark:text-white"
                         )}>
                           {item.label} ({Math.round(item.percentage)}%)

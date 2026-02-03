@@ -29,6 +29,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  letter-spacing: -0.03em;
 }
 
 /* Hide spin buttons for number inputs */
