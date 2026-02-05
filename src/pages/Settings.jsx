@@ -62,14 +62,14 @@ export default function Settings() {
               로그아웃
             </button>
           ) : (
-            <button
-              onClick={signInWithGoogle}
-              className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
-            >
-              <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-              구글 로그인
-            </button>
-          )}
+              <button
+                onClick={signInWithGoogle}
+                className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+                구글 로그인
+              </button>
+            )}
         </div>
 
         {/* 알림 설정 */}

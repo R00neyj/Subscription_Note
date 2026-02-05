@@ -24,9 +24,9 @@ export default function NotificationBanner() {
       localStorage.setItem('lastNotificationCheck', today)
       
       // 브라우저 알림 시도
-      requestNotificationPermission().then(granted => {
+      requestNotificationPermission().then(async (granted) => {
         if (granted) {
-          sendBrowserNotification(items)
+          await sendBrowserNotification(items)
         }
       })
     }

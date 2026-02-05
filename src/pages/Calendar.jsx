@@ -11,12 +11,15 @@ import {
   isSameMonth, 
   isSameDay, 
   getDate,
-  isToday
+  isToday,
+  differenceInCalendarDays,
+  startOfDay,
+  isBefore
 } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { extractDayFromBillingDate } from '../lib/dateUtils'
+import { extractDayFromBillingDate, getNextPaymentDate } from '../lib/dateUtils'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
 import useSubscriptionStore from '../store/useSubscriptionStore'
@@ -60,6 +63,41 @@ export default function Calendar() {
     const dayNum = getDate(day)
     return activeSubscriptions.filter(sub => extractDayFromBillingDate(sub.billing_date) === dayNum)
   }
+
+  // Calculate payments for the current week (Monday to Sunday)
+  const upcomingThisWeek = useMemo(() => {
+    const today = startOfDay(new Date())
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 }) // Monday
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 })     // Sunday
+    
+    const weekInterval = eachDayOfInterval({ start: weekStart, end: weekEnd })
+    
+    return activeSubscriptions
+      .map(sub => {
+        const billingDay = extractDayFromBillingDate(sub.billing_date)
+        // Find if the billing day falls within any date of the current week
+        const matchDate = weekInterval.find(date => getDate(date) === billingDay)
+        
+        return {
+          ...sub,
+          thisWeekDate: matchDate ? startOfDay(matchDate) : null
+        }
+      })
+      .filter(sub => sub.thisWeekDate !== null)
+      .sort((a, b) => a.thisWeekDate - b.thisWeekDate)
+  }, [activeSubscriptions])
+
+  const upcomingTotalAmount = useMemo(() => {
+    const today = startOfDay(new Date())
+    return upcomingThisWeek
+      .filter(sub => !isBefore(sub.thisWeekDate, today) || isSameDay(sub.thisWeekDate, today))
+      .reduce((acc, sub) => acc + sub.price, 0)
+  }, [upcomingThisWeek])
+
+  const remainingCount = useMemo(() => {
+    const today = startOfDay(new Date())
+    return upcomingThisWeek.filter(sub => !isBefore(sub.thisWeekDate, today) || isSameDay(sub.thisWeekDate, today)).length
+  }, [upcomingThisWeek])
 
   return (
     <div className="flex flex-col min-h-full">
@@ -169,13 +207,23 @@ export default function Calendar() {
 
         {/* Selected Date Info (Step 4) */}
         <div className="w-full mt-4 flex flex-col gap-4">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-lg md:text-xl font-bold text-dark dark:text-white">
-              {format(selectedDate, 'M월 d일', { locale: ko })} 결제 예정
-            </h3>
-            <span className="text-sm font-bold text-dark/40 dark:text-slate-500">
-              총 {getSubscriptionsForDay(selectedDate).length}건
-            </span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg md:text-xl font-bold text-dark dark:text-white">
+                {format(selectedDate, 'M월 d일', { locale: ko })} 결제 예정
+              </h3>
+              <span className="text-sm font-bold text-dark/40 dark:text-slate-500 bg-tertiary dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                총 {getSubscriptionsForDay(selectedDate).length}건
+              </span>
+            </div>
+            
+            <button 
+              onClick={() => useSubscriptionStore.getState().openModal({ billing_date: `${getDate(selectedDate)}` })}
+              className="h-[48px] px-6 bg-primary text-white rounded-[16px] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg shadow-primary/20 cursor-pointer group active:scale-95 self-start md:self-auto"
+            >
+              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+              <span className="font-bold text-[14px] md:text-[15px]">이 날짜에 구독 추가하기</span>
+            </button>
           </div>
 
           {getSubscriptionsForDay(selectedDate).length > 0 ? (
@@ -184,7 +232,7 @@ export default function Calendar() {
                 <div 
                   key={sub.id}
                   onClick={() => useSubscriptionStore.getState().openModal(sub)}
-                  className="bg-white dark:bg-slate-900 border border-tertiary dark:border-slate-800 rounded-[20px] p-4 flex items-center justify-between hover:border-primary dark:hover:border-primary transition-all cursor-pointer group"
+                  className="bg-white dark:bg-slate-900 border border-tertiary dark:border-slate-700 rounded-[20px] p-4 flex items-center justify-between hover:border-primary dark:hover:border-primary transition-all cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
@@ -214,9 +262,9 @@ export default function Calendar() {
               ))}
               
               {/* Daily Total Summary Card */}
-              <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-[20px] p-4 flex items-center justify-between">
-                <p className="font-bold text-primary">이날의 합계</p>
-                <p className="text-xl font-black text-primary">
+              <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-[20px] p-4 flex items-center justify-between">
+                <p className="font-bold text-primary dark:text-primary-light">이날의 합계</p>
+                <p className="text-xl font-black text-primary dark:text-primary-light">
                   {getSubscriptionsForDay(selectedDate).reduce((acc, sub) => acc + sub.price, 0).toLocaleString()}원
                 </p>
               </div>
@@ -224,6 +272,108 @@ export default function Calendar() {
           ) : (
             <div className="w-full py-12 flex flex-col items-center justify-center gap-2 bg-tertiary/20 dark:bg-slate-800/30 rounded-[32px] border-2 border-dashed border-tertiary dark:border-slate-800">
               <p className="text-dark/40 dark:text-slate-500 font-bold">이날은 결제 예정된 항목이 없습니다.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Upcoming This Week (Step 5) - Fixed to Mon-Sun */}
+        <div className="w-full mt-8 flex flex-col gap-4 border-t border-tertiary dark:border-slate-700 pt-8">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <CalendarIcon size={20} className="text-primary" />
+              <h3 className="text-lg md:text-xl font-bold text-dark dark:text-white">
+                이번 주 결제 일정
+              </h3>
+            </div>
+            <span className="text-sm font-bold text-dark/40 dark:text-slate-500">
+              {format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'M.d')} - {format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'M.d')}
+            </span>
+          </div>
+
+          {upcomingThisWeek.length > 0 ? (
+            <div className="flex flex-col gap-4 w-full">
+              {/* Weekly Summary Card */}
+              <div className="bg-dark dark:bg-slate-950 border border-transparent dark:border-slate-700 rounded-[24px] p-5 md:p-6 flex flex-row items-center justify-between gap-2 md:gap-4">
+                <div className="space-y-0.5 md:space-y-1">
+                  <p className="text-white/60 text-[11px] md:text-sm font-medium">이번 주 남은 결제 예정액</p>
+                  <p className="text-[20px] md:text-3xl font-black text-white whitespace-nowrap">
+                    {upcomingTotalAmount.toLocaleString()}원
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+                  <div className="px-2.5 py-1.5 md:px-4 md:py-2 bg-white/10 rounded-xl border border-white/5 text-center">
+                    <p className="text-white/40 text-[12px] md:text-[10px] uppercase font-bold tracking-wider">전체</p>
+                    <p className="text-white font-bold text-[15px] md:text-lg">{upcomingThisWeek.length}건</p>
+                  </div>
+                  <div className="px-2.5 py-1.5 md:px-4 md:py-2 bg-primary rounded-xl text-center">
+                    <p className="text-white/60 text-[12px] md:text-[10px] uppercase font-bold tracking-wider">남은 건수</p>
+                    <p className="text-white font-bold text-[15px] md:text-lg">
+                      {remainingCount}건
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Upcoming Subscriptions List - Vertical on Mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                {upcomingThisWeek.map((sub) => {
+                  const today = startOfDay(new Date())
+                  const daysDiff = differenceInCalendarDays(sub.thisWeekDate, today)
+                  const isPast = isBefore(sub.thisWeekDate, today) && !isSameDay(sub.thisWeekDate, today)
+                  
+                  let dDayText = daysDiff === 0 ? '오늘' : daysDiff === 1 ? '내일' : daysDiff < 0 ? '완료' : `${daysDiff}일 후`
+                  
+                  return (
+                    <div 
+                      key={sub.id}
+                      onClick={() => useSubscriptionStore.getState().openModal(sub)}
+                      className={cn(
+                        "bg-white dark:bg-slate-900 border border-tertiary dark:border-slate-700 rounded-[20px] p-4 flex items-center justify-between hover:border-primary dark:hover:border-primary transition-all cursor-pointer group",
+                        isPast && "opacity-50 grayscale-[0.5]"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "size-10 rounded-xl flex items-center justify-center text-white font-bold text-lg",
+                          CATEGORY_COLORS[sub.categories?.[0] || sub.category] || CATEGORY_COLORS.Etc
+                        )}>
+                          {sub.service_name[0].toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-dark dark:text-white group-hover:text-primary transition-colors">
+                              {sub.service_name}
+                            </p>
+                            <span className={cn(
+                              "text-[10px] px-2 py-0.5 rounded-full font-bold",
+                              daysDiff === 0 ? "bg-red-500 text-white" : 
+                              isPast ? "bg-slate-200 dark:bg-slate-700 text-slate-500" :
+                              "bg-primary/10 text-primary"
+                            )}>
+                              {dDayText}
+                            </span>
+                          </div>
+                          <p className="text-xs text-dark/40 dark:text-slate-500 font-medium">
+                            {format(sub.thisWeekDate, 'M월 d일 (EEEE)', { locale: ko })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <p className="font-bold text-dark dark:text-white">
+                          {sub.price.toLocaleString()}원
+                        </p>
+                        <p className="text-[12px] text-dark/40 dark:text-slate-500 font-medium">
+                          {sub.payment_method}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="w-full py-8 flex items-center justify-center bg-tertiary/10 dark:bg-slate-800/20 border border-transparent dark:border-slate-700 rounded-[20px]">
+              <p className="text-dark/40 dark:text-slate-500 text-sm font-medium">이번 주에 예정된 결제 항목이 없습니다.</p>
             </div>
           )}
         </div>

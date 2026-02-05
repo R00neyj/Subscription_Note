@@ -69,6 +69,12 @@ export default function Dashboard() {
         let aValue = a[sortConfig.key]
         let bValue = b[sortConfig.key]
 
+        // Handle category specially (might be in categories array)
+        if (sortConfig.key === 'category') {
+          aValue = a.category || a.categories?.[0] || ''
+          bValue = b.category || b.categories?.[0] || ''
+        }
+
         if (sortConfig.key === 'price') {
            return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
         }
@@ -78,7 +84,7 @@ export default function Dashboard() {
             bValue = getDay(bValue)
             return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
         }
-        // Handle strings (service_name, category, payment_method)
+        // Handle strings (service_name, payment_method)
         if (typeof aValue === 'string') {
           return sortConfig.direction === 'asc' 
             ? aValue.localeCompare(bValue) 

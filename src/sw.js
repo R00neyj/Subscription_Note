@@ -12,21 +12,25 @@ cleanupOutdatedCaches()
 
 // Handle Notification Click
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close()
+  const notification = event.notification;
+  notification.close();
 
-  // Open the app or focus the existing window
+  // 알림에 데이터로 넣은 URL이 있으면 사용, 없으면 루트
+  const urlToOpen = (notification.data && notification.data.url) ? notification.data.url : '/';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If there is an open window, focus it
+      // 1. 이미 앱이 열려있다면 해당 창을 포커스하고 페이지 이동
       for (const client of clientList) {
-        if (client.url.includes('/') && 'focus' in client) {
-          return client.focus()
+        if ('focus' in client) {
+          client.navigate(urlToOpen);
+          return client.focus();
         }
       }
-      // Otherwise, open a new window
+      // 2. 앱이 닫혀있다면 새로 열기
       if (clients.openWindow) {
-        return clients.openWindow('/')
+        return clients.openWindow(urlToOpen);
       }
     })
-  )
-})
+  );
+});

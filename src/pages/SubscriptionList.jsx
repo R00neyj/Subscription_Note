@@ -37,6 +37,12 @@ export default function SubscriptionList() {
         let aValue = a[sortConfig.key]
         let bValue = b[sortConfig.key]
 
+        // Handle category specially (might be in categories array)
+        if (sortConfig.key === 'category') {
+          aValue = a.category || a.categories?.[0] || ''
+          bValue = b.category || b.categories?.[0] || ''
+        }
+
         // Handle numeric values (price)
         if (sortConfig.key === 'price') {
            return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
@@ -50,7 +56,7 @@ export default function SubscriptionList() {
             return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
         }
 
-        // Handle strings (default for service_name, category, payment_method)
+        // Handle strings (default for service_name, payment_method)
         if (typeof aValue === 'string') {
           return sortConfig.direction === 'asc' 
             ? aValue.localeCompare(bValue) 

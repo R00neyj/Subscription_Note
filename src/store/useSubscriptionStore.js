@@ -55,7 +55,7 @@ const useSubscriptionStore = create(
 
           const subsToUpload = localSubs.map(sub => {
             // eslint-disable-next-line no-unused-vars
-            const { id, user_id, ...rest } = sub 
+            const { id, user_id, category, ...rest } = sub 
             return {
               ...rest,
               user_id: currentUser.id
@@ -92,6 +92,9 @@ const useSubscriptionStore = create(
       addSubscription: async (subscription) => {
         const currentUser = get().user
         
+        // eslint-disable-next-line no-unused-vars
+        const { category, ...dbSubscription } = subscription
+
         // Optimistic update
         const tempId = crypto.randomUUID()
         const newSub = { 
@@ -106,15 +109,20 @@ const useSubscriptionStore = create(
 
         // 로그인 상태라면 서버에 저장
         if (currentUser) {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('subscriptions')
-            .insert([{ ...subscription, user_id: currentUser.id }])
+            .insert([{ ...dbSubscription, user_id: currentUser.id }])
+            .select()
           
-          if (!error) {
-            // 서버에 성공적으로 저장되면 전체 목록을 다시 불러와 ID 및 생성일자 동기화
-            await get().fetchSubscriptions()
+          if (!error && data && data[0]) {
+            // 서버에서 생성된 실제 데이터(ID 포함)로 로컬 상태 업데이트
+            set((state) => ({
+              subscriptions: state.subscriptions.map(sub => 
+                sub.id === tempId ? data[0] : sub
+              )
+            }))
           } else {
-            console.error('Failed to sync addSubscription:', error)
+            if (error) console.error('Failed to sync addSubscription:', error)
             // 에러 발생 시 롤백 (로컬에서 추가했던 항목 제거)
             set((state) => ({
               subscriptions: state.subscriptions.filter(sub => sub.id !== tempId)
@@ -126,7 +134,11 @@ const useSubscriptionStore = create(
       updateSubscription: async (id, updates) => {
         const currentUser = get().user
 
-        // 먼저 로컬 상태 업데이트
+        // eslint-disable-next-line no-unused-vars
+        const { category, ...dbUpdates } = updates
+
+        // 먼저 로컬 상태 업데이트 (낙관적)
+        const previousSubs = get().subscriptions
         set((state) => ({
           subscriptions: state.subscriptions.map((sub) =>
             sub.id === id ? { ...sub, ...updates } : sub
@@ -137,13 +149,13 @@ const useSubscriptionStore = create(
         if (currentUser) {
           const { error } = await supabase
             .from('subscriptions')
-            .update(updates)
+            .update(dbUpdates)
             .eq('id', id)
           
-          if (!error) {
-            await get().fetchSubscriptions()
-          } else {
+          if (error) {
             console.error('Failed to sync updateSubscription:', error)
+            // 실패 시 롤백
+            set({ subscriptions: previousSubs })
           }
         }
       },
@@ -151,7 +163,8 @@ const useSubscriptionStore = create(
       removeSubscription: async (id) => {
         const currentUser = get().user
 
-        // 먼저 로컬 상태 업데이트
+        // 먼저 로컬 상태 업데이트 (낙관적)
+        const previousSubs = get().subscriptions
         set((state) => ({
           subscriptions: state.subscriptions.filter((sub) => sub.id !== id)
         }))
@@ -163,11 +176,10 @@ const useSubscriptionStore = create(
             .delete()
             .eq('id', id)
           
-          if (!error) {
-            // 삭제 시에도 정합성을 위해 재조회 (선택 사항)
-            await get().fetchSubscriptions()
-          } else {
+          if (error) {
             console.error('Failed to sync removeSubscription:', error)
+            // 실패 시 롤백
+            set({ subscriptions: previousSubs })
           }
         }
       },

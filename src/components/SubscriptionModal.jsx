@@ -10,10 +10,13 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
   const removeSubscription = useSubscriptionStore((state) => state.removeSubscription)
   
+  // Determine if it's a true edit mode (has ID) or just pre-filling for a new entry
+  const isEditMode = initialData && initialData.id
+
   const [formData, setFormData] = useState({
     service_name: initialData?.service_name || '',
     category: initialData?.category || initialData?.categories?.[0] || 'OTT',
-    billing_date: initialData?.billing_date.replace(/[^0-9]/g, '') || '',
+    billing_date: initialData?.billing_date?.replace(/[^0-9]/g, '') || '',
     price: initialData?.price || '',
     payment_method: initialData?.payment_method || '',
     status: initialData?.status || 'active'
@@ -88,15 +91,17 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
     e.preventDefault()
     if (!formData.service_name || !formData.price || !formData.category) return
     
+    // eslint-disable-next-line no-unused-vars
+    const { category, ...rest } = formData
     const payload = {
-      ...formData,
+      ...rest,
       categories: [formData.category], // Compatibility with array-based views
       price: Number(formData.price),
       billing_date: `매달 ${formData.billing_date}일`,
       payment_method: formData.payment_method || '미지정'
     }
 
-    if (initialData) {
+    if (isEditMode) {
       updateSubscription(initialData.id, payload)
     } else {
       addSubscription(payload)
@@ -106,7 +111,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
   }
 
   const handleDelete = () => {
-    if (initialData && window.confirm('정말로 이 구독을 삭제하시겠습니까?')) {
+    if (isEditMode && window.confirm('정말로 이 구독을 삭제하시겠습니까?')) {
       removeSubscription(initialData.id)
       onClose()
     }
@@ -123,7 +128,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-tertiary dark:border-slate-700 shrink-0">
           <h2 className="text-[22px] font-bold text-dark dark:text-white">
-            {initialData ? '구독 정보 수정' : '구독 추가하기'}
+            {isEditMode ? '구독 정보 수정' : '구독 추가하기'}
           </h2>
           <button 
             onClick={onClose}
@@ -299,7 +304,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
 
             {/* Action Buttons */}
             <div className="flex gap-3 mt-4 pt-4 border-t border-tertiary/50 dark:border-slate-700/50">
-               {initialData && (
+               {isEditMode && (
                 <button 
                   type="button"
                   onClick={handleDelete}
@@ -318,7 +323,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                     : "bg-gray-200 dark:bg-slate-700 text-dark/30 dark:text-slate-500 cursor-not-allowed"
                 )}
               >
-                {initialData ? '수정 완료' : '추가 완료'}
+                {isEditMode ? '수정 완료' : '추가 완료'}
               </button>
             </div>
           </form>

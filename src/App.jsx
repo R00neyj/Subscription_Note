@@ -8,6 +8,7 @@ import Settings from './pages/Settings'
 import SearchResults from './pages/SearchResults'
 import TutorialGuide from './components/TutorialGuide'
 import InstallPrompt from './components/InstallPrompt'
+import SWUpdatePrompt from './components/SWUpdatePrompt'
 import useSubscriptionStore from './store/useSubscriptionStore'
 import { supabase } from './lib/supabase'
 import { useEffectiveTheme } from './hooks/useEffectiveTheme'
@@ -52,6 +53,7 @@ export default function App() {
     <BrowserRouter>
       <TutorialGuide />
       <InstallPrompt />
+      <SWUpdatePrompt />
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
