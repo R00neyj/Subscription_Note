@@ -1,5 +1,30 @@
-import { addDays, isSameDay, differenceInCalendarDays, startOfDay } from 'date-fns'
+import { addDays, isSameDay, differenceInCalendarDays, startOfDay, startOfWeek, endOfWeek, eachDayOfInterval, isBefore, getDate } from 'date-fns'
 import { extractDayFromBillingDate, getNextPaymentDate } from './dateUtils'
+
+/**
+ * 이번 주(월-일)의 모든 결제 일정을 가져옵니다.
+ */
+export const getWeeklyUpcomingPayments = (subscriptions) => {
+  const today = startOfDay(new Date())
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 }) // Monday
+  const weekEnd = endOfWeek(today, { weekStartsOn: 1 })     // Sunday
+  
+  const weekInterval = eachDayOfInterval({ start: weekStart, end: weekEnd })
+  
+  return subscriptions
+    .filter(sub => sub.status === 'active')
+    .map(sub => {
+      const billingDay = extractDayFromBillingDate(sub.billing_date)
+      const matchDate = weekInterval.find(date => getDate(date) === billingDay)
+      
+      return {
+        ...sub,
+        thisWeekDate: matchDate ? startOfDay(matchDate) : null
+      }
+    })
+    .filter(sub => sub.thisWeekDate !== null)
+    .sort((a, b) => a.thisWeekDate - b.thisWeekDate)
+}
 
 // 알림용: 오늘과 내일 결제 건 확인
 export const checkUpcomingPayments = (subscriptions) => {
@@ -22,38 +47,21 @@ export const checkUpcomingPayments = (subscriptions) => {
   })
 }
 
-// 대시보드용: 오늘 결제 건이 있으면 오늘, 없으면 이번주(향후 7일) 확인
+// 대시보드용 요약 정보 (동기화된 주간 로직 사용)
 export const getDashboardUpcomingInfo = (subscriptions) => {
   const today = startOfDay(new Date())
-  
-  // 1. 모든 활성 구독의 다음 결제일 계산
-  const activeSubsWithNextDate = subscriptions
-    .filter(sub => sub.status === 'active')
-    .map(sub => ({
-      ...sub,
-      nextPaymentDate: getNextPaymentDate(sub.billing_date)
-    }))
-    .filter(sub => sub.nextPaymentDate !== null)
+  const weeklyPayments = getWeeklyUpcomingPayments(subscriptions)
 
-  // 2. 오늘 결제 건 확인
-  const todayItems = activeSubsWithNextDate.filter(sub => 
-    isSameDay(sub.nextPaymentDate, today)
-  )
-
+  // 1. 오늘 결제 건 확인
+  const todayItems = weeklyPayments.filter(sub => isSameDay(sub.thisWeekDate, today))
   if (todayItems.length > 0) {
     return { type: 'today', items: todayItems }
   }
 
-  // 3. 오늘 건이 없으면 이번주(향후 7일 이내) 확인
-  const weekItems = activeSubsWithNextDate
-    .filter(sub => {
-      const daysDiff = differenceInCalendarDays(sub.nextPaymentDate, today)
-      return daysDiff > 0 && daysDiff <= 7
-    })
-    .sort((a, b) => a.nextPaymentDate - b.nextPaymentDate) // 가까운 날짜순 정렬
-
-  if (weekItems.length > 0) {
-    return { type: 'week', items: weekItems }
+  // 2. 이번 주 남은 결제 건 확인 (오늘 이후)
+  const remainingItems = weeklyPayments.filter(sub => differenceInCalendarDays(sub.thisWeekDate, today) > 0)
+  if (remainingItems.length > 0) {
+    return { type: 'week', items: remainingItems }
   }
 
   return null

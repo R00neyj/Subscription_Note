@@ -20,6 +20,7 @@ import { ko } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { extractDayFromBillingDate, getNextPaymentDate } from '../lib/dateUtils'
+import { getWeeklyUpcomingPayments } from '../lib/notificationUtils'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
 import useSubscriptionStore from '../store/useSubscriptionStore'
@@ -64,28 +65,10 @@ export default function Calendar() {
     return activeSubscriptions.filter(sub => extractDayFromBillingDate(sub.billing_date) === dayNum)
   }
 
-  // Calculate payments for the current week (Monday to Sunday)
+  // Calculate payments for the current week (Monday to Sunday) using shared logic
   const upcomingThisWeek = useMemo(() => {
-    const today = startOfDay(new Date())
-    const weekStart = startOfWeek(today, { weekStartsOn: 1 }) // Monday
-    const weekEnd = endOfWeek(today, { weekStartsOn: 1 })     // Sunday
-    
-    const weekInterval = eachDayOfInterval({ start: weekStart, end: weekEnd })
-    
-    return activeSubscriptions
-      .map(sub => {
-        const billingDay = extractDayFromBillingDate(sub.billing_date)
-        // Find if the billing day falls within any date of the current week
-        const matchDate = weekInterval.find(date => getDate(date) === billingDay)
-        
-        return {
-          ...sub,
-          thisWeekDate: matchDate ? startOfDay(matchDate) : null
-        }
-      })
-      .filter(sub => sub.thisWeekDate !== null)
-      .sort((a, b) => a.thisWeekDate - b.thisWeekDate)
-  }, [activeSubscriptions])
+    return getWeeklyUpcomingPayments(subscriptions)
+  }, [subscriptions])
 
   const upcomingTotalAmount = useMemo(() => {
     const today = startOfDay(new Date())
@@ -207,22 +190,22 @@ export default function Calendar() {
 
         {/* Selected Date Info (Step 4) */}
         <div className="w-full mt-4 flex flex-col gap-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg md:text-xl font-bold text-dark dark:text-white">
+          <div className="flex flex-row items-center justify-between gap-2 px-2">
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+              <h3 className="text-lg md:text-xl font-bold text-dark dark:text-white whitespace-nowrap">
                 {format(selectedDate, 'M월 d일', { locale: ko })} 결제 예정
               </h3>
-              <span className="text-sm font-bold text-dark/40 dark:text-slate-500 bg-tertiary dark:bg-slate-800 px-2 py-0.5 rounded-full">
+              <span className="text-[12px] md:text-sm font-bold text-dark/40 dark:text-slate-500 bg-tertiary dark:bg-slate-800 px-2 py-0.5 rounded-full w-fit">
                 총 {getSubscriptionsForDay(selectedDate).length}건
               </span>
             </div>
             
             <button 
               onClick={() => useSubscriptionStore.getState().openModal({ billing_date: `${getDate(selectedDate)}` })}
-              className="h-[48px] px-6 bg-primary text-white rounded-[16px] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg shadow-primary/20 cursor-pointer group active:scale-95 self-start md:self-auto"
+              className="h-[40px] md:h-[48px] px-4 md:px-6 bg-primary text-white rounded-[12px] md:rounded-[16px] flex items-center justify-center gap-1.5 hover:bg-blue-600 transition-all shadow-lg shadow-primary/20 cursor-pointer group active:scale-95 shrink-0"
             >
-              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-              <span className="font-bold text-[14px] md:text-[15px]">이 날짜에 구독 추가하기</span>
+              <Plus className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:rotate-90" />
+              <span className="font-bold text-[13px] md:text-[15px] whitespace-nowrap">이 날짜에 추가</span>
             </button>
           </div>
 
