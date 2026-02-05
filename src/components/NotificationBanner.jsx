@@ -45,12 +45,12 @@ export default function NotificationBanner() {
         
         <div className="flex-1 space-y-1">
           <h4 className="font-bold text-dark dark:text-white text-sm">
-            내일 결제 예정 알림
+            {upcomingItems.some(i => i.isToday) ? '오늘 결제 예정 알림' : '내일 결제 예정 알림'}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             <span className="font-bold text-primary">{upcomingItems[0].service_name}</span>
             {upcomingItems.length > 1 && ` 외 ${upcomingItems.length - 1}건`}
-            이(가) 결제될 예정입니다.
+            이(가) {upcomingItems[0].isToday ? '오늘' : '내일'} 결제될 예정입니다.
             <br />
             <span className="font-medium">예상 금액: {totalAmount.toLocaleString()}원</span>
           </p>

@@ -19,7 +19,7 @@ export default function Layout() {
       <Navigation />
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center w-full">
+      <div className="flex-1 min-w-0 flex flex-col items-center w-full">
         <main className="px-4 py-4 pb-[100px] md:p-6 md:pb-8 relative max-w-[1440px] w-full">
           <Outlet />
         </main>

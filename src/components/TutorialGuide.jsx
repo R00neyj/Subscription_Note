@@ -185,7 +185,9 @@ export default function TutorialGuide() {
         } : (coords ? {
           top: tooltipPos.top,
           left: tooltipPos.left,
-          transform: `translateX(-50%) ${tooltipPos.placement === 'top' ? 'translateY(-100%)' : ''}`
+          transform: (currentStep === 4 || currentStep === 5) && window.innerWidth >= 768
+            ? (tooltipPos.placement === 'top' ? 'translateY(-100%)' : '')
+            : `translateX(-50%) ${tooltipPos.placement === 'top' ? 'translateY(-100%)' : ''}`
         } : {})}
       >
         <button 

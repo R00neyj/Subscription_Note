@@ -28,7 +28,7 @@ export default function Navigation() {
   }
 
   return (
-    <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-colors duration-300">
+    <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:shrink-0 md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-colors duration-300">
       <div className="flex md:flex-col items-center justify-around w-full md:w-auto md:space-y-10">
         {/* btn (Add Button) */}
         <button 

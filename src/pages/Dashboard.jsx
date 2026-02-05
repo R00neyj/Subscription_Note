@@ -7,7 +7,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import NotificationBanner from '../components/NotificationBanner'
-import { checkUpcomingPayments } from '../lib/notificationUtils'
+import { checkUpcomingPayments, getDashboardUpcomingInfo } from '../lib/notificationUtils'
 
 const CATEGORY_COLORS = {
   OTT: 'bg-[#2563EB]',     // Primary Blue
@@ -106,6 +106,9 @@ export default function Dashboard() {
       .reduce((acc, sub) => acc + sub.price, 0)
   )
 
+  // Yearly estimated cost
+  const yearlyCost = totalCost * 12
+
   const activeCount = useSubscriptionStore((state) => 
     state.subscriptions.filter(sub => sub.status === 'active').length
   )
@@ -116,14 +119,9 @@ export default function Dashboard() {
     return subs.sort((a, b) => b.price - a.price)[0]
   })
 
-  // Upcoming Payments Info (Tomorrow)
+  // Upcoming Payments Info (Today or This Week)
   const upcomingInfo = useMemo(() => {
-    const items = checkUpcomingPayments(subscriptions)
-    if (items.length === 0) return null
-    return {
-      count: items.length,
-      totalPrice: items.reduce((acc, cur) => acc + cur.price, 0)
-    }
+    return getDashboardUpcomingInfo(subscriptions)
   }, [subscriptions])
   
   const openModal = useSubscriptionStore((state) => state.openModal)
@@ -209,6 +207,19 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* 연간 예상 지출 */}
+          <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[240px] transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">연간 예상 지출</p>
+            <div className="flex items-center gap-[3px]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+                {yearlyCost.toLocaleString()}
+              </span>
+              <div className="pt-1">
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
+              </div>
+            </div>
+          </div>
+
           {/* 곧 결제될 구독 (배너형) */}
           {upcomingInfo && (
             <div 
@@ -217,11 +228,11 @@ export default function Dashboard() {
             >
               <div className="flex items-center gap-3 md:gap-4 text-primary">
                 <span className="text-[15px] md:text-[19px] font-bold">
-                  내일 결제 예정: 총 {upcomingInfo.count}건
+                  {upcomingInfo.type === 'today' ? '오늘' : '이번 주'} 결제 예정: 총 {upcomingInfo.items.length}건
                 </span>
                 <span className="text-primary/30 font-light">|</span>
                 <span className="text-[15px] md:text-[19px] font-bold">
-                  합계 {upcomingInfo.totalPrice.toLocaleString()}원
+                  합계 {upcomingInfo.items.reduce((acc, cur) => acc + cur.price, 0).toLocaleString()}원
                 </span>
               </div>
               <ChevronRight className="text-primary group-hover:translate-x-1 transition-transform" size={24} />
