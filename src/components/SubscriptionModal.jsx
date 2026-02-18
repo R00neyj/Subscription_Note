@@ -38,7 +38,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [wrapperRef])
 
-  // Reset form when modal opens or initialData changes
+  // 1. Data Initialization Effect
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -53,6 +53,47 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
       setShowSuggestions(false)
     }
   }, [isOpen, initialData])
+
+  // 2. History Management Effect (Back Button Support)
+  const pushedRef = useRef(false)
+  
+  useEffect(() => {
+    // 사용자가 요청한 '모바일에서 뒤로가기로 닫기' 기능을 위해 모바일 환경(768px 미만)에서만 작동하도록 제한
+    // PC에서 뒤로가기 시 창이 바로 닫히는 문제 해결
+    const isMobile = window.innerWidth < 768
+    if (!isOpen || !isMobile) return
+
+    if (!pushedRef.current) {
+      window.history.pushState({ modal: 'subscription' }, '', window.location.href)
+      pushedRef.current = true
+    }
+    
+    const handlePopState = (event) => {
+      // 뒤로가기가 발생하면 pushedRef를 초기화하고 닫기 호출
+      pushedRef.current = false
+      onClose()
+    }
+    
+    window.addEventListener('popstate', handlePopState)
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      // cleanup에서 history.back()을 호출하면 React Strict Mode에서 
+      // mount/unmount가 반복될 때 의도치 않게 창이 바로 닫힐 수 있으므로 제거합니다.
+      // 대신 handleCloseInternal에서 명시적으로 처리합니다.
+    }
+  }, [isOpen])
+
+  const handleCloseInternal = () => {
+    const isMobile = window.innerWidth < 768
+    // 모바일이고 히스토리를 우리가 밀어넣었다면 뒤로가기 호출
+    if (isMobile && pushedRef.current) {
+      window.history.back()
+    } else {
+      // 그 외(PC 등)는 바로 닫기
+      onClose()
+    }
+  }
 
   if (!isOpen) return null
 
@@ -107,13 +148,13 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
       addSubscription(payload)
     }
     
-    onClose()
+    handleCloseInternal()
   }
 
   const handleDelete = () => {
     if (isEditMode && window.confirm('정말로 이 구독을 삭제하시겠습니까?')) {
       removeSubscription(initialData.id)
-      onClose()
+      handleCloseInternal()
     }
   }
 
@@ -131,7 +172,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
             {isEditMode ? '구독 정보 수정' : '구독 추가하기'}
           </h2>
           <button 
-            onClick={onClose}
+            onClick={handleCloseInternal}
             className="p-2 hover:bg-tertiary dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
           >
             <X className="w-6 h-6 text-dark dark:text-white" />

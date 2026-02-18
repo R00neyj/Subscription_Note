@@ -2,14 +2,13 @@ import { useState, useMemo } from 'react'
 import Header from '../components/Header'
 import SubscriptionTable from '../components/SubscriptionTable'
 import useSubscriptionStore from '../store/useSubscriptionStore'
-import { CATEGORIES } from '../constants/categories'
-import { cn } from '../lib/utils'
+import { CATEGORIES, CATEGORY_COLORS, TEXT_COLORS } from '../constants/categories'
 import SectionHeader from '../components/SectionHeader'
+import CategoryDistributionChart from '../components/CategoryDistributionChart'
 
 export default function SubscriptionList() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
   const openModal = useSubscriptionStore((state) => state.openModal)
@@ -18,6 +17,34 @@ export default function SubscriptionList() {
   const toggleCategory = (categoryId) => {
     setSelectedCategory(categoryId)
   }
+
+  // Dynamic Category Data Calculation for Chart
+  const categoryData = useMemo(() => {
+    const activeSubs = subscriptions.filter(s => s.status === 'active')
+    if (activeSubs.length === 0) return []
+
+    const grouped = activeSubs.reduce((acc, sub) => {
+      const cat = (sub.categories && sub.categories.length > 0) 
+        ? sub.categories[0] 
+        : (sub.category || 'Etc')
+      
+      acc[cat] = (acc[cat] || 0) + sub.price
+      return acc
+    }, {})
+
+    const total = Object.values(grouped).reduce((a, b) => a + b, 0)
+
+    return Object.entries(grouped)
+      .map(([label, value]) => ({
+        id: label,
+        label,
+        value,
+        percentage: (value / total) * 100,
+        color: CATEGORY_COLORS[label] || CATEGORY_COLORS.Etc,
+        textColor: TEXT_COLORS[label] || 'text-white'
+      }))
+      .sort((a, b) => b.value - a.value)
+  }, [subscriptions])
 
   // Filter and Sort subscriptions
   const sortedSubscriptions = useMemo(() => {
@@ -92,70 +119,12 @@ export default function SubscriptionList() {
         <div className="flex flex-col gap-2 w-full">
           <SectionHeader title="구독 목록" />
           
-          {/* Category Filter Tabs */}
-          <div className="flex items-center gap-2">
-            {/* Mobile: Custom Dropdown */}
-            <div className="md:hidden relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center justify-between w-[96px] h-[36px] bg-tertiary dark:bg-slate-700 border border-transparent dark:border-slate-600 text-dark dark:text-white font-bold text-[13px] px-3 rounded-full outline-none transition-all cursor-pointer"
-              >
-                <span className="truncate mr-1">
-                  {CATEGORIES.find(c => c.id === selectedCategory)?.label}
-                </span>
-                <svg className={cn("h-4 w-4 transition-transform duration-200 shrink-0", isDropdownOpen && "rotate-180")} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-
-              {/* Dropdown Menu (The "Window") */}
-              {isDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                  <ul className="absolute left-0 mt-2 w-full bg-white dark:bg-slate-800 border border-tertiary dark:border-slate-700 rounded-[16px] z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                    {CATEGORIES.map((cat) => (
-                      <li key={cat.id}>
-                        <button
-                          onClick={() => {
-                            toggleCategory(cat.id)
-                            setIsDropdownOpen(false)
-                          }}
-                          className={cn(
-                            "w-full px-4 py-3 text-left text-[14px] font-medium transition-colors flex items-center justify-between cursor-pointer",
-                            selectedCategory === cat.id
-                              ? "bg-primary text-white" 
-                              : "text-dark dark:text-slate-300 hover:bg-tertiary dark:hover:bg-slate-700"
-                          )}
-                        >
-                          <span>{cat.label}</span>
-                          {selectedCategory === cat.id && (
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                          )}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-
-            {/* Desktop: Buttons */}
-            <div className="hidden md:flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-[14px] font-bold transition-colors whitespace-nowrap cursor-pointer",
-                    selectedCategory === cat.id
-                      ? "bg-primary text-white"
-                      : "bg-tertiary dark:bg-slate-700 text-dark/60 dark:text-slate-300 hover:bg-tertiary/80 dark:hover:bg-slate-600 hover:text-dark dark:hover:text-white"
-                  )}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+          <div className="w-full mb-6">
+            <CategoryDistributionChart 
+              categoryData={categoryData}
+              selectedCategory={selectedCategory === 'all' ? null : selectedCategory}
+              onCategoryClick={(id) => toggleCategory(id === selectedCategory ? 'all' : id)}
+            />
           </div>
         </div>
 

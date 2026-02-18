@@ -10,6 +10,25 @@ precacheAndRoute(self.__WB_MANIFEST)
 // Clean up old caches
 cleanupOutdatedCaches()
 
+// Handle Push Notification
+self.addEventListener('push', (event) => {
+  const data = event.data.json()
+  
+  const options = {
+    body: data.body,
+    icon: '/favicon-96x96.png',
+    badge: '/favicon-96x96.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || '/'
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  )
+})
+
 // Handle Notification Click
 self.addEventListener('notificationclick', (event) => {
   const notification = event.notification;

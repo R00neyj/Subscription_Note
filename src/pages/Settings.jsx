@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { Github } from 'lucide-react'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
+import { subscribeToPush } from '../lib/notificationUtils'
+import { supabase } from '../lib/supabase'
 
 export default function Settings() {
   const navigate = useNavigate()
@@ -20,6 +22,44 @@ export default function Settings() {
   const resetTutorial = useSubscriptionStore((state) => state.resetTutorial)
   const notificationsEnabled = useSubscriptionStore((state) => state.notificationsEnabled)
   const setNotificationsEnabled = useSubscriptionStore((state) => state.setNotificationsEnabled)
+
+  const handleToggleNotifications = async () => {
+    const newState = !notificationsEnabled
+    
+    if (newState) {
+      // 1. 브라우저 알림 권한 요청 및 푸시 구독
+      const subscription = await subscribeToPush()
+      
+      if (subscription) {
+        // 2. 로그인된 유저라면 DB에 저장
+        if (user) {
+          try {
+            const p256dh = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh'))))
+            const auth = btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
+            
+            const { error } = await supabase.from('push_subscriptions').upsert({
+              user_id: user.id,
+              endpoint: subscription.endpoint,
+              p256dh: p256dh,
+              auth: auth
+            }, { onConflict: 'endpoint' })
+            
+            if (error) throw error
+          } catch (err) {
+            console.error('Notification sync failed:', err)
+          }
+        }
+        setNotificationsEnabled(true)
+      } else {
+        // 권한 거부됨
+        alert('알림 권한이 차단되어 있습니다. 브라우저 설정에서 알림을 허용해주세요.')
+        setNotificationsEnabled(false)
+      }
+    } else {
+      // 끄기 (로컬 상태만 변경, 필요시 DB 삭제 로직 추가 가능)
+      setNotificationsEnabled(false)
+    }
+  }
 
   const handleReset = () => {
     if (confirmText === '초기화') {
@@ -79,7 +119,7 @@ export default function Settings() {
             <p className="text-sm text-slate-500 dark:text-slate-400">결제 예정일 하루 전에 알림을 받습니다.</p>
           </div>
           <button
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            onClick={handleToggleNotifications}
             className={cn(
               "relative w-[52px] h-[32px] rounded-full transition-colors duration-300 cursor-pointer",
               notificationsEnabled ? "bg-primary" : "bg-slate-200 dark:bg-slate-600"

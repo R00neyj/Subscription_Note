@@ -12,6 +12,10 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', '*.svg', '*.png'],
       manifest: {
         name: '구독노트 - 스마트한 구독 관리',

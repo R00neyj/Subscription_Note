@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Project specific sensitive files
+docs/web_push_guide.md
+tokenFromFigma.json
+
 docs
 *.local
 

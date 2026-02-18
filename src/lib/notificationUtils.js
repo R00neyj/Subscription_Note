@@ -86,16 +86,33 @@ export const sendBrowserNotification = async (items) => {
   // 권한 확인
   if (Notification.permission !== 'granted') return
 
-  const hasToday = items.some(item => item.isToday)
-  const targetLabel = hasToday ? '오늘' : '내일'
+  const todayItems = items.filter(item => item.isToday)
+  const tomorrowItems = items.filter(item => !item.isToday)
   
-  const title = items.length === 1 
-    ? `${targetLabel} 결제 예정: ${items[0].service_name}`
-    : `${targetLabel} ${items.length}건의 결제가 예정되어 있어요!`
-  
-  const body = items.length === 1
-    ? `${items[0].price.toLocaleString()}원이 결제될 예정입니다.`
-    : `총 ${items.reduce((acc, cur) => acc + cur.price, 0).toLocaleString()}원이 결제됩니다. 잔액을 확인하세요.`
+  let title = ''
+  let body = ''
+
+  if (todayItems.length > 0 && tomorrowItems.length > 0) {
+    title = `오늘과 내일 결제 예정 알림`
+    const totalAmount = items.reduce((acc, cur) => acc + cur.price, 0)
+    body = `오늘 ${todayItems.length}건, 내일 ${tomorrowItems.length}건 (총 ${totalAmount.toLocaleString()}원)이 예정되어 있어요.`
+  } else if (todayItems.length > 0) {
+    title = todayItems.length === 1 
+      ? `오늘 결제 예정: ${todayItems[0].service_name}`
+      : `오늘 ${todayItems.length}건의 결제가 예정되어 있어요!`
+    
+    body = todayItems.length === 1
+      ? `${todayItems[0].price.toLocaleString()}원이 결제될 예정입니다.`
+      : `총 ${todayItems.reduce((acc, cur) => acc + cur.price, 0).toLocaleString()}원이 결제됩니다. 잔액을 확인하세요.`
+  } else {
+    title = tomorrowItems.length === 1 
+      ? `내일 결제 예정: ${tomorrowItems[0].service_name}`
+      : `내일 ${tomorrowItems.length}건의 결제가 예정되어 있어요!`
+    
+    body = tomorrowItems.length === 1
+      ? `${tomorrowItems[0].price.toLocaleString()}원이 결제될 예정입니다.`
+      : `총 ${tomorrowItems.reduce((acc, cur) => acc + cur.price, 0).toLocaleString()}원이 결제됩니다. 잔액을 확인하세요.`
+  }
 
   const options = {
     body,
@@ -130,5 +147,64 @@ export const sendBrowserNotification = async (items) => {
     } catch (err) {
       console.error('Browser Notification fallback failed:', err)
     }
+  }
+}
+
+// --- Web Push Implementation ---
+
+const VAPID_PUBLIC_KEY = 'BB8kU2idNZuS0R1MnsbmtL_aGUDaON0eWoV4NyCZ3gLdgKVQ9xDPfOAsa1SmPsvah5RJ11_ZjUW44hCr-pm2jtc'
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/')
+
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i)
+  }
+  return outputArray
+}
+
+export const subscribeToPush = async (userId) => {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('Push messaging is not supported in this browser.')
+    return null
+  }
+
+  try {
+    // 2초 타임아웃 추가 (서비스 워커가 응답하지 않을 때 대비)
+    const swPromise = navigator.serviceWorker.ready
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Service Worker registration timeout')), 2000)
+    )
+
+    const registration = await Promise.race([swPromise, timeoutPromise])
+    
+    // 기존 구독 확인
+    const existingSubscription = await registration.pushManager.getSubscription()
+    if (existingSubscription) {
+      return existingSubscription
+    }
+
+    const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    
+    // 새 구독 요청
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: convertedVapidKey
+    })
+
+    return subscription
+  } catch (error) {
+    if (error.message === 'Service Worker registration timeout') {
+      alert('알림 서버 연결에 실패했습니다. 페이지를 새로고침(F5) 후 다시 시도해주세요.')
+    } else {
+      console.warn('Push subscription failed:', error)
+    }
+    return null
   }
 }
