@@ -15,7 +15,7 @@ dist-ssr
 docs/web_push_guide.md
 tokenFromFigma.json
 
-docs
+# docs
 *.local
 
 # Editor directories and files

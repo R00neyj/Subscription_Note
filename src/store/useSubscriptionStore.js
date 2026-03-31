@@ -6,7 +6,6 @@ const useSubscriptionStore = create(
   persist(
     (set, get) => ({
       subscriptions: [],
-      searchQuery: '',
       isLoading: false,
       user: null,
 

@@ -3,7 +3,9 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "넷플릭스 프리미엄", nameEn: "Netflix Premium", price: 17000, category: "OTT" },
   { nameKo: "유튜브 프리미엄", nameEn: "YouTube Premium", price: 14900, category: "OTT" },
   { nameKo: "디즈니+ 프리미엄", nameEn: "Disney+ Premium", price: 13900, category: "OTT" },
+  { nameKo: "디즈니+ 프리미엄 (연간)", nameEn: "Disney+ Premium Yearly", price: 139000, category: "OTT", billing_cycle: "yearly" },
   { nameKo: "티빙 프리미엄", nameEn: "TVING Premium", price: 17000, category: "OTT" },
+  { nameKo: "티빙 프리미엄 (연간)", nameEn: "TVING Premium Yearly", price: 170000, category: "OTT", billing_cycle: "yearly" },
   { nameKo: "웨이브 프리미엄", nameEn: "Wavve Premium", price: 13900, category: "OTT" },
   { nameKo: "쿠팡플레이 (와우)", nameEn: "Coupang Play", price: 7890, category: "OTT" },
   { nameKo: "왓챠 프리미엄", nameEn: "WATCHA Premium", price: 12900, category: "OTT" },
@@ -46,7 +48,8 @@ export const SUBSCRIPTION_PRESETS = [
   // Shopping
   { nameKo: "쿠팡 와우", nameEn: "Coupang Wow", price: 7890, category: "Shopping" },
   { nameKo: "네이버 플러스", nameEn: "Naver Plus", price: 4900, category: "Shopping" },
-  { nameKo: "신세계 유니버스", nameEn: "Universe Club", price: 4900, category: "Shopping" },
+  { nameKo: "네이버 플러스 (연간)", nameEn: "Naver Plus Yearly", price: 46800, category: "Shopping", billing_cycle: "yearly" },
+  { nameKo: "신세계 유니버스", nameEn: "Universe Club", price: 30000, category: "Shopping", billing_cycle: "yearly" },
   { nameKo: "컬리 멤버스", nameEn: "Kurly Members", price: 1900, category: "Shopping" },
   { nameKo: "우주패스 all", nameEn: "Universe Pass all", price: 9900, category: "Shopping" },
   { nameKo: "신세계 유니버스 (G마켓)", nameEn: "Smile Club", price: 3000, category: "Shopping" },
@@ -85,8 +88,11 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "클로드 팀 (Standard)", nameEn: "Claude Team Standard", price: 43500, category: "Work" },
   { nameKo: "클로드 팀 (Premium)", nameEn: "Claude Team Premium", price: 217500, category: "Work" },
   { nameKo: "퍼플렉시티 프로", nameEn: "Perplexity Pro", price: 29000, category: "Work" }, // 약 $20
+  { nameKo: "퍼플렉시티 프로 (연간)", nameEn: "Perplexity Pro Yearly", price: 290000, category: "Work", billing_cycle: "yearly" }, // 약 $200
   { nameKo: "깃허브 코파일럿", nameEn: "Github Copilot", price: 14500, category: "Work" }, // 약 $10
+  { nameKo: "깃허브 코파일럿 (연간)", nameEn: "Github Copilot Yearly", price: 145000, category: "Work", billing_cycle: "yearly" }, // 약 $100
   { nameKo: "미드저니 베이직", nameEn: "Midjourney Basic", price: 14500, category: "Work" }, // 약 $10
+  { nameKo: "미드저니 베이직 (연간)", nameEn: "Midjourney Basic Yearly", price: 139000, category: "Work", billing_cycle: "yearly" }, // 약 $96
   { nameKo: "딥엘 프로 (Starter)", nameEn: "DeepL Pro Starter", price: 12000, category: "Work" },
 
   // Design & Creativity
@@ -103,6 +109,7 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "어도비 CC 학생용 (첫해)", nameEn: "Adobe CC Student 1st Year", price: 21120, category: "Work" },
   { nameKo: "어도비 CC 학생용 (갱신)", nameEn: "Adobe CC Student Renewal", price: 47300, category: "Work" },
   { nameKo: "피그마 프로 (디자인)", nameEn: "Figma Professional Full", price: 29000, category: "Work" },
+  { nameKo: "피그마 프로 (디자인) (연간)", nameEn: "Figma Professional Yearly", price: 210000, category: "Work", billing_cycle: "yearly" },
   { nameKo: "피그마 프로 (개발)", nameEn: "Figma Professional Dev", price: 22000, category: "Work" },
   { nameKo: "피그마 프로 (협업)", nameEn: "Figma Professional Collab", price: 7500, category: "Work" },
   { nameKo: "피그마 조직 (디자인)", nameEn: "Figma Organization Full", price: 80000, category: "Work" },
@@ -114,10 +121,14 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "캔바 프로", nameEn: "Canva Pro", price: 14000, category: "Work" },
   { nameKo: "프레이머 프로", nameEn: "Framer Pro", price: 29000, category: "Work" }, // 약 $20
   { nameKo: "웹플로우 스타터", nameEn: "Webflow Starter", price: 20000, category: "Work" }, // 약 $14
+  { nameKo: "엔바토 엘리먼츠", nameEn: "Envato Elements", price: 45000, category: "Work" }, // 약 $33
+  { nameKo: "엔바토 엘리먼츠 (연간)", nameEn: "Envato Elements Yearly", price: 264000, category: "Work", billing_cycle: "yearly" }, // 약 $198
 
   // Productivity & Collaboration
   { nameKo: "노션 플러스", nameEn: "Notion Plus", price: 14500, category: "Work" }, // 약 $10
+  { nameKo: "노션 플러스 (연간)", nameEn: "Notion Plus Yearly", price: 144000, category: "Work", billing_cycle: "yearly" }, // 약 $96
   { nameKo: "마이크로소프트 365 퍼스널", nameEn: "Microsoft 365 Personal", price: 8900, category: "Work" },
+  { nameKo: "마이크로소프트 365 퍼스널 (연간)", nameEn: "Microsoft 365 Personal Yearly", price: 89000, category: "Work", billing_cycle: "yearly" },
   { nameKo: "슬랙 프로", nameEn: "Slack Pro", price: 10500, category: "Work" }, // 약 $7.25
   { nameKo: "줌 프로", nameEn: "Zoom Pro", price: 23000, category: "Work" }, // 약 $15.99
   { nameKo: "미로 스타터", nameEn: "Miro Starter", price: 11500, category: "Work" }, // 약 $8
@@ -168,11 +179,15 @@ export const SUBSCRIPTION_PRESETS = [
   { nameKo: "요기패스", nameEn: "Yogipass", price: 9900, category: "Etc" },
   { nameKo: "쏘카 패스", nameEn: "Socar Pass", price: 14900, category: "Etc" },
   { nameKo: "밀리의 서재", nameEn: "Millies Library", price: 9900, category: "Etc" },
-  { nameKo: "리디셀렉트", nameEn: "Ridi Select", price: 4900, category: "Etc" },
+  { nameKo: "밀리의 서재 (연간)", nameEn: "Millies Library Yearly", price: 99000, category: "Etc", billing_cycle: "yearly" },
   { nameKo: "클래스101", nameEn: "Class101", price: 19900, category: "Etc" },
+  { nameKo: "클래스101 (연간)", nameEn: "Class101 Yearly", price: 199000, category: "Etc", billing_cycle: "yearly" },
   { nameKo: "엑스박스 게임패스", nameEn: "Xbox Game Pass", price: 13500, category: "Etc" },
   { nameKo: "플스 플러스", nameEn: "PS Plus", price: 7500, category: "Etc" },
+  { nameKo: "플스 플러스 (연간)", nameEn: "PS Plus Yearly", price: 75000, category: "Etc", billing_cycle: "yearly" },
   { nameKo: "닌텐도 온라인", nameEn: "Nintendo Online", price: 4900, category: "Etc" },
+  { nameKo: "닌텐도 온라인 (연간)", nameEn: "Nintendo Online Yearly", price: 19900, category: "Etc", billing_cycle: "yearly" },
+
   { nameKo: "윌라", nameEn: "Willa", price: 9900, category: "Etc" },
   { nameKo: "예스24 북클럽", nameEn: "Yes24 Book Club", price: 5500, category: "Etc" },
   { nameKo: "교보문고 sam", nameEn: "Kyobo sam", price: 9900, category: "Etc" },

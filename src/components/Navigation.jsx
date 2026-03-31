@@ -28,13 +28,13 @@ export default function Navigation() {
   }
 
   return (
-    <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:shrink-0 md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-colors duration-300">
+    <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:shrink-0 md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
       <div className="flex md:flex-col items-center justify-around w-full md:w-auto md:space-y-10">
         {/* btn (Add Button) */}
         <button 
           id="step-add-pc"
           onClick={() => openModal()}
-          className="hidden md:flex justify-center items-center w-[56px] h-[56px] bg-primary rounded-[12px] p-0 transition-colors hover:bg-accent-2 cursor-pointer" 
+          className="hidden md:flex justify-center items-center w-[56px] h-[56px] bg-primary rounded-[16px] p-0 transition-all hover:bg-primary/90 active:scale-95 cursor-pointer shadow-lg shadow-primary/20" 
           style={{ padding: '16px 13px' }}
         >
           <div className="relative w-6 h-6 flex items-center justify-center">
@@ -51,27 +51,26 @@ export default function Navigation() {
                 key={item.path}
                 id={item.path === '/settings' ? 'step-settings-mobile' : undefined}
                 to={item.path}
-                className="flex flex-col items-center w-[56px] h-[65px] py-[6px] gap-[4px] transition-all group cursor-pointer"
+                className="flex flex-col items-center w-[56px] h-[65px] py-[6px] gap-[4px] transition-all group active:scale-95 cursor-pointer"
               >
                 {/* size-56 (Icon Container) */}
                 <div className={cn(
-                  "flex items-center justify-center w-[56px] h-[32px] px-[16px] py-[4px] rounded-[32px] transition-colors",
-                  isActive ? "bg-primary" : "group-hover:bg-white/50 dark:group-hover:bg-slate-700"
+                  "flex items-center justify-center w-[56px] h-[32px] px-[16px] py-[4px] rounded-[32px] transition-all",
+                  isActive ? "bg-primary shadow-md shadow-primary/20" : "group-hover:bg-white/50 dark:group-hover:bg-slate-700"
                 )}>
                   <img 
                     src={isActive ? item.activeIcon : item.inactiveIcon} 
                     alt={item.label} 
                     className={cn(
                       "w-6 h-6 shrink-0 transition-all", 
-                      isActive ? "brightness-0 invert" : "dark:invert"
+                      isActive ? "brightness-0 invert scale-110" : "dark:invert"
                     )} 
                   />
                 </div>
                 {/* Label */}
                 <span className={cn(
-                  "w-[56px] h-[17px] text-[12px] leading-[1.4] text-center whitespace-nowrap",
-                  isActive ? "font-bold" : "font-medium",
-                  "text-[#111111] dark:text-white"
+                  "w-[56px] h-[17px] text-[12px] leading-[1.4] text-center whitespace-nowrap transition-colors",
+                  isActive ? "font-extrabold text-primary" : "font-bold text-[#111111] dark:text-slate-400"
                 )}>
                   {item.label}
                 </span>
@@ -85,7 +84,7 @@ export default function Navigation() {
       <button 
         id="step-dark-pc"
         onClick={toggleDarkMode}
-        className="hidden md:flex justify-center items-center w-12 h-12 rounded-full border border-dark/20 dark:border-white/20 cursor-pointer hover:bg-white/50 dark:hover:bg-slate-700 transition-colors"
+        className="hidden md:flex justify-center items-center w-12 h-12 rounded-full border border-dark/10 dark:border-white/10 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all active:scale-90 shadow-sm"
       >
         <img 
           src={isDark ? "/darkMode=true, fill=true.svg" : "/darkMode=false, fill=false.svg"} 

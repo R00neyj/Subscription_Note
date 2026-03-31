@@ -5,33 +5,33 @@ import { X, ChevronRight, ChevronLeft, Check } from 'lucide-react'
 
 const TUTORIAL_STEPS = [
   {
-    title: "반가워요! 👋",
-    description: "구독노트에 오신 것을 환영합니다. 모든 구독 서비스를 한눈에 관리하는 방법을 알려드릴게요.",
+    title: "만나서 반가워요! 👋",
+    description: "구독노트에 오신 것을 환영합니다. 모든 구독 서비스를 스마트하게 관리하는 팁을 가볍게 짚어드릴게요.",
     target: null, // Center
   },
   {
-    title: "월간 리포트",
-    description: "이번 달 총 지출액과 가장 많이 지출한 항목을 한눈에 확인할 수 있어요.",
+    title: "월간 구독 리포트",
+    description: "이번 달 총 지출액과 가장 많은 비용을 차지하는 항목을 한눈에 파악해 보세요.",
     target: "#step-summary",
   },
   {
     title: "카테고리 분석",
-    description: "지출 비중을 차트로 확인하고, 클릭하여 해당 카테고리만 모아볼 수 있어요.",
+    description: "지출 비중을 차트로 확인하고, 원하는 카테고리만 따로 모아 분석할 수 있답니다.",
     target: "#step-chart",
   },
   {
-    title: "구독 목록",
-    description: "현재 활성화된 구독 서비스들을 확인하고 정렬하거나 상세 내용을 볼 수 있습니다.",
+    title: "최근 구독 내역",
+    description: "현재 이용 중인 구독 서비스들을 확인하고, 상세 내역을 편하게 관리하세요.",
     target: "#step-recent",
   },
   {
     title: "빠른 추가하기",
-    description: "모바일에서는 하단 버튼으로, PC에서는 사이드바 버튼을 통해 새로운 구독을 빠르게 추가하세요.",
+    description: "새로운 구독 서비스를 발견하셨나요? 언제 어디서든 버튼 하나로 빠르게 추가할 수 있어요.",
     target: window.innerWidth >= 768 ? "#step-add-pc" : "#step-fab",
   },
   {
-    title: "다크모드 & 설정",
-    description: "취향에 맞는 테마를 선택하거나 데이터를 관리할 수 있습니다.",
+    title: "나에게 맞는 테마 설정",
+    description: "눈이 편안한 다크모드나 나만의 설정을 통해 구독노트를 더 쾌적하게 꾸며보세요.",
     target: window.innerWidth >= 768 ? "#step-dark-pc" : "#step-settings-mobile",
   }
 ]

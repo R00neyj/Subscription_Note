@@ -44,7 +44,7 @@ export default function FloatingActionButton() {
       id="step-fab"
       onClick={() => openModal()}
       className={cn(
-        "md:hidden fixed bottom-[78px] right-4 z-[60] flex items-center justify-center gap-2 w-[104px] h-[56px] bg-gradient-to-r from-[#2C25EB] to-[#2563EB] text-white rounded-[16px] transition-all duration-500 cursor-pointer",
+        "md:hidden fixed bottom-[78px] right-4 z-[60] flex items-center justify-center gap-2 w-[104px] h-[56px] bg-gradient-to-r from-[#2C25EB] to-[#2563EB] text-white rounded-[20px] shadow-lg shadow-primary/20 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-95 cursor-pointer",
         isVisible 
           ? "translate-y-0 opacity-100" 
           : "translate-y-[20%] opacity-0 pointer-events-none"

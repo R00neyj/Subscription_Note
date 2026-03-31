@@ -25,7 +25,7 @@ export default function CategoryDistributionChart({
   return (
     <div className="w-full">
       {/* Legend */}
-      <div className="flex flex-wrap gap-6 mb-4 justify-start">
+      <div className="flex flex-wrap gap-x-4 gap-y-3 md:gap-6 mb-4 justify-start">
         {categoryData.map((item) => {
           const isSelected = selectedCategory === item.id
           const isDimmed = selectedCategory && !isSelected
@@ -43,12 +43,12 @@ export default function CategoryDistributionChart({
               onMouseEnter={() => setHoveredCategory(item.id)}
               onMouseLeave={() => setHoveredCategory(null)}
             >
-              <div className={cn("shrink-0 size-[24px] rounded-[8px]", item.color, isSelected && "ring-2 ring-offset-2 ring-primary dark:ring-offset-slate-800")} />
+              <div className={cn("shrink-0 size-4 md:size-6 rounded-[4px] md:rounded-[8px]", item.color, isSelected && "ring-2 ring-offset-2 ring-primary dark:ring-offset-slate-800")} />
               <p className={cn(
-                "font-medium text-[16px]",
-                isSelected ? "text-primary dark:text-blue-400 font-bold" : "text-black dark:text-white"
+                "font-extrabold text-[14px] md:text-[16px]",
+                isSelected ? "text-primary dark:text-blue-400" : "text-black dark:text-white"
               )}>
-                {item.label} ({Math.round(item.percentage)}%)
+                {item.label} <span className="text-[12px] md:text-[14px] font-bold opacity-60">({Math.round(item.percentage)}%)</span>
               </p>
             </div>
           )
@@ -56,7 +56,7 @@ export default function CategoryDistributionChart({
       </div>
 
       {/* Bar Chart */}
-      <div className="h-[42px] w-full rounded-full flex overflow-hidden">
+      <div className="h-[32px] md:h-[42px] w-full rounded-full flex overflow-hidden shadow-inner bg-slate-100 dark:bg-slate-900/50">
         {categoryData.map((item) => {
           const isSelected = selectedCategory === item.id
           const isDimmed = selectedCategory && !isSelected

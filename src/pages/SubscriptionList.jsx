@@ -59,8 +59,14 @@ export default function SubscriptionList() {
     }
 
     // 2. Sort
-    if (sortConfig.key) {
-      data.sort((a, b) => {
+    data.sort((a, b) => {
+      // 2.1. Primary Sort: Status (Active first)
+      if (a.status !== b.status) {
+        return a.status === 'active' ? -1 : 1
+      }
+
+      // 2.2. Secondary Sort: User Configuration
+      if (sortConfig.key) {
         let aValue = a[sortConfig.key]
         let bValue = b[sortConfig.key]
 
@@ -89,10 +95,13 @@ export default function SubscriptionList() {
             ? aValue.localeCompare(bValue) 
             : bValue.localeCompare(aValue)
         }
-        
-        return 0
-      })
-    }
+      } else {
+        // Default: Sort by newest (created_at descending)
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      }
+      
+      return 0
+    })
 
     return data
   }, [subscriptions, selectedCategory, sortConfig])
@@ -115,11 +124,11 @@ export default function SubscriptionList() {
     <div className="flex flex-col min-h-full">
       <Header />
       
-      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 md:p-[42px] flex flex-col gap-[24px] items-start w-full transition-colors duration-300">
-        <div className="flex flex-col gap-2 w-full">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 py-4 md:p-8 flex flex-col gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+        <div className="flex flex-col gap-4 w-full">
           <SectionHeader title="구독 목록" />
           
-          <div className="w-full mb-6">
+          <div className="w-full mb-2">
             <CategoryDistributionChart 
               categoryData={categoryData}
               selectedCategory={selectedCategory === 'all' ? null : selectedCategory}
@@ -129,19 +138,17 @@ export default function SubscriptionList() {
         </div>
 
         {/* Summary Card */}
-        <div className="bg-background dark:bg-slate-900 border border-primary rounded-[20px] p-4 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-          <p className="text-[14px] md:text-[18px] font-bold text-dark dark:text-slate-200 leading-[1.4]">
+        <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300">
+          <p className="text-[13px] md:text-[15px] font-bold text-primary/70 leading-none mb-1">
             {selectedCategory === 'all' 
               ? '총 구독료' 
               : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} 구독료`}
           </p>
-          <div className="flex items-center gap-[3px]">
-            <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+          <div className="flex items-baseline gap-[2px]">
+            <span className="text-[22px] md:text-[28px] font-extrabold text-dark dark:text-white leading-none">
               {totalCost.toLocaleString()}
             </span>
-            <div className="pt-1">
-              <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
-            </div>
+            <span className="text-[14px] md:text-[16px] font-bold text-dark/60 dark:text-slate-400">원</span>
           </div>
         </div>
 
