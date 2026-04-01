@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
 import Navigation from './Navigation'
 import SubscriptionModal from './SubscriptionModal'
 import FloatingActionButton from './FloatingActionButton'
@@ -20,7 +19,7 @@ export default function Layout() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col items-center w-full">
-        <main className="p-6 pb-[100px] md:p-8 md:pb-10 relative max-w-[1440px] w-full">
+        <main className="px-4 py-6 pb-[100px] md:p-8 md:pb-10 relative max-w-[1440px] w-full">
           <Outlet />
         </main>
       </div>

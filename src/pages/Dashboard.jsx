@@ -291,10 +291,10 @@ export default function Dashboard() {
         <motion.div 
           id="step-summary" 
           variants={itemVariants}
-          className="grid grid-cols-2 md:flex md:flex-wrap gap-4 items-start w-full"
+          className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-start w-full"
         >
           {/* 총 구독료 */}
-          <motion.div 
+          <div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
@@ -309,14 +309,15 @@ export default function Dashboard() {
                 <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
               </div>
             </div>
-          </motion.div>
+          </div>
           
           {/* 구독중인 서비스 */}
           <motion.div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
-            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px]"
+            onClick={() => navigate('/list')} 
+            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] cursor-pointer"
           >
              <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">구독중인 서비스</p>
             <div className="flex items-center gap-[3px]">
@@ -346,7 +347,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* 연간 예상 지출 */}
-          <motion.div 
+          <div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
@@ -361,7 +362,7 @@ export default function Dashboard() {
                 <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* 곧 결제될 구독 (배너형) */}
           {upcomingInfo && (
@@ -390,7 +391,7 @@ export default function Dashboard() {
         {insights && (
           <motion.div variants={itemVariants} className="mt-8 flex flex-col items-start w-full gap-4">
             <SectionHeader title="구독 최적화 리포트" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 w-full">
               {/* Long-term Cost Card */}
               <motion.div 
                 variants={cardHover}
@@ -512,10 +513,10 @@ export default function Dashboard() {
                 className="bg-white dark:bg-slate-800 w-full max-w-[520px] rounded-[32px] overflow-hidden ring-1 ring-black/5 shadow-2xl shadow-primary/10 border border-tertiary dark:border-slate-700 flex flex-col max-h-[90vh]"
               >
                 {/* Modal Header */}
-                <div className="p-6 border-b border-tertiary dark:border-slate-700 flex items-center justify-between shrink-0">
+                <div className="p-4 pt-5 pb-5 border-b border-tertiary dark:border-slate-700 flex items-center justify-between shrink-0">
                   <h3 className="text-[22px] font-bold text-dark dark:text-white">
                     {activeInsight.type === 'cost' && '장기 지출 분석'}
-                    {activeInsight.type === 'satisfaction' && '낮은 만족도 서비스'}
+                    {activeInsight.type === 'satisfaction' && (activeInsight.data.length > 0 ? '낮은 만족도 서비스' : '만족도 분석 결과')}
                     {activeInsight.type === 'duplicates' && '비슷한 서비스 상세 분석'}
                   </h3>
                   <button 
@@ -527,7 +528,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Modal Content */}
-                <div className="px-6 py-4 md:py-6 overflow-y-auto custom-scrollbar grow">
+                <div className="px-4 py-4 md:py-6 overflow-y-auto custom-scrollbar grow">
                   {activeInsight.type === 'cost' && (
                     <motion.div 
                       variants={containerVariants}
@@ -552,7 +553,7 @@ export default function Dashboard() {
                             variants={itemVariants}
                             whileHover={{ y: -2, backgroundColor: "rgba(37, 99, 235, 0.08)" }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex items-center gap-4 p-4 bg-primary/5 dark:bg-primary/10 rounded-[24px] border border-primary/10 transition-colors relative group"
+                            className="flex items-center gap-4 p-3 bg-primary/5 dark:bg-primary/10 rounded-[24px] border border-primary/10 transition-colors relative group"
                           >
                             {/* Cumulative Amount Badge - Top Right */}
                             <div className="absolute top-4 right-5">
@@ -567,7 +568,7 @@ export default function Dashboard() {
                             </div>
 
                             {/* Right: Text Area */}
-                            <div className="flex flex-col gap-0.5 pr-16">
+                            <div className="flex flex-col gap-0.5 pr-2 md:pr-16">
                               <span className="text-[13px] font-bold text-primary/60 uppercase tracking-tight">
                                 {item.label}만 아껴도
                               </span>
@@ -584,7 +585,7 @@ export default function Dashboard() {
 
                       <motion.div variants={itemVariants} className="bg-amber-50 dark:bg-amber-950/20 rounded-[24px] p-5 border border-amber-100 dark:border-amber-900/30 mt-2 mb-2">
                         <p className="text-[13px] md:text-[14px] text-amber-700 dark:text-amber-400 leading-relaxed font-bold text-center break-keep">
-                          "이 금액은 단순한 비용이 아니라,<br/>당신이 더 가치 있게 사용할 수 있는 소중한 기회입니다."
+                          소액이라도 장기적으로는 꽤 큰 자산입니다.<br/>꼭 필요한 서비스만 남기고 나머지는 더 유용한 곳에 활용하는 게 좋습니다.
                         </p>
                       </motion.div>
                     </motion.div>
@@ -597,12 +598,21 @@ export default function Dashboard() {
                       animate="visible"
                       className="space-y-4"
                     >
-                      <motion.div variants={itemVariants} className="bg-red-50 dark:bg-red-950/20 p-4 rounded-[20px] border border-red-100 dark:border-red-900/30 mb-2">
-                        <p className="text-[14px] font-bold text-red-600 dark:text-red-400 text-center break-keep">
-                          만족도가 낮은 서비스들을 발견했습니다.<br/>
-                          <span className="font-extrabold underline underline-offset-4">아까운 비용이 매달 새어나가고 있어요.</span>
-                        </p>
-                      </motion.div>
+                      {activeInsight.data.length > 0 ? (
+                        <motion.div variants={itemVariants} className="bg-red-50 dark:bg-red-950/20 p-4 rounded-[20px] border border-red-100 dark:border-red-900/30 mb-2">
+                          <p className="text-[14px] font-bold text-red-600 dark:text-red-400 text-center break-keep">
+                            만족도가 낮은 서비스들을 발견했습니다.<br/>
+                            <span className="font-extrabold underline underline-offset-4">아까운 비용이 매달 새어나가고 있어요.</span>
+                          </p>
+                        </motion.div>
+                      ) : (
+                        <motion.div variants={itemVariants} className="bg-emerald-50 dark:bg-emerald-950/20 p-4 rounded-[20px] border border-emerald-100 dark:border-emerald-900/30 mb-2">
+                          <p className="text-[14px] font-bold text-emerald-600 dark:text-emerald-400 text-center break-keep">
+                            현재 모든 서비스를 만족하며 이용하고 계시네요!<br/>
+                            <span className="font-extrabold underline underline-offset-4">현명한 소비 습관을 유지하고 있습니다.</span>
+                          </p>
+                        </motion.div>
+                      )}
 
                       {activeInsight.data.map(sub => (
                         <motion.div 
@@ -775,7 +785,7 @@ export default function Dashboard() {
                   )}                </div>
 
                 {/* Modal Footer */}
-                <div className="p-6 pt-0 flex justify-center shrink-0">
+                <div className="p-4 pt-0 flex justify-center shrink-0">
                   <motion.button 
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}

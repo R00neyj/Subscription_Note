@@ -458,7 +458,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                       className={cn(
                         "flex-1 h-[44px] rounded-[12px] font-bold text-[14px] transition-all cursor-pointer",
                         formData.billing_cycle === 'monthly'
-                          ? "bg-white dark:bg-slate-600 text-primary shadow-sm"
+                          ? "bg-white dark:bg-slate-600 text-primary shadow-sm dark:text-blue-300"
                           : "text-dark/40 dark:text-slate-400"
                       )}
                     >
