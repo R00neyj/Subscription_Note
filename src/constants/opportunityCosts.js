@@ -14,8 +14,11 @@ export const OPPORTUNITY_COST_ITEMS = [
   { name: '다이슨 에어랩', price: 900000, icon: '💨' },
   
   // 100만원 ~ 500만원
+  { name: '아이패드 에어 신형', price: 1000000, icon: '📱' },
   { name: '최신형 아이폰 Pro', price: 1700000, icon: '📱' },
+  { name: '일본 도쿄 3박 4일 여행', price: 2000000, icon: '✈️' },
   { name: '맥북 프로 14인치', price: 3000000, icon: '💻' },
+  { name: '최고급 프리미엄 안마의자', price: 4000000, icon: '🛋️' },
   { name: '유럽 배낭여행 2주', price: 5000000, icon: '✈️' },
   
   // 500만원 ~ 2000만원

@@ -94,8 +94,8 @@ const BRAND_ICONS = {
   claude: {
     bg: 'bg-[#D97706] text-white',
     render: () => (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-[60%] h-[60%]">
-        <path d="M13.527 2.158c.28-.68 1.226-.68 1.506 0l1.83 4.44a1.8 1.8 0 0 0 1.002 1.002l4.44 1.83c.68.28.68 1.226 0 1.506l-4.44 1.83a1.8 1.8 0 0 0-1.002 1.002l-1.83 4.44c-.28.68-1.226.68-1.506 0l-1.83-4.44a1.8 1.8 0 0 0-1.002-1.002l-4.44-1.83c-.68-.28-.68-1.226 0-1.506l4.44-1.83a1.8 1.8 0 0 0 1.002-1.002l1.83-4.44z"/>
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-[65%] h-[65%]">
+        <path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" />
       </svg>
     )
   },
@@ -142,11 +142,9 @@ const BRAND_ICONS = {
 
   // Disney+
   disney: {
-    bg: 'bg-[#113CCF] text-white',
+    bg: 'bg-[#113CCF] text-white font-black',
     render: () => (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-[65%] h-[65%]">
-        <path d="M4.5 12c0-4.14 3.36-7.5 7.5-7.5 2.45 0 4.63 1.18 6 3l-1.5 1.5C15.4 7.7 13.8 7 12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5c1.8 0 3.4-.7 4.5-2l1.5 1.5c-1.37 1.82-3.55 3-6 3-4.14 0-7.5-3.36-7.5-7.5zm14-1h2v2h-2v2h-2v-2h-2v-2h2v-2h2v2z"/>
-      </svg>
+      <span className="text-[12px] md:text-[14px] font-black tracking-tighter leading-none">D+</span>
     )
   },
 

@@ -11,6 +11,7 @@ import NotificationBanner from '../components/NotificationBanner'
 import { getDashboardUpcomingInfo } from '../lib/notificationUtils'
 import { CATEGORY_COLORS, TEXT_COLORS, CATEGORIES } from '../constants/categories'
 import { OPPORTUNITY_COST_ITEMS } from '../constants/opportunityCosts'
+import { detectSubDomain } from '../constants/serviceSubDomains'
 import ServiceIcon from '../components/ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
@@ -57,6 +58,9 @@ export default function Dashboard() {
   const hasSeenTutorial = useSubscriptionStore((state) => state.hasSeenTutorial)
   const openModal = useSubscriptionStore((state) => state.openModal)
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
+  const ignoredDuplicates = useSubscriptionStore((state) => state.ignoredDuplicates || [])
+  const ignoreDuplicateGroup = useSubscriptionStore((state) => state.ignoreDuplicateGroup)
+  const resetIgnoredDuplicates = useSubscriptionStore((state) => state.resetIgnoredDuplicates)
 
   // Insights Logic
   const insights = useMemo(() => {
@@ -66,24 +70,36 @@ export default function Dashboard() {
     // 1. Low Satisfaction (1-2 stars) - Exclude essentials
     const lowSatisfaction = activeSubs.filter(s => s.satisfaction && s.satisfaction <= 2 && !s.is_essential)
     
-    // 2. Duplicate Categories & Potential Savings (Exclude Essentials)
-    const catGroups = activeSubs.reduce((acc, sub) => {
-      const cat = sub.categories?.[0] || sub.category || 'Etc'
-      if (!acc[cat]) acc[cat] = []
-      acc[cat].push(sub)
+    // 2. Fine-grained Sub-domain Duplicate Detection (Exclude Essentials & Ignored Duplicates)
+    const subDomainGroups = activeSubs.reduce((acc, sub) => {
+      const mainCat = sub.categories?.[0] || sub.category || 'Etc'
+      const subDomain = detectSubDomain(sub.service_name, mainCat)
+      
+      // Work, Cloud, Etc의 'general' 미분류는 성격이 다를 확률이 높아 오탐 방지를 위해 자동 중복 묶음에서 배제
+      if (subDomain.isGeneral && (mainCat === 'Work' || mainCat === 'Cloud' || mainCat === 'Etc')) {
+        return acc
+      }
+
+      const groupId = subDomain.id
+      if (!acc[groupId]) {
+        acc[groupId] = {
+          subDomain,
+          items: []
+        }
+      }
+      acc[groupId].items.push(sub)
       return acc
     }, {})
 
-    const duplicates = Object.entries(catGroups)
-      .map(([catId, allItems]) => {
+    const duplicates = Object.entries(subDomainGroups)
+      .map(([groupId, group]) => {
+        // 사용자가 알림 끄기(예외) 처리한 그룹이면 제외
+        if (ignoredDuplicates.includes(groupId)) return null
+
         // 필수(is_essential)가 아닌 항목들만 중복 후보로 필터링
-        const nonEssentialItems = allItems.filter(item => !item.is_essential)
-        
+        const nonEssentialItems = group.items.filter(item => !item.is_essential)
         if (nonEssentialItems.length < 2) return null
 
-        const category = CATEGORIES.find(c => c.id === catId)
-        const label = category?.label || catId
-        
         const sorted = [...nonEssentialItems].sort((a, b) => {
           if ((b.satisfaction || 0) !== (a.satisfaction || 0)) {
             return (b.satisfaction || 0) - (a.satisfaction || 0)
@@ -94,13 +110,16 @@ export default function Dashboard() {
         const others = sorted.slice(1)
         const potentialSaving = others.reduce((sum, s) => sum + s.price, 0)
 
-        let advice = ''
-        if (catId === 'OTT') advice = '비슷한 영상 콘텐츠가 겹치지 않나요?'
-        else if (catId === 'Music') advice = '하나의 플레이리스트로 합쳐보세요.'
-        else if (catId === 'Shopping') advice = '가장 자주 쓰는 배송 혜택만 남겨보세요.'
-        else advice = '불필요한 중복이 없는지 확인해보세요.'
-
-        return { id: catId, label, count: nonEssentialItems.length, potentialSaving, advice, items: sorted }
+        return {
+          id: groupId,
+          groupKey: groupId,
+          label: group.subDomain.label,
+          mainCategory: group.subDomain.mainCategory,
+          count: nonEssentialItems.length,
+          potentialSaving,
+          advice: group.subDomain.advice,
+          items: sorted
+        }
       })
       .filter(Boolean)
       .sort((a, b) => b.potentialSaving - a.potentialSaving)
@@ -112,9 +131,11 @@ export default function Dashboard() {
     }, 0)
     const periods = [
       { key: 'one', label: '1년 누적', periodLabel: '1년', mult: 12 },
+      { key: 'two', label: '2년 누적', periodLabel: '2년', mult: 12 * 2 },
+      { key: 'three', label: '3년 누적', periodLabel: '3년', mult: 12 * 3 },
+      { key: 'four', label: '4년 누적', periodLabel: '4년', mult: 12 * 4 },
       { key: 'five', label: '5년 누적', periodLabel: '5년', mult: 12 * 5 },
-      { key: 'ten', label: '10년 누적', periodLabel: '10년', mult: 12 * 10 },
-      { key: 'twenty', label: '20년 누적', periodLabel: '20년', mult: 12 * 20 }
+      { key: 'ten', label: '10년 누적', periodLabel: '10년', mult: 12 * 10 }
     ]
 
     const costData = periods.map(p => {
@@ -154,8 +175,8 @@ export default function Dashboard() {
       lowSatisfaction,
       duplicates,
       costData,
-      // Card default shows 5-year (index 1)
-      defaultCost: costData[1]
+      // Card default shows 3-year (index 2)
+      defaultCost: costData.find(p => p.key === 'three') || costData[0]
     }
   }, [subscriptions])
 
@@ -698,110 +719,152 @@ export default function Dashboard() {
                       ))}
                     </motion.div>
                   )}
+
                   {activeInsight.type === 'duplicates' && (
                     <motion.div 
                       variants={containerVariants}
                       initial="hidden"
                       animate="visible"
-                      className="space-y-10 pb-20"
+                      className="space-y-6 pb-6"
                     >
-                      {activeInsight.data.map(group => (
-                        <motion.div key={group.id} variants={itemVariants} className="space-y-4">
-                          <div className="flex items-center gap-3 px-1">
-                            <h4 className="font-extrabold text-[15px] text-primary uppercase tracking-wider">[{group.label}] 상세 비교</h4>
-                            <div className="h-px bg-primary/10 grow" />
-                            <span className="text-[12px] font-bold bg-primary/5 text-primary px-2 py-0.5 rounded-md">
-                              {group.count}개 후보
-                            </span>
-                          </div>
+                      {(insights?.duplicates || []).length > 0 ? (
+                        (insights.duplicates).map(group => (
+                          <motion.div key={group.id} variants={itemVariants} className="space-y-4 bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-[28px] border border-slate-200/60 dark:border-slate-700/50">
+                            <div className="flex items-center justify-between px-1">
+                              <div>
+                                <h4 className="font-extrabold text-[16px] text-primary flex items-center gap-1.5">
+                                  <span>[{group.label}]</span>
+                                  <span className="text-dark dark:text-white">상세 비교</span>
+                                </h4>
+                                <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                                  💡 {group.advice}
+                                </p>
+                              </div>
+                              <span className="text-[12px] font-bold bg-primary/10 text-primary px-2.5 py-1 rounded-full shrink-0">
+                                {group.count}개 후보
+                              </span>
+                            </div>
 
-                          <div className="space-y-3">
-                            {group.items.map((sub, idx) => (
-                              <motion.div 
-                                key={sub.id} 
-                                whileHover={{ scale: 1.01 }}
-                                whileTap={{ scale: 0.99 }}
-                                onClick={() => {
-                                  openModal(sub);
-                                  setActiveInsight(null);
-                                }}
-                                className={cn(
-                                  "relative flex items-center justify-between p-5 rounded-[24px] transition-all cursor-pointer group overflow-hidden",
-                                  idx === 0 
-                                    ? "bg-dark dark:bg-slate-700 text-white shadow-xl shadow-black/10 scale-[1.02] z-10 border-none" 
-                                    : "bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0"
-                                )}
-                              >
-                                {idx === 0 && (
-                                  <div className="absolute top-0 left-0 bg-primary text-white text-[10px] font-extrabold px-3 py-1 rounded-br-xl uppercase tracking-widest">
-                                    Best Choice
+                            <div className="space-y-3">
+                              {group.items.map((sub, idx) => (
+                                <motion.div 
+                                  key={sub.id} 
+                                  whileHover={{ scale: 1.01 }}
+                                  whileTap={{ scale: 0.99 }}
+                                  onClick={() => {
+                                    openModal(sub);
+                                    setActiveInsight(null);
+                                  }}
+                                  className={cn(
+                                    "relative flex items-center justify-between p-4 rounded-[20px] transition-all cursor-pointer group overflow-hidden",
+                                    idx === 0 
+                                      ? "bg-dark dark:bg-slate-700 text-white shadow-xl shadow-black/10 z-10 border-none" 
+                                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
+                                  )}
+                                >
+                                  {idx === 0 && (
+                                    <div className="absolute top-0 left-0 bg-primary text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-br-lg uppercase tracking-wider">
+                                      Best Choice
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-3">
+                                    <ServiceIcon 
+                                      serviceName={sub.service_name} 
+                                      category={sub.categories?.[0] || sub.category || 'Etc'} 
+                                      size="md"
+                                    />
+                                    <div className="flex flex-col">
+                                      <p className={cn(
+                                        "font-extrabold text-[15px]",
+                                        idx === 0 ? "text-white" : "text-dark dark:text-white"
+                                      )}>
+                                        {sub.service_name}
+                                      </p>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          updateSubscription(sub.id, { is_essential: true });
+                                        }}
+                                        className={cn(
+                                          "text-[11px] text-left font-bold hover:underline mt-0.5",
+                                          idx === 0 ? "text-white/60" : "text-purple-500"
+                                        )}
+                                      >
+                                        필수 서비스로 지정 (비교 제외)
+                                      </button>
+                                    </div>
                                   </div>
-                                )}
-                                <div className="flex items-center gap-4">
-                                  <ServiceIcon 
-                                    serviceName={sub.service_name} 
-                                    category={sub.categories?.[0] || sub.category || 'Etc'} 
-                                    size="md"
-                                  />
-                                  <div className="flex flex-col">
+                                  <div className="flex flex-col items-end gap-1">
                                     <p className={cn(
                                       "font-extrabold text-[16px]",
                                       idx === 0 ? "text-white" : "text-dark dark:text-white"
+                                    )}>{sub.price.toLocaleString()}원</p>
+                                    <span className={cn(
+                                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter",
+                                      idx === 0 ? "bg-white/10 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                                     )}>
-                                      {sub.service_name}
-                                    </p>
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        updateSubscription(sub.id, { is_essential: true });
-                                        setActiveInsight(null);
-                                      }}
-                                      className={cn(
-                                        "text-[11px] text-left font-bold hover:underline mt-0.5",
-                                        idx === 0 ? "text-white/60" : "text-purple-500"
-                                      )}
-                                    >
-                                      필수 서비스로 지정 (비교 제외)
-                                    </button>
+                                      {idx === 0 ? '유지 권장' : '해지 후보'}
+                                    </span>
                                   </div>
-                                </div>
-                                <div className="flex flex-col items-end gap-1">
-                                  <p className={cn(
-                                    "font-extrabold text-[17px]",
-                                    idx === 0 ? "text-white" : "text-dark dark:text-white"
-                                  )}>{sub.price.toLocaleString()}원</p>
-                                  <span className={cn(
-                                    "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter",
-                                    idx === 0 ? "bg-white/10 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                                  )}>
-                                    {idx === 0 ? '유지 권장' : '해지 후보'}
-                                  </span>
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
+                                </motion.div>
+                              ))}
+                            </div>
 
-                          {/* Savings Summary Box */}
-                          <div className="mt-6">
-                            <motion.div 
-                              initial={{ y: 10, opacity: 0 }}
-                              animate={{ y: 0, opacity: 1 }}
-                              className="p-5 bg-primary text-white rounded-[24px] shadow-2xl shadow-primary/30 flex items-center justify-between border border-white/10"
-                            >
-                              <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest leading-none mb-1">Monthly potential saving</span>
-                                <p className="text-[14px] font-bold leading-none">불필요한 중복 정리 시</p>
+                            {/* Savings Summary & Ignore Action */}
+                            <div className="space-y-2 pt-1">
+                              <div className="p-4 bg-primary text-white rounded-[20px] shadow-lg shadow-primary/20 flex items-center justify-between border border-white/10">
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-bold text-white/70 uppercase tracking-wider leading-none mb-1">Monthly potential saving</span>
+                                  <p className="text-[13px] font-bold leading-none">불필요한 중복 정리 시</p>
+                                </div>
+                                <div className="flex items-baseline gap-1">
+                                  <span className="text-[22px] font-extrabold leading-none">{group.potentialSaving.toLocaleString()}</span>
+                                  <span className="text-[13px] font-bold">원 절약</span>
+                                </div>
                               </div>
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-[24px] font-extrabold leading-none">{group.potentialSaving.toLocaleString()}</span>
-                                <span className="text-[14px] font-bold">원 절약</span>
+
+                              <div className="flex items-center justify-between px-2 pt-1">
+                                <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                                  서로 다른 목적으로 쓰고 계신가요?
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => ignoreDuplicateGroup(group.groupKey)}
+                                  className="text-[11px] font-bold text-slate-500 hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400 px-2 py-1 rounded-md hover:bg-amber-500/10 active:scale-95 transition-all cursor-pointer"
+                                >
+                                  중복 알림 끄기
+                                </button>
                               </div>
-                            </motion.div>
-                          </div>
+                            </div>
+                          </motion.div>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center space-y-2">
+                          <p className="text-[16px] font-bold text-dark dark:text-white">
+                            비슷하거나 중복된 서비스가 없습니다.
+                          </p>
+                          <p className="text-[13px] text-slate-400">
+                            모든 구독이 각자의 고유한 용도로 효율적으로 관리되고 있습니다.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Ignored duplicates restoration footer */}
+                      {ignoredDuplicates.length > 0 && (
+                        <motion.div variants={itemVariants} className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-850 rounded-[18px] text-slate-500 text-[12px] border border-slate-200/50 dark:border-slate-750">
+                          <span>알림 제외된 중복 그룹: <strong className="text-dark dark:text-slate-300">{ignoredDuplicates.length}개</strong></span>
+                          <button
+                            type="button"
+                            onClick={resetIgnoredDuplicates}
+                            className="font-extrabold text-primary hover:underline cursor-pointer"
+                          >
+                            제외 목록 초기화
+                          </button>
                         </motion.div>
-                      ))}
+                      )}
                     </motion.div>
-                  )}                </div>
+                  )}
+                </div>
 
                 {/* Modal Footer */}
                 <div className="p-4 pt-0 flex justify-center shrink-0">

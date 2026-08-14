@@ -1,7 +1,8 @@
 import { cn } from "../lib/utils";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { CATEGORY_COLORS, TEXT_COLORS } from "../constants/categories";
-import { Timer, ShieldCheck, CalendarDays, Check, Minus } from "lucide-react";
+import { Timer, ShieldCheck, CalendarDays, Check, Minus, ExternalLink, Globe, Ban } from "lucide-react";
+import { getServiceLinks } from "../constants/presets";
 import ServiceIcon from "./ServiceIcon";
 
 const SortableHeader = ({ label, sortKey, width, sortConfig, onSort, isLast = false }) => {
@@ -51,7 +52,9 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
                             </tr>
                         </thead>
                         <tbody ref={parent}>
-                            {data.map((item, index) => (
+                            {data.map((item, index) => {
+                                const links = getServiceLinks(item.service_name);
+                                return (
                                 <tr
                                     key={item.id}
                                     className="border-b border-black/5 dark:border-slate-700/5 group hover:bg-tertiary/50 dark:hover:bg-slate-700/50 transition-colors duration-300 cursor-pointer h-[64px]"
@@ -62,15 +65,47 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
 
                                     {/* 서비스명 */}
                                     <td className="w-[180px] md:w-[22%] border-r border-black/5 dark:border-slate-700/50 px-4 md:px-6">
-                                        <div className="flex items-center gap-2 md:gap-3 justify-start">
-                                            <ServiceIcon 
-                                                serviceName={item.service_name} 
-                                                category={item.categories?.[0] || item.category || "Etc"} 
-                                                className="group-hover:scale-110"
-                                            />
-                                            <div className="flex flex-col min-w-0">
-                                                <p className="font-bold text-dark dark:text-white text-[14px] md:text-[16px] leading-[1.4] truncate group-hover:text-primary transition-colors">{item.service_name}</p>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                                                <ServiceIcon 
+                                                    serviceName={item.service_name} 
+                                                    category={item.categories?.[0] || item.category || "Etc"} 
+                                                    className="group-hover:scale-110 shrink-0"
+                                                />
+                                                <div className="flex flex-col min-w-0">
+                                                    <p className="font-bold text-dark dark:text-white text-[14px] md:text-[16px] leading-[1.4] truncate group-hover:text-primary transition-colors">{item.service_name}</p>
+                                                </div>
                                             </div>
+
+                                            {/* Official & Cancel Links Icons */}
+                                            {(links.subscribe_url || links.cancel_url) && (
+                                                <div className="flex items-center gap-1 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
+                                                    {links.subscribe_url && (
+                                                        <a
+                                                            href={links.subscribe_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="p-1 text-dark/40 dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 hover:bg-primary/10 rounded-[6px] transition-all"
+                                                            title="공식 홈페이지 새 창 열기"
+                                                        >
+                                                            <Globe className="w-3.5 h-3.5" />
+                                                        </a>
+                                                    )}
+                                                    {links.cancel_url && (
+                                                        <a
+                                                            href={links.cancel_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="p-1 text-dark/40 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/10 rounded-[6px] transition-all"
+                                                            title="구독 해지 / 관리 새 창 열기"
+                                                        >
+                                                            <Ban className="w-3.5 h-3.5" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
 
@@ -146,7 +181,7 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )})}
                         </tbody>
                     </table>
                 </div>

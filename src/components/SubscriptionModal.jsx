@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Trash2, Star } from 'lucide-react'
+import { X, Trash2, Star, ExternalLink, Globe, Ban } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
-import { SUBSCRIPTION_PRESETS } from '../constants/presets'
+import { SUBSCRIPTION_PRESETS, getServiceLinks } from '../constants/presets'
 import { cn, sanitizeInput } from '../lib/utils'
 import ServiceIcon from './ServiceIcon'
 // eslint-disable-next-line no-unused-vars
@@ -180,6 +180,8 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                       formData.category !== '' &&
                       (!formData.is_free_trial || formData.trial_end_date !== '')
 
+  const serviceLinks = getServiceLinks(formData.service_name)
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -197,24 +199,24 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
             className="bg-white dark:bg-slate-800 w-full md:max-w-[520px] h-full md:h-auto rounded-none md:rounded-[32px] overflow-hidden border-none md:border border-tertiary dark:border-slate-700 ring-1 ring-black/5 shadow-2xl shadow-primary/10 flex flex-col max-h-none md:max-h-[95vh] transition-colors"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-tertiary dark:border-slate-700 shrink-0">
-              <h2 className="text-[22px] font-bold text-dark dark:text-white">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary dark:border-slate-700 shrink-0">
+              <h2 className="text-[19px] md:text-[21px] font-bold text-dark dark:text-white">
                 {isEditMode ? '구독 정보 수정' : '구독 추가하기'}
               </h2>
               <button 
                 onClick={handleCloseInternal}
-                className="p-2 hover:bg-tertiary dark:hover:bg-slate-700 rounded-full transition-all active:scale-95 cursor-pointer"
+                className="p-1.5 hover:bg-tertiary dark:hover:bg-slate-700 rounded-full transition-all active:scale-95 cursor-pointer"
               >
-                <X className="w-6 h-6 text-dark dark:text-white" />
+                <X className="w-5 h-5 text-dark dark:text-white" />
               </button>
             </div>
 
-            {/* Modal Body - Scrollable */}
-            <div className="p-5 md:p-8 overflow-y-auto custom-scrollbar">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6">
-                {/* Service Name with Autocomplete */}
+            {/* Modal Body - Scrollable if needed, but designed for one-screen fit */}
+            <div className="px-5 py-4 md:px-6 md:py-4.5 overflow-y-auto custom-scrollbar">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3 md:gap-3.5">
+                {/* 1. Service Name with Autocomplete */}
                 <div className="flex flex-col gap-1.5 relative" ref={wrapperRef}>
-                  <label className="text-sm md:text-[16px] font-extrabold text-dark dark:text-white ml-1">
+                  <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
                     서비스 명 <span className="text-red-500">*</span>
                   </label>
                   <input 
@@ -222,7 +224,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                     type="text" 
                     maxLength="30"
                     placeholder="예: 넷플릭스, 유튜브"
-                    className="w-full h-[48px] md:h-[52px] px-5 md:px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-extrabold placeholder:text-dark/30 dark:placeholder:text-slate-500 shadow-inner"
+                    className="w-full h-[44px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[15px] md:text-[16px] font-bold placeholder:text-dark/30 dark:placeholder:text-slate-500"
                     value={formData.service_name}
                     onChange={handleNameChange}
                     onFocus={() => {
@@ -245,22 +247,22 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-slate-800 border border-tertiary dark:border-slate-600 rounded-[16px] shadow-lg max-h-[200px] overflow-y-auto z-50 custom-scrollbar"
+                        className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-slate-800 border border-tertiary dark:border-slate-600 rounded-[14px] shadow-xl max-h-[190px] overflow-y-auto z-50 custom-scrollbar"
                       >
                         {suggestions.map((preset, index) => (
                           <li 
                             key={index}
                             onClick={() => handleSelectSuggestion(preset)}
-                            className="px-5 py-3 hover:bg-tertiary dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between border-b border-tertiary/50 dark:border-slate-700/50 last:border-none group active:bg-tertiary transition-colors gap-3"
+                            className="px-4 py-2.5 hover:bg-tertiary dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between border-b border-tertiary/50 dark:border-slate-700/50 last:border-none group active:bg-tertiary transition-colors gap-2"
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               <ServiceIcon 
                                 serviceName={preset.nameKo} 
                                 category={preset.category} 
                                 size="sm" 
                               />
                               <div className="flex flex-col min-w-0">
-                                <span className="font-bold text-dark dark:text-white text-[14px] md:text-[16px] truncate">
+                                <span className="font-bold text-dark dark:text-white text-[14px] md:text-[15px] truncate">
                                   {preset.nameKo}
                                 </span>
                                 <span className="text-[12px] text-dark/40 dark:text-slate-400 font-medium truncate">
@@ -268,11 +270,11 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                                 </span>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-1 shrink-0">
-                              <span className="text-[12px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                              <span className="text-[11px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
                                 {preset.category}
                               </span>
-                              <span className="text-[12px] font-bold text-dark/60 dark:text-slate-300">
+                              <span className="text-[12px] font-bold text-dark/70 dark:text-slate-200">
                                 {preset.price.toLocaleString()}원
                               </span>
                             </div>
@@ -283,14 +285,35 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                   </AnimatePresence>
                 </div>
 
-                {/* Combined Row for Status, Trial, Essential */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* 2. Category Selection */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
+                    카테고리 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5">
+                    {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleCategoryChange(cat.id)}
+                        className={cn(
+                          "h-[36px] rounded-[10px] font-bold text-[13px] md:text-[13.5px] transition-all border cursor-pointer",
+                          formData.category === cat.id
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-tertiary dark:bg-slate-700 text-dark/60 dark:text-slate-300 border-transparent hover:bg-tertiary/80 dark:hover:bg-slate-600 hover:text-dark dark:hover:text-white"
+                        )}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Combined Row: Status, Free Trial, Essential Toggles */}
+                <div className="grid grid-cols-3 gap-2 bg-tertiary/40 dark:bg-slate-700/40 p-2.5 rounded-[14px]">
                   {/* Status Toggle */}
-                  <div className="flex items-center justify-between px-1 md:col-span-2">
-                    <div className="flex flex-col">
-                      <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white">구독 상태</label>
-                      <p className="text-xs md:text-[13px] text-dark/40 dark:text-slate-400 font-medium">현재 이용 중이신가요?</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <span className="text-[12px] md:text-[13px] font-bold text-dark/80 dark:text-slate-200">구독 상태</span>
                     <button
                       type="button"
                       onClick={() => setFormData({ 
@@ -298,18 +321,17 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                         status: formData.status === 'active' ? 'disable' : 'active' 
                       })}
                       className={cn(
-                        "relative w-[76px] h-[32px] rounded-full transition-colors duration-300 flex items-center px-1 shrink-0 cursor-pointer",
-                        formData.status === 'active' ? "bg-emerald-500" : "bg-gray-200 dark:bg-slate-600"
+                        "relative w-[64px] h-[28px] rounded-full transition-colors duration-200 flex items-center px-1 shrink-0 cursor-pointer",
+                        formData.status === 'active' ? "bg-emerald-500" : "bg-gray-300 dark:bg-slate-600"
                       )}
                     >
                       <motion.div 
-                        animate={formData.status === 'active' ? { x: 42 } : { x: 0 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-[26px] h-[26px] bg-white rounded-full shadow-sm flex items-center justify-center"
+                        animate={formData.status === 'active' ? { x: 34 } : { x: 0 }}
+                        className="w-[22px] h-[22px] bg-white rounded-full shadow-sm"
                       />
                       <span className={cn(
-                        "absolute w-full text-center text-[12px] font-extrabold transition-all left-0 pointer-events-none",
-                        formData.status === 'active' ? "pr-[26px] text-white" : "pl-[26px] text-dark/40 dark:text-slate-300"
+                        "absolute w-full text-center text-[11px] font-extrabold left-0 pointer-events-none",
+                        formData.status === 'active' ? "pr-[22px] text-white" : "pl-[22px] text-dark/50 dark:text-slate-300"
                       )}>
                         {formData.status === 'active' ? '활성' : '비활성'}
                       </span>
@@ -317,11 +339,8 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                   </div>
 
                   {/* Free Trial Toggle */}
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex flex-col">
-                      <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white">무료 체험</label>
-                      <p className="text-[10px] md:text-[11px] text-dark/40 dark:text-slate-500 font-medium">유료 전환 전인가요?</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center gap-1.5 border-x border-dark/5 dark:border-slate-600">
+                    <span className="text-[12px] md:text-[13px] font-bold text-dark/80 dark:text-slate-200">무료 체험</span>
                     <button
                       type="button"
                       onClick={() => setFormData({ 
@@ -329,18 +348,17 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                         is_free_trial: !formData.is_free_trial 
                       })}
                       className={cn(
-                        "relative w-[76px] h-[32px] rounded-full transition-colors duration-300 flex items-center px-1 shrink-0 cursor-pointer",
-                        formData.is_free_trial ? "bg-blue-500" : "bg-gray-200 dark:bg-slate-600"
+                        "relative w-[64px] h-[28px] rounded-full transition-colors duration-200 flex items-center px-1 shrink-0 cursor-pointer",
+                        formData.is_free_trial ? "bg-blue-500" : "bg-gray-300 dark:bg-slate-600"
                       )}
                     >
                       <motion.div 
-                        animate={formData.is_free_trial ? { x: 42 } : { x: 0 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-[26px] h-[26px] bg-white rounded-full shadow-sm flex items-center justify-center"
+                        animate={formData.is_free_trial ? { x: 34 } : { x: 0 }}
+                        className="w-[22px] h-[22px] bg-white rounded-full shadow-sm"
                       />
                       <span className={cn(
-                        "absolute w-full text-center text-[12px] font-extrabold transition-all left-0 pointer-events-none",
-                        formData.is_free_trial ? "pr-[26px] text-white" : "pl-[26px] text-dark/40 dark:text-slate-300"
+                        "absolute w-full text-center text-[11px] font-extrabold left-0 pointer-events-none",
+                        formData.is_free_trial ? "pr-[22px] text-white" : "pl-[22px] text-dark/50 dark:text-slate-300"
                       )}>
                         {formData.is_free_trial ? 'ON' : 'OFF'}
                       </span>
@@ -348,11 +366,8 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                   </div>
 
                   {/* Essential Service Toggle */}
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex flex-col">
-                      <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white">필수 항목</label>
-                      <p className="text-[10px] md:text-[11px] text-dark/40 dark:text-slate-500 font-medium">분석에서 제외할까요?</p>
-                    </div>
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <span className="text-[12px] md:text-[13px] font-bold text-dark/80 dark:text-slate-200">필수 항목</span>
                     <button
                       type="button"
                       onClick={() => setFormData({ 
@@ -360,18 +375,17 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                         is_essential: !formData.is_essential 
                       })}
                       className={cn(
-                        "relative w-[76px] h-[32px] rounded-full transition-colors duration-300 flex items-center px-1 shrink-0 cursor-pointer",
-                        formData.is_essential ? "bg-purple-500" : "bg-gray-200 dark:bg-slate-600"
+                        "relative w-[64px] h-[28px] rounded-full transition-colors duration-200 flex items-center px-1 shrink-0 cursor-pointer",
+                        formData.is_essential ? "bg-purple-500" : "bg-gray-300 dark:bg-slate-600"
                       )}
                     >
                       <motion.div 
-                        animate={formData.is_essential ? { x: 42 } : { x: 0 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-[26px] h-[26px] bg-white rounded-full shadow-sm flex items-center justify-center"
+                        animate={formData.is_essential ? { x: 34 } : { x: 0 }}
+                        className="w-[22px] h-[22px] bg-white rounded-full shadow-sm"
                       />
                       <span className={cn(
-                        "absolute w-full text-center text-[12px] font-extrabold transition-all left-0 pointer-events-none",
-                        formData.is_essential ? "pr-[26px] text-white" : "pl-[26px] text-dark/40 dark:text-slate-300"
+                        "absolute w-full text-center text-[11px] font-extrabold left-0 pointer-events-none",
+                        formData.is_essential ? "pr-[22px] text-white" : "pl-[22px] text-dark/50 dark:text-slate-300"
                       )}>
                         {formData.is_essential ? '필수' : '일반'}
                       </span>
@@ -386,15 +400,15 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="flex flex-col gap-2 overflow-hidden"
+                      className="flex flex-col gap-1.5 overflow-hidden"
                     >
-                      <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1 mt-2">
+                      <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
                         체험 종료일 <span className="text-red-500">*</span>
                       </label>
                       <input 
                         required
                         type="date" 
-                        className="w-full h-[52px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium"
+                        className="w-full h-[42px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[15px] font-medium"
                         value={formData.trial_end_date}
                         onChange={(e) => setFormData({ ...formData, trial_end_date: e.target.value })}
                       />
@@ -402,119 +416,63 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                   )}
                 </AnimatePresence>
 
-                {/* Satisfaction Rating */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-1">
-                  <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white">사용 만족도</label>
-                  <div className="flex items-center gap-1.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <motion.button
-                        key={star}
-                        type="button"
-                        whileTap={{ scale: 0.8 }}
-                        onClick={() => setFormData({ ...formData, satisfaction: star })}
-                        className="p-1 cursor-pointer"
-                      >
-                        <Star 
+                {/* 4. Billing Cycle & Price & Billing Date Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Left: Billing Cycle + Price */}
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
+                        {formData.billing_cycle === 'monthly' ? '월' : '연'} 결제 금액 <span className="text-red-500">*</span>
+                      </label>
+                      {/* Compact Cycle Switcher */}
+                      <div className="flex bg-tertiary dark:bg-slate-700 p-0.5 rounded-[8px] text-[12px]">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, billing_cycle: 'monthly' })}
                           className={cn(
-                            "w-8 h-8 transition-colors duration-200",
-                            star <= formData.satisfaction 
-                              ? "fill-yellow-400 text-yellow-400" 
-                              : "text-gray-300 dark:text-slate-600"
-                          )} 
-                        />
-                      </motion.button>
-                    ))}
-                    <span className="ml-2 font-extrabold text-primary dark:text-primary/80 text-[13px] min-w-[70px] text-right">
-                      {['매우 불만족', '불만족', '보통', '만족', '매우 만족'][formData.satisfaction - 1]}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Category Selection */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
-                    카테고리 <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                    {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
-                      <motion.button
-                        key={cat.id}
-                        type="button"
-                        whileTap={{ scale: 0.96 }}
-                        onClick={() => handleCategoryChange(cat.id)}
-                        className={cn(
-                          "h-[42px] rounded-[12px] font-bold text-[13px] md:text-[14px] transition-all border-2 cursor-pointer",
-                          formData.category === cat.id
-                            ? "bg-primary text-white border-primary shadow-lg shadow-primary/10"
-                            : "bg-tertiary dark:bg-slate-700 text-dark/60 dark:text-slate-300 border-transparent hover:bg-tertiary/80 dark:hover:bg-slate-600 hover:text-dark dark:hover:text-white"
-                        )}
-                      >
-                        {cat.label}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Billing Cycle Selection */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">결제 주기</label>
-                  <div className="flex bg-tertiary dark:bg-slate-700 p-1 rounded-[16px]">
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setFormData({ ...formData, billing_cycle: 'monthly' })}
-                      className={cn(
-                        "flex-1 h-[44px] rounded-[12px] font-bold text-[14px] transition-all cursor-pointer",
-                        formData.billing_cycle === 'monthly'
-                          ? "bg-white dark:bg-slate-600 text-primary shadow-sm dark:text-blue-300"
-                          : "text-dark/40 dark:text-slate-400"
-                      )}
-                    >
-                      월간 결제
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setFormData({ ...formData, billing_cycle: 'yearly' })}
-                      className={cn(
-                        "flex-1 h-[44px] rounded-[12px] font-bold text-[14px] transition-all cursor-pointer",
-                        formData.billing_cycle === 'yearly'
-                          ? "bg-white dark:bg-slate-600 text-amber-500 shadow-sm"
-                          : "text-dark/40 dark:text-slate-400"
-                      )}
-                    >
-                      연간 결제
-                    </motion.button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Price */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
-                      {formData.billing_cycle === 'monthly' ? '월' : '연'} 결제 금액 <span className="text-red-500">*</span>
-                    </label>
+                            "px-2.5 py-0.5 rounded-[6px] font-bold transition-all cursor-pointer",
+                            formData.billing_cycle === 'monthly'
+                              ? "bg-white dark:bg-slate-600 text-primary shadow-xs"
+                              : "text-dark/40 dark:text-slate-400"
+                          )}
+                        >
+                          월간
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, billing_cycle: 'yearly' })}
+                          className={cn(
+                            "px-2.5 py-0.5 rounded-[6px] font-bold transition-all cursor-pointer",
+                            formData.billing_cycle === 'yearly'
+                              ? "bg-white dark:bg-slate-600 text-amber-500 shadow-xs"
+                              : "text-dark/40 dark:text-slate-400"
+                          )}
+                        >
+                          연간
+                        </button>
+                      </div>
+                    </div>
                     <div className="relative">
                       <input 
                         required
                         type="number" 
                         maxLength="12"
                         placeholder="금액 입력"
-                        className="w-full h-[52px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400 shadow-inner"
+                        className="w-full h-[44px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[15px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                         value={formData.price}
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       />
                       {formData.billing_cycle === 'yearly' && formData.price > 0 && (
-                        <span className="absolute -bottom-5 right-2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
-                          월 환산 약 {Math.floor(formData.price / 12).toLocaleString()}원
+                        <span className="absolute -bottom-4 right-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                          월 약 {Math.floor(formData.price / 12).toLocaleString()}원
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Billing Date */}
-                   <div className="flex flex-col gap-2">
-                    <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">
+                  {/* Right: Billing Date */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
                       결제일 ({formData.billing_cycle === 'monthly' ? '매달' : '매년'}) <span className="text-red-500">*</span>
                     </label>
                     <input 
@@ -523,51 +481,118 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                       min="1"
                       max={formData.billing_cycle === 'monthly' ? 31 : 1231}
                       placeholder={formData.billing_cycle === 'monthly' ? '일자 (1~31)' : 'MMDD (예: 0305)'}
-                      className="w-full h-[52px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400 shadow-inner"
+                      className="w-full h-[44px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[15px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
                       value={formData.billing_date}
                       onChange={(e) => setFormData({ ...formData, billing_date: e.target.value })}
                     />
                   </div>
                 </div>
 
-                {/* Payment Method */}
-                 <div className="flex flex-col gap-2 mt-2">
-                  <label className="text-sm md:text-[16px] font-bold text-dark dark:text-white ml-1">결제 수단</label>
-                  <input 
-                    type="text" 
-                    maxLength="20"
-                    placeholder="예: 현대카드, 카카오뱅크"
-                    className="w-full h-[52px] px-6 bg-tertiary dark:bg-slate-700 rounded-[16px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[16px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400 shadow-inner"
-                    value={formData.payment_method}
-                    onChange={(e) => setFormData({ ...formData, payment_method: sanitizeInput(e.target.value) })}
-                  />
+                {/* 5. Payment Method & Satisfaction Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-0.5">
+                  {/* Payment Method */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">결제 수단</label>
+                    <input 
+                      type="text" 
+                      maxLength="20"
+                      placeholder="예: 현대카드, 카카오뱅크"
+                      className="w-full h-[42px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14px] md:text-[15px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
+                      value={formData.payment_method}
+                      onChange={(e) => setFormData({ ...formData, payment_method: sanitizeInput(e.target.value) })}
+                    />
+                  </div>
+
+                  {/* Satisfaction Rating */}
+                  <div className="flex flex-col gap-1.5 justify-center">
+                    <div className="flex items-center justify-between px-1">
+                      <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white">사용 만족도</label>
+                      <span className="text-[12px] font-bold text-primary dark:text-primary/80">
+                        {['매우 불만족', '불만족', '보통', '만족', '매우 만족'][formData.satisfaction - 1]}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center gap-1.5 h-[42px] bg-tertiary/50 dark:bg-slate-700/50 rounded-[12px] px-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, satisfaction: star })}
+                          className="p-1 cursor-pointer hover:scale-110 transition-transform"
+                        >
+                          <Star 
+                            className={cn(
+                              "w-[22px] h-[22px] transition-colors duration-200",
+                              star <= formData.satisfaction 
+                                ? "fill-yellow-400 text-yellow-400" 
+                                : "text-gray-300 dark:text-slate-600"
+                            )} 
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-4 mt-2 pt-6 border-t border-tertiary dark:border-slate-700">
-                   {isEditMode && (
-                    <motion.button 
+                {/* 6. Quick Official & Cancel Links Bar (Option 1) */}
+                {(serviceLinks.subscribe_url || serviceLinks.cancel_url) && (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {serviceLinks.subscribe_url ? (
+                      <a
+                        href={serviceLinks.subscribe_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="h-[40px] md:h-[42px] px-3 rounded-[12px] bg-primary/5 hover:bg-primary text-primary hover:text-white dark:bg-slate-700/50 dark:text-blue-300 dark:hover:bg-primary dark:hover:text-white border border-primary/20 hover:border-primary flex items-center justify-center gap-1.5 font-bold text-[13px] md:text-[14px] transition-all cursor-pointer shadow-xs group"
+                        title="공식 홈페이지 새 창 열기"
+                      >
+                        <Globe className="w-4 h-4 shrink-0 text-primary group-hover:text-white dark:text-blue-300 dark:group-hover:text-white transition-colors" />
+                        <span className="truncate">공식 홈페이지</span>
+                        <ExternalLink className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    ) : (
+                      <div />
+                    )}
+
+                    {serviceLinks.cancel_url ? (
+                      <a
+                        href={serviceLinks.cancel_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="h-[40px] md:h-[42px] px-3 rounded-[12px] bg-rose-500/5 hover:bg-rose-500 text-rose-600 dark:text-rose-400 hover:text-white dark:hover:text-white dark:bg-slate-700/50 border border-rose-500/20 hover:border-rose-500 flex items-center justify-center gap-1.5 font-bold text-[13px] md:text-[14px] transition-all cursor-pointer shadow-xs group"
+                        title="구독 해지 / 관리 페이지 새 창 열기"
+                      >
+                        <Ban className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400 group-hover:text-white dark:group-hover:text-white transition-colors" />
+                        <span className="truncate">구독 해지/관리</span>
+                        <ExternalLink className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </a>
+                    ) : (
+                      <div />
+                    )}
+                  </div>
+                )}
+
+                {/* 7. Action Buttons */}
+                <div className="flex gap-2.5 pt-2.5 border-t border-tertiary dark:border-slate-700">
+                  {isEditMode && (
+                    <button 
                       type="button"
-                      whileTap={{ scale: 0.95 }}
                       onClick={handleDelete}
-                      className="h-[56px] px-6 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[20px] font-bold text-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+                      className="h-[48px] px-4.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-[14px] font-bold text-[16px] hover:bg-red-200 dark:hover:bg-red-900/50 transition-all flex items-center justify-center shrink-0 cursor-pointer"
                     >
-                      <Trash2 className="w-6 h-6" />
-                    </motion.button>
-                   )}
-                  <motion.button 
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  )}
+                  <button 
                     type="submit"
                     disabled={!isFormValid}
-                    whileTap={isFormValid ? { scale: 0.98 } : {}}
                     className={cn(
-                      "flex-1 h-[56px] rounded-[20px] font-bold text-lg transition-all",
+                      "flex-1 h-[48px] rounded-[14px] font-bold text-[16px] transition-all",
                       isFormValid 
-                        ? "bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-lg shadow-primary/20" 
+                        ? "bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-md shadow-primary/20" 
                         : "bg-gray-200 dark:bg-slate-700 text-dark/30 dark:text-slate-500 cursor-not-allowed"
                     )}
                   >
                     {isEditMode ? '수정 완료' : '추가 완료'}
-                  </motion.button>
+                  </button>
                 </div>
               </form>
             </div>
@@ -577,4 +602,5 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
     </AnimatePresence>
   )
 }
+
 

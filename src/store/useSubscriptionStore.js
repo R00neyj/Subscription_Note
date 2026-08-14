@@ -230,6 +230,15 @@ const useSubscriptionStore = create(
       // Notification Settings
       notificationsEnabled: true,
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
+
+      // Duplicate Optimization Exceptions
+      ignoredDuplicates: [],
+      ignoreDuplicateGroup: (groupKey) => set((state) => ({
+        ignoredDuplicates: state.ignoredDuplicates.includes(groupKey)
+          ? state.ignoredDuplicates
+          : [...state.ignoredDuplicates, groupKey]
+      })),
+      resetIgnoredDuplicates: () => set({ ignoredDuplicates: [] }),
     }),
     {
       name: 'subscription-storage',
@@ -240,7 +249,8 @@ const useSubscriptionStore = create(
         themeMode: state.themeMode,
         hasSeenTutorial: state.hasSeenTutorial,
         hasSeenLanding: state.hasSeenLanding,
-        notificationsEnabled: state.notificationsEnabled
+        notificationsEnabled: state.notificationsEnabled,
+        ignoredDuplicates: state.ignoredDuplicates
       }), 
     }
   )
