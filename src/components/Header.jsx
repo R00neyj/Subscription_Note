@@ -34,7 +34,7 @@ export default function Header() {
   }
 
   return (
-    <div className="sticky md:relative top-0 z-[50] md:z-0 flex flex-row items-center p-[8px_24px] md:p-[8px_12px] gap-[12px] md:gap-[28px] w-[calc(100%+48px)] md:w-full -mx-6 md:mx-0 h-[64px] mb-[24px] md:mb-8 bg-[#F8FAFC]/80 dark:bg-[#0F172A]/80 md:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all shrink-0">
+    <div className="sticky md:relative top-0 z-[50] md:z-0 flex flex-row items-center p-[8px_24px] md:p-[8px_12px] gap-[12px] md:gap-[28px] w-[calc(100%+32px)] md:w-full -mx-4 md:mx-0 h-[64px] mb-[24px] md:mb-8 bg-[#F8FAFC]/80 dark:bg-[#0F172A]/80 md:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all shrink-0">
       {/* Frame 23: Logo & Title */}
       <div className="flex flex-row items-center p-0 gap-[8px] w-fit h-[48px] shrink-0">
         <div className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] bg-white dark:bg-slate-800 rounded-lg border border-blue-50 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">

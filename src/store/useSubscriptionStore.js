@@ -212,6 +212,10 @@ const useSubscriptionStore = create(
       themeMode: 'system', // 'light' | 'dark' | 'system'
       setThemeMode: (mode) => set({ themeMode: mode }),
 
+      // Landing State
+      hasSeenLanding: false,
+      setHasSeenLanding: (val) => set({ hasSeenLanding: val }),
+
       // Tutorial State
       hasSeenTutorial: false,
       isTutorialOpen: false,
@@ -235,6 +239,7 @@ const useSubscriptionStore = create(
         user: state.user,
         themeMode: state.themeMode,
         hasSeenTutorial: state.hasSeenTutorial,
+        hasSeenLanding: state.hasSeenLanding,
         notificationsEnabled: state.notificationsEnabled
       }), 
     }

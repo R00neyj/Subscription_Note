@@ -10,3 +10,53 @@ export function sanitizeInput(input) {
   // Remove <, >, ", ', ` to prevent basic XSS and injection
   return input.replace(/[<>"'`]/g, '')
 }
+
+/**
+ * 한글 받침(종성) 유무 확인
+ */
+export function hasJongseong(word) {
+  if (!word || typeof word !== 'string') return false
+  const trimmed = word.trim()
+  if (!trimmed) return false
+  const lastChar = trimmed.slice(-1)
+  const code = lastChar.charCodeAt(0)
+
+  // 한글 음절 유니코드 범위 (가 ~ 힣)
+  if (code >= 0xac00 && code <= 0xd7a3) {
+    return (code - 0xac00) % 28 > 0
+  }
+
+  // 끝 글자가 숫자인 경우
+  if (/[013678]$/.test(trimmed)) return true
+  if (/[2459]$/.test(trimmed)) return false
+
+  // 끝 글자가 영문인 경우 간이 판별 (받침 소리가 나는 자음)
+  if (/[lmnrkptcb]$/i.test(trimmed)) return true
+
+  return false
+}
+
+/**
+ * 조사 자동 결합 헬퍼 함수
+ * @param {string} word - 대상 단어
+ * @param {'을/를'|'이/가'|'은/는'|'과/와'|'으로/로'} particle - 붙일 조사 쌍
+ */
+export function attachParticle(word, particle) {
+  if (!word) return ''
+  const hasJong = hasJongseong(word)
+  if (particle === '을/를') return `${word}${hasJong ? '을' : '를'}`
+  if (particle === '이/가') return `${word}${hasJong ? '이' : '가'}`
+  if (particle === '은/는') return `${word}${hasJong ? '은' : '는'}`
+  if (particle === '과/와') return `${word}${hasJong ? '과' : '와'}`
+  if (particle === '으로/로') {
+    const lastChar = word.trim().slice(-1)
+    const code = lastChar.charCodeAt(0)
+    // 한글 중 ㄹ 받침인 경우 '로' 결합
+    if (code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 === 8) {
+      return `${word}로`
+    }
+    return `${word}${hasJong ? '으로' : '로'}`
+  }
+  return word
+}
+

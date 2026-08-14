@@ -5,12 +5,13 @@ import SectionHeader from '../components/SectionHeader'
 import CategoryDistributionChart from '../components/CategoryDistributionChart'
 import { ChevronRight, AlertTriangle, TrendingDown, Info, Star, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { cn } from '../lib/utils'
+import { cn, attachParticle } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import NotificationBanner from '../components/NotificationBanner'
 import { getDashboardUpcomingInfo } from '../lib/notificationUtils'
 import { CATEGORY_COLORS, TEXT_COLORS, CATEGORIES } from '../constants/categories'
 import { OPPORTUNITY_COST_ITEMS } from '../constants/opportunityCosts'
+import ServiceIcon from '../components/ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -110,10 +111,10 @@ export default function Dashboard() {
       return acc + monthlyPrice
     }, 0)
     const periods = [
-      { key: 'one', label: '1년 누적', mult: 12 },
-      { key: 'five', label: '5년 누적', mult: 12 * 5 },
-      { key: 'ten', label: '10년 누적', mult: 12 * 10 },
-      { key: 'twenty', label: '20년 누적', mult: 12 * 20 }
+      { key: 'one', label: '1년 누적', periodLabel: '1년', mult: 12 },
+      { key: 'five', label: '5년 누적', periodLabel: '5년', mult: 12 * 5 },
+      { key: 'ten', label: '10년 누적', periodLabel: '10년', mult: 12 * 10 },
+      { key: 'twenty', label: '20년 누적', periodLabel: '20년', mult: 12 * 20 }
     ]
 
     const costData = periods.map(p => {
@@ -121,13 +122,30 @@ export default function Dashboard() {
       // Find best match for this amount
       const match = [...OPPORTUNITY_COST_ITEMS].reverse().find(item => amount >= item.price) || OPPORTUNITY_COST_ITEMS[0]
       
-      // Generate dynamic message based on price range
+      // Generate dynamic message based on price range with natural Korean particles
       let message = ''
-      if (match.price >= 100000000) message = `${match.name}의 꿈이 조금씩 멀어지고 있을지도 몰라요.`
-      else if (match.price >= 10000000) message = `통장에서 ${match.name} 한 대 값이 조용히 빠져나갔네요.`
-      else if (match.price >= 1000000) message = `벌써 ${match.name}을 사고도 남을 만큼의 소중한 돈이에요.`
-      else if (match.price >= 100000) message = `${match.name}을 손에 넣을 수 있는 넉넉한 금액입니다.`
-      else message = `${match.name}을 ${Math.floor(amount / match.price)}번이나 즐길 수 있었겠네요.`
+      if (amount <= 0) {
+        message = '현재 정기 결제 중인 구독 서비스가 없습니다.'
+      } else {
+        const objWithEul = attachParticle(match.name, '을/를')
+        const count = Math.floor(amount / match.price)
+
+        if (match.price >= 100000000) {
+          message = `${objWithEul} 마련할 수 있는 거대한 목돈이에요.`
+        } else if (match.price >= 20000000) {
+          message = `통장에서 ${match.name} 한 대 값이 조용히 빠져나간 셈이에요.`
+        } else if (match.price >= 10000000) {
+          message = `벌써 ${objWithEul} 마련하고도 남을 만큼의 소중한 돈이에요.`
+        } else if (match.price >= 1000000) {
+          message = `벌써 ${objWithEul} 사고도 남을 만큼의 소중한 돈이에요.`
+        } else if (match.price >= 100000) {
+          message = `${objWithEul} 손에 넣을 수 있는 넉넉한 금액입니다.`
+        } else if (count > 1) {
+          message = `${objWithEul} 무려 ${count}번이나 즐길 수 있는 금액이에요.`
+        } else {
+          message = `${objWithEul} 즐길 수 있는 소중한 금액이에요.`
+        }
+      }
 
       return { ...p, amount, match, message }
     })
@@ -570,13 +588,13 @@ export default function Dashboard() {
                             {/* Right: Text Area */}
                             <div className="flex flex-col gap-0.5 pr-2 md:pr-16">
                               <span className="text-[13px] font-bold text-primary/60 uppercase tracking-tight">
-                                {item.label}만 아껴도
+                                {item.periodLabel || item.label}만 모아도
                               </span>
                               <h5 className="text-[17px] md:text-[19px] font-extrabold text-dark dark:text-white leading-tight break-keep">
                                 {item.match.name}
                               </h5>
                               <p className="text-[12px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-                                {item.message.split('!')[0]}!
+                                {item.message}
                               </p>
                             </div>
                           </motion.div>
@@ -630,9 +648,11 @@ export default function Dashboard() {
                             className="flex items-center justify-between p-5 cursor-pointer group"
                           >
                             <div className="flex items-center gap-4">
-                              <div className={cn("size-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-primary/10 shrink-0", CATEGORY_COLORS[sub.categories?.[0] || 'Etc'])}>
-                                {sub.service_name[0]}
-                              </div>
+                              <ServiceIcon 
+                                serviceName={sub.service_name} 
+                                category={sub.categories?.[0] || sub.category || 'Etc'} 
+                                size="lg"
+                              />
                               <div className="flex flex-col gap-1">
                                 <p className="font-extrabold text-dark dark:text-white text-[18px] group-hover:text-primary transition-colors">{sub.service_name}</p>
                                 {/* Satisfaction Gauge */}
@@ -718,12 +738,11 @@ export default function Dashboard() {
                                   </div>
                                 )}
                                 <div className="flex items-center gap-4">
-                                  <div className={cn(
-                                    "size-10 rounded-xl flex items-center justify-center font-extrabold text-sm shrink-0",
-                                    idx === 0 ? "bg-white/10 text-white" : "bg-slate-100 dark:bg-slate-800 text-dark dark:text-white"
-                                  )}>
-                                    {sub.service_name[0]}
-                                  </div>
+                                  <ServiceIcon 
+                                    serviceName={sub.service_name} 
+                                    category={sub.categories?.[0] || sub.category || 'Etc'} 
+                                    size="md"
+                                  />
                                   <div className="flex flex-col">
                                     <p className={cn(
                                       "font-extrabold text-[16px]",

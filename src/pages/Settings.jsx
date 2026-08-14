@@ -3,10 +3,10 @@ import { cn } from '../lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Github } from 'lucide-react'
-import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
 import { subscribeToPush } from '../lib/notificationUtils'
 import { supabase } from '../lib/supabase'
+import GoogleIcon from '../components/GoogleIcon'
 
 export default function Settings() {
   const navigate = useNavigate()
@@ -20,6 +20,7 @@ export default function Settings() {
   const themeMode = useSubscriptionStore((state) => state.themeMode) || 'system'
   const setThemeMode = useSubscriptionStore((state) => state.setThemeMode)
   const resetTutorial = useSubscriptionStore((state) => state.resetTutorial)
+  const setHasSeenLanding = useSubscriptionStore((state) => state.setHasSeenLanding)
   const notificationsEnabled = useSubscriptionStore((state) => state.notificationsEnabled)
   const setNotificationsEnabled = useSubscriptionStore((state) => state.setNotificationsEnabled)
 
@@ -75,6 +76,11 @@ export default function Settings() {
     navigate('/')
   }
 
+  const handleRestartLanding = () => {
+    setHasSeenLanding(false)
+    navigate('/landing')
+  }
+
   return (
     <div className="flex flex-col min-h-full">
       <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 md:p-[42px] flex flex-col items-start w-full transition-colors duration-300">
@@ -104,9 +110,9 @@ export default function Settings() {
           ) : (
               <button
                 onClick={signInWithGoogle}
-                className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+                className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-dark dark:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
-                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+                <GoogleIcon size={18} />
                 구글 로그인
               </button>
             )}
@@ -161,6 +167,20 @@ export default function Settings() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* 소개 페이지 다시보기 */}
+        <div className="py-4 md:p-6 flex items-center justify-between transition-colors">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-dark dark:text-white">소개 페이지</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">앱의 핵심 가치와 소개를 다시 확인합니다.</p>
+          </div>
+          <button
+            onClick={handleRestartLanding}
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
+          >
+            다시보기
+          </button>
         </div>
 
         {/* 튜토리얼 다시보기 */}

@@ -23,6 +23,7 @@ import { extractDayFromBillingDate, getNextPaymentDate } from '../lib/dateUtils'
 import { getWeeklyUpcomingPayments } from '../lib/notificationUtils'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
+import ServiceIcon from '../components/ServiceIcon'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORY_COLORS } from '../constants/categories'
 
@@ -212,12 +213,11 @@ export default function Calendar() {
                   className="bg-white dark:bg-slate-900 border border-tertiary dark:border-slate-700 rounded-[24px] p-4 flex items-center justify-between hover:border-primary dark:hover:border-primary transition-all active:scale-[0.98] cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "size-10 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-md shadow-primary/10",
-                      CATEGORY_COLORS[sub.categories?.[0] || sub.category] || CATEGORY_COLORS.Etc
-                    )}>
-                      {sub.service_name[0].toUpperCase()}
-                    </div>
+                    <ServiceIcon 
+                      serviceName={sub.service_name} 
+                      category={sub.categories?.[0] || sub.category} 
+                      size="md"
+                    />
                     <div className="flex flex-col">
                       <p className="font-extrabold text-dark dark:text-white group-hover:text-primary transition-colors">
                         {sub.service_name}
@@ -310,12 +310,11 @@ export default function Calendar() {
                       )}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={cn(
-                          "size-12 rounded-2xl flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-primary/5",
-                          CATEGORY_COLORS[sub.categories?.[0] || sub.category] || CATEGORY_COLORS.Etc
-                        )}>
-                          {sub.service_name[0].toUpperCase()}
-                        </div>
+                        <ServiceIcon 
+                          serviceName={sub.service_name} 
+                          category={sub.categories?.[0] || sub.category} 
+                          size="lg"
+                        />
                         <div className="flex flex-col">
                           <div className="flex items-center gap-2">
                             <p className="font-extrabold text-dark dark:text-white group-hover:text-primary transition-colors text-lg">

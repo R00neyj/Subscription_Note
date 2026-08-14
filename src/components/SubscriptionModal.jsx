@@ -4,6 +4,7 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
 import { SUBSCRIPTION_PRESETS } from '../constants/presets'
 import { cn, sanitizeInput } from '../lib/utils'
+import ServiceIcon from './ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -250,21 +251,28 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
                           <li 
                             key={index}
                             onClick={() => handleSelectSuggestion(preset)}
-                            className="px-6 py-3 hover:bg-tertiary dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between border-b border-tertiary/50 dark:border-slate-700/50 last:border-none group active:bg-tertiary transition-colors"
+                            className="px-5 py-3 hover:bg-tertiary dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between border-b border-tertiary/50 dark:border-slate-700/50 last:border-none group active:bg-tertiary transition-colors gap-3"
                           >
-                            <div className="flex flex-col">
-                              <span className="font-bold text-dark dark:text-white text-[14px] md:text-[16px]">
-                                {preset.nameKo}
-                              </span>
-                              <span className="text-[12px] text-dark/40 dark:text-slate-400 font-medium">
-                                {preset.nameEn}
-                              </span>
+                            <div className="flex items-center gap-3 min-w-0">
+                              <ServiceIcon 
+                                serviceName={preset.nameKo} 
+                                category={preset.category} 
+                                size="sm" 
+                              />
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-dark dark:text-white text-[14px] md:text-[16px] truncate">
+                                  {preset.nameKo}
+                                </span>
+                                <span className="text-[12px] text-dark/40 dark:text-slate-400 font-medium truncate">
+                                  {preset.nameEn}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex flex-col items-end gap-1">
+                            <div className="flex flex-col items-end gap-1 shrink-0">
                               <span className="text-[12px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
                                 {preset.category}
                               </span>
-                              <span className="text-[13px] md:text-[14px] font-bold text-dark/60 dark:text-slate-300">
+                              <span className="text-[12px] font-bold text-dark/60 dark:text-slate-300">
                                 {preset.price.toLocaleString()}원
                               </span>
                             </div>
