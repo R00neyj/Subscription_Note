@@ -43,7 +43,7 @@ export default function Navigation() {
         </button>
 
         {/* Nav (Container for menu items) */}
-        <div className="flex md:flex-col w-full md:w-[50px] md:h-auto justify-around md:justify-start items-center p-0 relative md:gap-1">
+        <div className="flex md:flex-col w-full md:w-[50px] md:h-auto justify-around md:justify-start items-center px-1 py-1 md:p-0 relative md:gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
 
@@ -52,26 +52,26 @@ export default function Navigation() {
                 key={item.path}
                 id={item.path === '/settings' ? 'step-settings-mobile' : undefined}
                 to={item.path}
-                className="flex flex-col items-center justify-center w-[54px] md:w-[50px] h-[52px] md:h-[58px] py-1 gap-[2px] transition-all group active:scale-95 cursor-pointer"
+                className="flex flex-col items-center justify-center w-[58px] md:w-[50px] h-[58px] md:h-[58px] py-1 gap-[3px] transition-all group active:scale-95 cursor-pointer"
               >
                 {/* size-56 (Icon Container) */}
                 <div className={cn(
-                  "flex items-center justify-center w-[44px] md:w-[48px] h-[26px] md:h-[28px] rounded-full transition-all",
+                  "flex items-center justify-center w-[48px] md:w-[48px] h-[30px] md:h-[28px] rounded-full transition-all",
                   isActive ? "bg-primary shadow-xs shadow-primary/20" : "group-hover:bg-slate-100 dark:group-hover:bg-slate-800"
                 )}>
                   <img 
                     src={isActive ? item.activeIcon : item.inactiveIcon} 
                     alt={item.label} 
                     className={cn(
-                      "w-4 h-4 md:w-5 md:h-5 shrink-0 transition-all", 
+                      "w-[20px] h-[20px] md:w-5 md:h-5 shrink-0 transition-all", 
                       isActive ? "brightness-0 invert" : "opacity-60 dark:invert dark:opacity-80"
                     )} 
                   />
                 </div>
                 {/* Label */}
                 <span className={cn(
-                  "text-[10px] md:text-[11px] leading-tight text-center whitespace-nowrap transition-colors",
-                  isActive ? "font-extrabold text-primary" : "font-semibold text-slate-500 dark:text-slate-400"
+                  "text-[11px] md:text-[11px] leading-tight text-center whitespace-nowrap transition-colors",
+                  isActive ? "font-extrabold text-primary" : "font-medium text-slate-500 dark:text-slate-400"
                 )}>
                   {item.label}
                 </span>

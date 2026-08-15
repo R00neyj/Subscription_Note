@@ -45,7 +45,7 @@ export default function FloatingActionButton() {
       onClick={() => openModal()}
       aria-label="구독 추가"
       className={cn(
-        "md:hidden fixed bottom-[64px] right-3.5 z-[60] flex items-center justify-center size-[46px] bg-primary text-white rounded-full shadow-md shadow-primary/30 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 cursor-pointer",
+        "md:hidden fixed bottom-[74px] right-4 z-[60] flex items-center justify-center size-[48px] bg-primary text-white rounded-full shadow-md shadow-primary/30 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 cursor-pointer",
         isVisible 
           ? "translate-y-0 opacity-100" 
           : "translate-y-[20%] opacity-0 pointer-events-none"

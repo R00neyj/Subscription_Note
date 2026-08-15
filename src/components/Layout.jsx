@@ -20,7 +20,7 @@ export default function Layout() {
       
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col items-center w-full">
-        <main className="px-3.5 py-3 pb-[84px] md:p-8 md:pb-10 relative max-w-[1440px] w-full">
+        <main className="px-3.5 py-3 pb-[92px] md:p-8 md:pb-10 relative max-w-[1440px] w-full">
           <Outlet />
         </main>
       </div>
