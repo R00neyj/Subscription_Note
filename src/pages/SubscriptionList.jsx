@@ -28,7 +28,8 @@ export default function SubscriptionList() {
         ? sub.categories[0] 
         : (sub.category || 'Etc')
       
-      acc[cat] = (acc[cat] || 0) + sub.price
+      const price = sub.billing_cycle === 'yearly' ? Math.floor(sub.price / 12) : sub.price
+      acc[cat] = (acc[cat] || 0) + price
       return acc
     }, {})
 
@@ -117,7 +118,10 @@ export default function SubscriptionList() {
   const totalCost = useMemo(() => {
     return sortedSubscriptions
       .filter(sub => sub.status === 'active')
-      .reduce((acc, sub) => acc + sub.price, 0)
+      .reduce((acc, sub) => {
+        const price = sub.billing_cycle === 'yearly' ? Math.floor(sub.price / 12) : sub.price
+        return acc + price
+      }, 0)
   }, [sortedSubscriptions])
 
   return (
