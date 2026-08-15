@@ -104,11 +104,16 @@ export default function Dashboard() {
           if ((b.satisfaction || 0) !== (a.satisfaction || 0)) {
             return (b.satisfaction || 0) - (a.satisfaction || 0)
           }
-          return b.price - a.price
+          const priceA = a.billing_cycle === 'yearly' ? Math.floor(a.price / 12) : a.price
+          const priceB = b.billing_cycle === 'yearly' ? Math.floor(b.price / 12) : b.price
+          return priceB - priceA
         })
         
         const others = sorted.slice(1)
-        const potentialSaving = others.reduce((sum, s) => sum + s.price, 0)
+        const potentialSaving = others.reduce((sum, s) => {
+          const price = s.billing_cycle === 'yearly' ? Math.floor(s.price / 12) : s.price
+          return sum + price
+        }, 0)
 
         return {
           id: groupId,
@@ -272,7 +277,11 @@ export default function Dashboard() {
   const maxExpenseItem = useSubscriptionStore((state) => {
     const subs = state.subscriptions.filter(sub => sub.status === 'active')
     if (subs.length === 0) return null
-    return subs.sort((a, b) => b.price - a.price)[0]
+    return [...subs].sort((a, b) => {
+      const priceA = a.billing_cycle === 'yearly' ? Math.floor(a.price / 12) : a.price
+      const priceB = b.billing_cycle === 'yearly' ? Math.floor(b.price / 12) : b.price
+      return priceB - priceA
+    })[0]
   })
 
   // Dynamic Category Data Calculation
@@ -672,9 +681,11 @@ export default function Dashboard() {
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-1">
-                              <p className="font-extrabold text-dark dark:text-white text-[19px]">{sub.price.toLocaleString()}원</p>
+                              <p className="font-extrabold text-dark dark:text-white text-[19px]">
+                                {sub.price.toLocaleString()}원{sub.billing_cycle === 'yearly' ? '/년' : ''}
+                              </p>
                               <p className="text-[11px] font-bold text-red-500 uppercase tracking-tight">
-                                연 {(sub.price * 12).toLocaleString()}원 낭비 중
+                                연 {(sub.billing_cycle === 'yearly' ? sub.price : sub.price * 12).toLocaleString()}원 낭비 중
                               </p>
                             </div>
                           </div>
@@ -772,13 +783,23 @@ export default function Dashboard() {
                                       </button>
                                     </div>
                                   </div>
-                                  <div className="flex flex-col items-end gap-1">
+                                  <div className="flex flex-col items-end gap-0.5">
                                     <p className={cn(
                                       "font-extrabold text-[16px]",
                                       idx === 0 ? "text-white" : "text-dark dark:text-white"
-                                    )}>{sub.price.toLocaleString()}원</p>
+                                    )}>
+                                      {sub.price.toLocaleString()}원{sub.billing_cycle === 'yearly' ? '/년' : ''}
+                                    </p>
+                                    {sub.billing_cycle === 'yearly' && (
+                                      <span className={cn(
+                                        "text-[10px] font-medium",
+                                        idx === 0 ? "text-white/70" : "text-dark/50 dark:text-slate-400"
+                                      )}>
+                                        (월 {Math.floor(sub.price / 12).toLocaleString()}원)
+                                      </span>
+                                    )}
                                     <span className={cn(
-                                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter",
+                                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter mt-0.5",
                                       idx === 0 ? "bg-white/10 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                                     )}>
                                       {idx === 0 ? '유지 권장' : '해지 후보'}
