@@ -178,7 +178,7 @@ export default function Dashboard() {
       // Card default shows 3-year (index 2)
       defaultCost: costData.find(p => p.key === 'three') || costData[0]
     }
-  }, [subscriptions])
+  }, [subscriptions, ignoredDuplicates])
 
   useEffect(() => {
     // 튜토리얼을 보지 않았다면 자동으로 시작 (약간의 지연 후)
