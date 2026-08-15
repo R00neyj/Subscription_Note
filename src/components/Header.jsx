@@ -34,28 +34,28 @@ export default function Header() {
   }
 
   return (
-    <div className="sticky md:relative top-0 z-[50] md:z-0 flex flex-row items-center p-[8px_24px] md:p-[8px_12px] gap-[12px] md:gap-[28px] w-[calc(100%+32px)] md:w-full -mx-4 md:mx-0 h-[64px] mb-[24px] md:mb-8 bg-[#F8FAFC]/80 dark:bg-[#0F172A]/80 md:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all shrink-0">
+    <div className="sticky md:relative top-0 z-[50] md:z-0 flex flex-row items-center p-[6px_14px] md:p-[6px_8px] gap-[10px] md:gap-[20px] w-[calc(100%+28px)] md:w-full -mx-3.5 md:mx-0 h-[50px] md:h-[58px] mb-2.5 md:mb-6 bg-[#F8FAFC]/90 dark:bg-[#0F172A]/90 md:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all shrink-0">
       {/* Frame 23: Logo & Title */}
-      <div className="flex flex-row items-center p-0 gap-[8px] w-fit h-[48px] shrink-0">
-        <div className="w-[40px] h-[40px] md:w-[48px] md:h-[48px] bg-white dark:bg-slate-800 rounded-lg border border-blue-50 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+      <div className="flex flex-row items-center p-0 gap-[6px] md:gap-[8px] w-fit h-[36px] md:h-[44px] shrink-0">
+        <div className="w-[32px] h-[32px] md:w-[40px] md:h-[40px] bg-white dark:bg-slate-800 rounded-lg border border-blue-50 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
             <img 
               src={isDark ? "/logo_d.svg" : "/favicon.svg"} 
               alt="Logo" 
-              className="w-[32px] h-[32px] md:w-[42px] md:h-[42px]" 
+              className="w-[24px] h-[24px] md:w-[32px] md:h-[32px]" 
             />
         </div>
-        <p className="font-extrabold text-[20px] md:text-[22px] leading-[140%] text-[#1E293B] dark:text-white whitespace-nowrap text-center">
+        <p className="font-extrabold text-[16px] md:text-[20px] leading-[140%] text-[#1E293B] dark:text-white whitespace-nowrap text-center">
           구독노트
         </p>
       </div>
 
       {/* Frame 19: Search Bar */}
-      <div className="flex flex-row items-center px-4 md:px-[24px] gap-[8px] flex-1 h-[48px] md:h-[64px] bg-tertiary dark:bg-slate-800/80 rounded-[99px] transition-all overflow-hidden border border-transparent focus-within:border-primary/30">
-        <img src="/name=search, fill=true.svg" alt="Search" className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] shrink-0 opacity-50 dark:opacity-70 dark:invert" />
+      <div className="flex flex-row items-center px-3 md:px-4 gap-[6px] md:gap-[8px] flex-1 h-[36px] md:h-[44px] bg-slate-100 dark:bg-slate-800/80 rounded-xl transition-all overflow-hidden border border-transparent focus-within:border-primary/40 focus-within:bg-white dark:focus-within:bg-slate-800">
+        <img src="/name=search, fill=true.svg" alt="Search" className="w-[16px] h-[16px] md:w-[20px] md:h-[20px] shrink-0 opacity-50 dark:opacity-70 dark:invert" />
         <input 
           type="text" 
           placeholder="구독 검색" 
-          className="bg-transparent border-none outline-none text-[14px] md:text-[18px] leading-[140%] text-dark dark:text-white placeholder:text-dark/40 dark:placeholder:text-white/40 w-full font-bold"
+          className="bg-transparent border-none outline-none text-[13px] md:text-[15px] leading-[140%] text-dark dark:text-white placeholder:text-dark/40 dark:placeholder:text-white/40 w-full font-medium"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleSearch}
@@ -63,9 +63,9 @@ export default function Header() {
         {searchQuery && (
           <button 
             onClick={handleClear}
-            className="p-1 hover:bg-black/5 rounded-full transition-colors cursor-pointer"
+            className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5 text-dark/40 dark:text-white/40" />
+            <X className="w-4 h-4 text-dark/40 dark:text-white/40" />
           </button>
         )}
       </div>

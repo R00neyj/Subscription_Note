@@ -323,7 +323,7 @@ export default function Dashboard() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 py-4 md:p-8 flex flex-col gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        className="bg-transparent md:bg-white dark:md:bg-slate-900 rounded-2xl md:rounded-3xl px-0 py-2 md:p-6 flex flex-col gap-4 md:gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
       >
         {/* Title Section */}
         <motion.div variants={itemVariants} className="flex justify-start w-full">
@@ -334,23 +334,21 @@ export default function Dashboard() {
         <motion.div 
           id="step-summary" 
           variants={itemVariants}
-          className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-start w-full"
+          className="grid grid-cols-2 md:flex md:flex-wrap gap-2.5 md:gap-3 items-start w-full"
         >
           {/* 총 구독료 */}
           <motion.div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
-            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px]"
+            className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:max-w-[190px] shadow-xs"
           >
-            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">총 구독료</p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+            <p className="text-[12px] md:text-[13px] font-semibold text-primary">총 구독료</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 {totalCost.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
-              </div>
+              <span className="text-[12px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원</span>
             </div>
           </motion.div>
           
@@ -360,16 +358,14 @@ export default function Dashboard() {
             whileHover="hover"
             whileTap="tap"
             onClick={() => navigate('/list')} 
-            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] cursor-pointer"
+            className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:max-w-[190px] cursor-pointer shadow-xs"
           >
-             <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">구독중인 서비스</p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+             <p className="text-[12px] md:text-[13px] font-semibold text-primary">구독중인 서비스</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 {activeCount}
               </span>
-              <div className="pt-1">
-                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">개</span>
-              </div>
+              <span className="text-[12px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">개</span>
             </div>
           </motion.div>
 
@@ -379,11 +375,11 @@ export default function Dashboard() {
             whileHover="hover"
             whileTap="tap"
             onClick={() => maxExpenseItem && openModal(maxExpenseItem)}
-            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:min-w-[200px] md:w-[240px] cursor-pointer overflow-hidden group"
+            className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:min-w-[190px] md:w-[220px] cursor-pointer overflow-hidden group shadow-xs"
           >
-             <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">가장 지출이 큰 곳</p>
-            <div className="flex items-center gap-[3px] w-full overflow-hidden">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4] truncate block w-full group-hover:text-primary transition-colors" title={maxExpenseItem?.service_name || '-'}>
+             <p className="text-[12px] md:text-[13px] font-semibold text-primary">가장 지출이 큰 곳</p>
+            <div className="w-full overflow-hidden">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white truncate block w-full group-hover:text-primary transition-colors" title={maxExpenseItem?.service_name || '-'}>
                 {maxExpenseItem?.service_name || '-'}
               </span>
             </div>
@@ -394,30 +390,28 @@ export default function Dashboard() {
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
-            className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[240px]"
+            className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:max-w-[220px] shadow-xs"
           >
-            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">연간 예상 지출</p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+            <p className="text-[12px] md:text-[13px] font-semibold text-primary">연간 예상 지출</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 {yearlyCost.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
-              </div>
+              <span className="text-[12px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원</span>
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Payment Briefing Section (월간 구독 리포트 아래, 구독 최적화 리포트 위) */}
-        <motion.div variants={itemVariants} className="mt-2 flex flex-col items-start w-full">
+        {/* Payment Briefing Section */}
+        <motion.div variants={itemVariants} className="mt-1 flex flex-col items-start w-full">
           <PaymentBriefing showDetailsList={false} />
         </motion.div>
 
         {/* Optimization Insights Section */}
         {insights && (
-          <motion.div variants={itemVariants} className="mt-8 flex flex-col items-start w-full gap-4">
+          <motion.div variants={itemVariants} className="mt-4 md:mt-6 flex flex-col items-start w-full gap-3">
             <SectionHeader title="구독 최적화 리포트" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-3.5 w-full">
               {/* Long-term Cost Card */}
               <motion.div 
                 variants={cardHover}
@@ -427,20 +421,20 @@ export default function Dashboard() {
                   type: 'cost', 
                   data: insights.costData
                 })}
-                className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden group"
+                className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden group shadow-xs"
               >
-                <div className="flex items-center gap-2 text-primary">
-                  <TrendingDown size={18} />
-                  <p className="text-[14px] md:text-[18px] font-bold leading-[1.4]">장기 지출 경고</p>
+                <div className="flex items-center gap-1.5 text-primary">
+                  <TrendingDown size={16} />
+                  <p className="text-[13px] md:text-[14px] font-bold">장기 지출 경고</p>
                 </div>
-                <div className="flex flex-col gap-1 mt-1">
-                  <div className="flex items-baseline gap-[3px]">
-                    <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4] group-hover:text-primary transition-colors duration-300">
+                <div className="flex flex-col gap-0.5 mt-0.5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[17px] md:text-[20px] font-bold text-dark dark:text-white group-hover:text-primary transition-colors">
                       {insights.defaultCost.label} {insights.defaultCost.amount.toLocaleString()}
                     </span>
-                    <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200">원</span>
+                    <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">원</span>
                   </div>
-                  <p className="text-[12px] md:text-[14px] text-red-500 font-extrabold">
+                  <p className="text-[11.5px] md:text-[12.5px] text-red-500 font-bold line-clamp-1">
                     {insights.defaultCost.match.icon} {insights.defaultCost.message}
                   </p>
                 </div>
@@ -453,26 +447,26 @@ export default function Dashboard() {
                 whileTap="tap"
                 onClick={() => setActiveInsight({ type: 'satisfaction', data: insights.lowSatisfaction })}
                 className={cn(
-                  "bg-background dark:bg-slate-900 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border transition-colors duration-300",
+                  "bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border shadow-xs transition-colors",
                   insights.lowSatisfaction.length > 0 
-                    ? "border-red-500/30" 
-                    : "border-emerald-500/30"
+                    ? "border-red-500/30 dark:border-red-500/30" 
+                    : "border-emerald-500/30 dark:border-emerald-500/30"
                 )}
               >
                 <div className={cn(
-                  "flex items-center gap-2",
+                  "flex items-center gap-1.5",
                   insights.lowSatisfaction.length > 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
                 )}>
-                  <Star size={18} className={insights.lowSatisfaction.length > 0 ? "fill-red-600/20" : "fill-emerald-600/20"} />
-                  <p className="text-[14px] md:text-[18px] font-bold leading-[1.4]">만족도 분석</p>
+                  <Star size={16} className={insights.lowSatisfaction.length > 0 ? "fill-red-600/20" : "fill-emerald-600/20"} />
+                  <p className="text-[13px] md:text-[14px] font-bold">만족도 분석</p>
                 </div>
-                <div className="flex flex-col gap-1 mt-1">
-                  <div className="flex items-baseline gap-[3px]">
-                    <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+                <div className="flex flex-col gap-0.5 mt-0.5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[17px] md:text-[20px] font-bold text-dark dark:text-white">
                       {insights.lowSatisfaction.length > 0 ? `${insights.lowSatisfaction.length}개 발견` : '모두 만족'}
                     </span>
                   </div>
-                  <p className="text-[12px] md:text-[14px] text-dark/40 dark:text-slate-400 font-extrabold leading-tight">
+                  <p className="text-[11.5px] md:text-[12.5px] text-slate-400 dark:text-slate-500 font-medium">
                     {insights.lowSatisfaction.length > 0 
                       ? '낮은 만족도 서비스 정리'
                       : '효율적으로 구독 관리 중'}
@@ -487,34 +481,34 @@ export default function Dashboard() {
                 whileTap="tap"
                 onClick={() => setActiveInsight({ type: 'duplicates', data: insights.duplicates })}
                 className={cn(
-                  "bg-background dark:bg-slate-900 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border transition-colors duration-300",
+                  "bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border shadow-xs transition-colors",
                   insights.duplicates.length > 0
-                    ? "border-amber-500/30"
-                    : "border-slate-200 dark:border-slate-700"
+                    ? "border-amber-500/30 dark:border-amber-500/30"
+                    : "border-slate-200/80 dark:border-slate-800"
                 )}
               >
                 <div className={cn(
-                  "flex items-center gap-2",
+                  "flex items-center gap-1.5",
                   insights.duplicates.length > 0 ? "text-amber-600 dark:text-amber-400" : "text-slate-500"
                 )}>
-                  {insights.duplicates.length > 0 ? <AlertTriangle size={18} /> : <Info size={18} />}
-                  <p className="text-[14px] md:text-[18px] font-bold leading-[1.4]">비슷한 서비스 점검</p>
+                  {insights.duplicates.length > 0 ? <AlertTriangle size={16} /> : <Info size={16} />}
+                  <p className="text-[13px] md:text-[14px] font-bold">비슷한 서비스 점검</p>
                 </div>
-                <div className="flex flex-col gap-1 mt-1 w-full">
-                  <div className="flex items-baseline gap-[3px]">
-                    <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+                <div className="flex flex-col gap-0.5 mt-0.5 w-full">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[17px] md:text-[20px] font-bold text-dark dark:text-white">
                       {insights.duplicates.length > 0 
                         ? `월 ${insights.duplicates[0].potentialSaving.toLocaleString()}원` 
-                        : '중복된 항목이 없어요'}
+                        : '중복 항목 없음'}
                     </span>
                     {insights.duplicates.length > 0 && (
-                      <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200">절감 가능</span>
+                      <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">절감 가능</span>
                     )}
                   </div>
-                  <p className="text-[12px] md:text-[14px] text-dark/40 dark:text-slate-400 font-extrabold truncate w-full">
+                  <p className="text-[11.5px] md:text-[12.5px] text-slate-400 dark:text-slate-500 font-medium truncate w-full">
                     {insights.duplicates.length > 0 
-                      ? `${insights.duplicates[0].label} 카테고리를 점검해보세요`
-                      : '아주 알뜰하게 구독을 관리하고 계시네요!'}
+                      ? `${insights.duplicates[0].label} 카테고리 점검 추천`
+                      : '알뜰하게 구독 관리 중'}
                   </p>
                 </div>
               </motion.div>

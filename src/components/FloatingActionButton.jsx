@@ -43,17 +43,15 @@ export default function FloatingActionButton() {
     <button
       id="step-fab"
       onClick={() => openModal()}
+      aria-label="구독 추가"
       className={cn(
-        "md:hidden fixed bottom-[78px] right-4 z-[60] flex items-center justify-center gap-2 w-[104px] h-[56px] bg-gradient-to-r from-[#2C25EB] to-[#2563EB] text-white rounded-[20px] shadow-lg shadow-primary/20 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-95 cursor-pointer",
+        "md:hidden fixed bottom-[64px] right-3.5 z-[60] flex items-center justify-center size-[46px] bg-primary text-white rounded-full shadow-md shadow-primary/30 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 cursor-pointer",
         isVisible 
           ? "translate-y-0 opacity-100" 
           : "translate-y-[20%] opacity-0 pointer-events-none"
       )}
     >
-      <Plus className="w-6 h-6 shrink-0 stroke-[3px]" />
-      <span className="font-bold text-[16px] leading-[24px]">
-        추가
-      </span>
+      <Plus className="w-5 h-5 stroke-[2.5px]" />
     </button>
   )
 }

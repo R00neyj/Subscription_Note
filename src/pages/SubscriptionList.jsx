@@ -130,25 +130,25 @@ export default function SubscriptionList() {
     <div className="flex flex-col min-h-full">
       <Header />
       
-      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 py-4 md:p-8 flex flex-col gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-900 rounded-2xl md:rounded-3xl px-0 py-2 md:p-6 flex flex-col gap-4 md:gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
         
         {/* Section Header with CTA */}
-        <div className="flex items-center justify-between gap-4 w-full">
+        <div className="flex items-center justify-between gap-3 w-full">
           <SectionHeader title="구독 목록" className="w-auto" />
           
           <button
             type="button"
             onClick={() => openModal(null, 'active')}
-            className="h-[42px] px-4 rounded-[14px] font-bold text-[14px] bg-primary hover:bg-primary/90 shadow-sm shadow-primary/20 text-white flex items-center gap-1.5 transition-all cursor-pointer shrink-0 active:scale-95"
+            className="h-[36px] md:h-[38px] px-3 md:px-3.5 rounded-xl font-bold text-[13px] md:text-[13.5px] bg-primary hover:bg-primary/90 shadow-xs shadow-primary/20 text-white flex items-center gap-1 transition-all cursor-pointer shrink-0 active:scale-95"
           >
-            <Plus className="w-4 h-4 stroke-[3px]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5px]" />
             <span>구독 추가</span>
           </button>
         </div>
 
         {/* Category Chart Section */}
         {categoryData.length > 0 && (
-          <div className="w-full mb-2">
+          <div className="w-full">
             <CategoryDistributionChart 
               categoryData={categoryData}
               selectedCategory={selectedCategory === 'all' ? null : selectedCategory}
@@ -158,44 +158,40 @@ export default function SubscriptionList() {
         )}
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-start w-full">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2.5 md:gap-3 items-start w-full">
           {/* 총 구독료 */}
-          <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300">
-            <p className="text-[13px] md:text-[16px] font-bold text-primary leading-[1.4]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:max-w-[190px] shadow-xs transition-all duration-200">
+            <p className="text-[12px] md:text-[13px] font-semibold text-primary">
               {selectedCategory === 'all' 
                 ? '총 구독료' 
                 : `${CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} 구독료`}
             </p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[26px] font-bold text-dark dark:text-white leading-[1.4]">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 {totalCost.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[13px] md:text-[16px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원/월</span>
-              </div>
+              <span className="text-[11.5px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원/월</span>
             </div>
           </div>
 
           {/* 연간 예상 지출 */}
-          <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[240px] transition-all duration-300">
-            <p className="text-[13px] md:text-[16px] font-bold text-primary leading-[1.4]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col items-start gap-0.5 w-full md:max-w-[220px] shadow-xs transition-all duration-200">
+            <p className="text-[12px] md:text-[13px] font-semibold text-primary">
               {selectedCategory === 'all' 
                 ? '연간 예상 지출' 
                 : `${CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} 연간 지출`}
             </p>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[26px] font-bold text-dark dark:text-white leading-[1.4]">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 {yearlyCost.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[13px] md:text-[16px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원/년</span>
-              </div>
+              <span className="text-[11.5px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원/년</span>
             </div>
           </div>
         </div>
 
         {/* Table Container */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-1">
           <SubscriptionTable 
             data={sortedSubscriptions} 
             onRowClick={(item) => openModal(item)}

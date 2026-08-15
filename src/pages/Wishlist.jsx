@@ -206,50 +206,41 @@ export default function Wishlist() {
   // 5. Simulated Final Total Monthly Cost
   const simulatedFinalTotal = Math.max(0, currentActiveMonthlyTotal + simulatedNetChange)
 
-  // Max expense wishlist item
-  const maxExpenseWishItem = useMemo(() => {
-    if (wishlistSubs.length === 0) return null
-    return [...wishlistSubs].sort((a, b) => {
-      const aPrice = a.billing_cycle === 'yearly' ? Math.floor(a.price / 12) : a.price
-      const bPrice = b.billing_cycle === 'yearly' ? Math.floor(b.price / 12) : b.price
-      return bPrice - aPrice
-    })[0]
-  }, [wishlistSubs])
 
   return (
     <div className="flex flex-col min-h-full">
       <Header />
       
-      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 py-4 md:p-8 flex flex-col gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-900 rounded-2xl md:rounded-3xl px-0 py-2 md:p-6 flex flex-col gap-4 md:gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
         
         {/* Section Header with Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 w-full">
           <div className="flex flex-col">
             <SectionHeader title="위시리스트 & 지출 시뮬레이터" className="w-auto" />
-            <p className="text-[13px] md:text-[14px] text-dark/50 dark:text-slate-400 font-medium">
+            <p className="text-[12px] md:text-[13px] text-slate-500 dark:text-slate-400 font-medium">
               새 구독 추가와 기존 구독 덜어내기를 조합하여 최적의 월 지출 균형을 찾아보세요.
             </p>
           </div>
           
-          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
             {/* Import from active subscription CTA */}
             <button
               type="button"
               onClick={() => setIsImportModalOpen(true)}
-              className="h-[42px] px-3.5 rounded-[14px] font-bold text-[13.5px] bg-tertiary dark:bg-slate-700/80 hover:bg-tertiary/80 text-dark/75 dark:text-slate-200 border border-dark/5 dark:border-slate-600 flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-xs"
+              className="h-[36px] md:h-[38px] px-3 rounded-xl font-bold text-[12.5px] md:text-[13px] bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1 transition-all cursor-pointer active:scale-95 shadow-xs"
               title="현재 구독 중인 항목을 위시리스트로 복제하여 고민하기"
             >
-              <CopyPlus className="w-4 h-4 text-primary dark:text-blue-400" />
-              <span>구독 목록 불러오기</span>
+              <CopyPlus className="w-3.5 h-3.5 text-primary dark:text-blue-400" />
+              <span>구독 불러오기</span>
             </button>
 
             {/* Direct Add CTA */}
             <button
               type="button"
               onClick={() => openModal(null, 'wishlist')}
-              className="h-[42px] px-4 rounded-[14px] font-bold text-[14px] bg-amber-500 hover:bg-amber-600 shadow-sm shadow-amber-500/20 text-white flex items-center gap-1.5 transition-all cursor-pointer shrink-0 active:scale-95"
+              className="h-[36px] md:h-[38px] px-3 md:px-3.5 rounded-xl font-bold text-[13px] md:text-[13.5px] bg-amber-500 hover:bg-amber-600 shadow-xs shadow-amber-500/20 text-white flex items-center gap-1 transition-all cursor-pointer shrink-0 active:scale-95"
             >
-              <Plus className="w-4 h-4 stroke-[3px]" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5px]" />
               <span>위시 추가</span>
             </button>
           </div>
@@ -257,7 +248,7 @@ export default function Wishlist() {
 
         {/* Category Chart Section */}
         {categoryData.length > 0 && (
-          <div className="w-full mb-2">
+          <div className="w-full">
             <CategoryDistributionChart 
               categoryData={categoryData}
               selectedCategory={selectedCategory === 'all' ? null : selectedCategory}
@@ -267,65 +258,53 @@ export default function Wishlist() {
         )}
 
         {/* 4-Split Live Balanced Simulator Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-start w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3 items-start w-full">
           
           {/* 1. 가상 도입 (위시 추가액) */}
-          <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-[24px] p-4 md:p-6 flex flex-col justify-between items-start gap-2 w-full h-full min-h-[120px] md:min-h-[140px] transition-all duration-300">
-            <div className="flex items-center justify-between w-full">
-              <p className="text-[13px] md:text-[16px] font-bold leading-[1.4] text-amber-600 dark:text-amber-400 flex items-center gap-1.5 truncate">
-                <TrendingUp className="w-4 h-4 shrink-0" />
-                <span className="truncate">가상 도입 (위시)</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+          <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col justify-between items-start gap-1 w-full h-full min-h-[90px] md:min-h-[110px] transition-all duration-200">
+            <p className="text-[11.5px] md:text-[13px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 truncate">
+              <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">가상 도입 (위시)</span>
+            </p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-dark dark:text-white">
                 +{simulatedWishlistAdd.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[13px] md:text-[16px] font-medium text-dark dark:text-slate-200 leading-[1.4]">
-                  원/월
-                </span>
-              </div>
+              <span className="text-[11.5px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원/월</span>
             </div>
-            <span className="text-[11px] md:text-[12px] text-amber-700/60 dark:text-amber-300/60 font-medium truncate">
+            <span className="text-[10px] md:text-[11.5px] text-amber-700/60 dark:text-amber-300/60 font-medium truncate">
               {selectedWishlistIds.length}개 항목 선택됨
             </span>
           </div>
 
           {/* 2. 가상 덜어내기 (구독 다이어트 절감액) */}
           <div className={cn(
-            "rounded-[24px] p-4 md:p-6 flex flex-col justify-between items-start gap-2 w-full h-full min-h-[120px] md:min-h-[140px] transition-all duration-300 border",
+            "rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col justify-between items-start gap-1 w-full h-full min-h-[90px] md:min-h-[110px] transition-all duration-200 border",
             simulatedActiveCut > 0
               ? "bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/30"
-              : "bg-background dark:bg-slate-900 border-tertiary dark:border-slate-700"
+              : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
           )}>
-            <div className="flex items-center justify-between w-full">
-              <p className={cn(
-                "text-[13px] md:text-[16px] font-bold leading-[1.4] flex items-center gap-1.5 truncate",
-                simulatedActiveCut > 0 ? "text-rose-600 dark:text-rose-400" : "text-dark/60 dark:text-slate-400"
-              )}>
-                <Scissors className="w-4 h-4 shrink-0" />
-                <span className="truncate">가상 덜어내기</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-[3px]">
+            <p className={cn(
+              "text-[11.5px] md:text-[13px] font-bold flex items-center gap-1 truncate",
+              simulatedActiveCut > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-500 dark:text-slate-400"
+            )}>
+              <Scissors className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">가상 덜어내기</span>
+            </p>
+            <div className="flex items-baseline gap-1">
               <span className={cn(
-                "text-[20px] md:text-[28px] font-bold leading-[1.4]",
-                simulatedActiveCut > 0 ? "text-rose-600 dark:text-rose-400" : "text-dark/40 dark:text-slate-500"
+                "text-[17px] md:text-[22px] font-bold",
+                simulatedActiveCut > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-400 dark:text-slate-500"
               )}>
                 {simulatedActiveCut > 0 ? `-${simulatedActiveCut.toLocaleString()}` : '0'}
               </span>
-              <div className="pt-1">
-                <span className="text-[13px] md:text-[16px] font-medium text-dark dark:text-slate-200 leading-[1.4]">
-                  원/월
-                </span>
-              </div>
+              <span className="text-[11.5px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원/월</span>
             </div>
             <span className={cn(
-              "text-[11px] md:text-[12px] font-medium truncate",
-              simulatedActiveCut > 0 ? "text-rose-700/70 dark:text-rose-300/70" : "text-dark/40 dark:text-slate-500"
+              "text-[10px] md:text-[11.5px] font-medium truncate",
+              simulatedActiveCut > 0 ? "text-rose-700/70 dark:text-rose-300/70" : "text-slate-400 dark:text-slate-500"
             )}>
-              {excludedActiveIds.length > 0 ? `${excludedActiveIds.length}개 해지 시뮬레이션 중` : '아래에서 해지할 항목 선택'}
+              {excludedActiveIds.length > 0 ? `${excludedActiveIds.length}개 해지 중` : '아래에서 선택'}
             </span>
           </div>
 
@@ -335,76 +314,66 @@ export default function Wishlist() {
             const isZero = simulatedNetChange === 0
             return (
               <div className={cn(
-                "border rounded-[24px] p-4 md:p-6 flex flex-col justify-between items-start gap-2 w-full h-full min-h-[120px] md:min-h-[140px] transition-all duration-300",
+                "border rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col justify-between items-start gap-1 w-full h-full min-h-[90px] md:min-h-[110px] transition-all duration-200",
                 isSaving 
                   ? "bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20" 
                   : isZero
-                    ? "bg-background dark:bg-slate-900 border-tertiary dark:border-slate-700"
+                    ? "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
                     : "bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/20"
               )}>
-                <div className="flex items-center justify-between w-full">
-                  <p className={cn(
-                    "text-[13px] md:text-[16px] font-bold leading-[1.4] flex items-center gap-1.5 truncate",
-                    isSaving ? "text-emerald-600 dark:text-emerald-400" : isZero ? "text-dark/60 dark:text-slate-400" : "text-amber-600 dark:text-amber-400"
-                  )}>
-                    {isSaving ? (
-                      <>
-                        <TrendingDown className="w-4 h-4 shrink-0" />
-                        <span className="truncate">최종 월 절감액</span>
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="w-4 h-4 shrink-0" />
-                        <span className="truncate">최종 순 추가 지출</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="flex items-center gap-[3px]">
+                <p className={cn(
+                  "text-[11.5px] md:text-[13px] font-bold flex items-center gap-1 truncate",
+                  isSaving ? "text-emerald-600 dark:text-emerald-400" : isZero ? "text-slate-500 dark:text-slate-400" : "text-amber-600 dark:text-amber-400"
+                )}>
+                  {isSaving ? (
+                    <>
+                      <TrendingDown className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">최종 월 절감액</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">최종 순 추가 지출</span>
+                    </>
+                  )}
+                </p>
+                <div className="flex items-baseline gap-1">
                   <span className={cn(
-                    "text-[20px] md:text-[28px] font-bold leading-[1.4]",
+                    "text-[17px] md:text-[22px] font-bold",
                     isSaving ? "text-emerald-600 dark:text-emerald-400" : isZero ? "text-dark dark:text-white" : "text-dark dark:text-white"
                   )}>
                     {simulatedNetChange > 0 ? `+${simulatedNetChange.toLocaleString()}` : `${simulatedNetChange.toLocaleString()}`}
                   </span>
-                  <div className="pt-1">
-                    <span className={cn(
-                      "text-[13px] md:text-[16px] font-medium leading-[1.4]",
-                      isSaving ? "text-emerald-700/80 dark:text-emerald-300/80" : "text-dark dark:text-slate-200"
-                    )}>
-                      원/월
-                    </span>
-                  </div>
+                  <span className={cn(
+                    "text-[11.5px] md:text-[13px] font-medium",
+                    isSaving ? "text-emerald-700/80 dark:text-emerald-300/80" : "text-slate-500 dark:text-slate-400"
+                  )}>
+                    원/월
+                  </span>
                 </div>
                 <span className={cn(
-                  "text-[11px] md:text-[12px] font-medium truncate",
+                  "text-[10px] md:text-[11.5px] font-medium truncate",
                   isSaving ? "text-emerald-700/60 dark:text-emerald-300/60" : "text-amber-700/60 dark:text-amber-300/60"
                 )}>
-                  {isSaving ? '도입 후에도 총 지출 감소' : '덜어내기 상쇄 반영 완료'}
+                  {isSaving ? '도입 후에도 총 지출 감소' : '덜어내기 상쇄 반영'}
                 </span>
               </div>
             )
           })()}
 
           {/* 4. 예상 총 월 지출 */}
-          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col justify-between items-start gap-2 w-full h-full min-h-[120px] md:min-h-[140px] transition-all duration-300">
-            <div className="flex items-center justify-between w-full">
-              <p className="text-[13px] md:text-[16px] font-bold text-primary dark:text-blue-400 leading-[1.4] flex items-center gap-1.5 truncate">
-                <Wallet className="w-4 h-4 shrink-0" />
-                <span className="truncate">예상 총 월 지출</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-[3px]">
-              <span className="text-[20px] md:text-[28px] font-bold text-primary dark:text-blue-400 leading-[1.4]">
+          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col justify-between items-start gap-1 w-full h-full min-h-[90px] md:min-h-[110px] transition-all duration-200">
+            <p className="text-[11.5px] md:text-[13px] font-bold text-primary dark:text-blue-400 flex items-center gap-1 truncate">
+              <Wallet className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">예상 총 월 지출</span>
+            </p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[17px] md:text-[22px] font-bold text-primary dark:text-blue-400">
                 {simulatedFinalTotal.toLocaleString()}
               </span>
-              <div className="pt-1">
-                <span className="text-[13px] md:text-[16px] font-medium text-dark dark:text-slate-200 leading-[1.4]">
-                  원/월
-                </span>
-              </div>
+              <span className="text-[11.5px] md:text-[13px] font-medium text-slate-500 dark:text-slate-400">원/월</span>
             </div>
-            <span className="text-[11px] md:text-[12px] text-dark/50 dark:text-slate-400 font-medium truncate">
+            <span className="text-[10px] md:text-[11.5px] text-slate-400 font-medium truncate">
               현재 {currentActiveMonthlyTotal.toLocaleString()}원 대비
             </span>
           </div>
@@ -413,8 +382,8 @@ export default function Wishlist() {
         {/* Section 1: Wishlist Table (가상 도입 목록) */}
         <div className="w-full flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-[16px] md:text-[18px] font-bold text-dark dark:text-white flex items-center gap-2">
-              <Bookmark className="w-4 h-4 text-amber-500" />
+            <h3 className="text-[15px] md:text-[17px] font-bold text-dark dark:text-white flex items-center gap-1.5">
+              <Bookmark className="w-4 h-4 text-amber-500 fill-amber-500" />
               가상 도입 위시리스트
             </h3>
             <span className="text-[12px] text-dark/40 dark:text-slate-400 font-medium">

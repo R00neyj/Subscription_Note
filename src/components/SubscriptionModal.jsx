@@ -268,7 +268,7 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
                   : "text-dark/50 dark:text-slate-400 hover:text-dark dark:hover:text-white"
               )}
             >
-              <Bookmark className="w-4 h-4" />
+              <Bookmark className={cn("w-4 h-4 stroke-[2.5px]", entryType === 'wishlist' && "fill-amber-500")} />
               <span>위시리스트 (고민 중)</span>
             </button>
           </div>

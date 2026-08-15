@@ -75,47 +75,47 @@ export default function Calendar() {
     <div className="flex flex-col min-h-full">
       <Header />
       
-      <div className="bg-transparent md:bg-white dark:md:bg-slate-800 rounded-[24px] md:rounded-[48px] px-0 py-4 md:p-8 flex flex-col gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+      <div className="bg-transparent md:bg-white dark:md:bg-slate-900 rounded-2xl md:rounded-3xl px-0 py-2 md:p-6 flex flex-col gap-4 md:gap-6 items-start w-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
         <SectionHeader title="결제 달력" />
 
         {/* Calendar Container */}
-        <div className="w-full bg-white dark:bg-slate-900 md:bg-background md:dark:bg-slate-900 border border-primary/20 dark:border-slate-700 rounded-[32px] overflow-hidden shadow-sm">
+        <div className="w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
           
           {/* Calendar Header */}
-          <div className="flex items-center justify-between py-4 px-6 border-b border-tertiary dark:border-slate-800">
-            <h2 className="text-xl md:text-2xl font-extrabold text-dark dark:text-white">
+          <div className="flex items-center justify-between py-3 px-4 md:px-6 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-lg md:text-xl font-bold text-dark dark:text-white">
               {format(currentDate, 'yyyy년 M월', { locale: ko })}
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button 
                 onClick={prevMonth}
-                className="p-2 hover:bg-tertiary dark:hover:bg-slate-800 rounded-full transition-all active:scale-90 cursor-pointer text-dark dark:text-white"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90 cursor-pointer text-dark dark:text-white"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={() => setCurrentDate(new Date())}
-                className="px-4 py-1.5 text-sm font-extrabold text-primary bg-primary/10 rounded-xl hover:bg-primary/20 transition-all active:scale-95 cursor-pointer"
+                className="px-3 py-1 text-xs font-bold text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-all active:scale-95 cursor-pointer"
               >
                 오늘
               </button>
               <button 
                 onClick={nextMonth}
-                className="p-2 hover:bg-tertiary dark:hover:bg-slate-800 rounded-full transition-all active:scale-90 cursor-pointer text-dark dark:text-white"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90 cursor-pointer text-dark dark:text-white"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={20} />
               </button>
             </div>
           </div>
 
           {/* Weekdays Header */}
-          <div className="grid grid-cols-7 border-b border-tertiary dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+          <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-850">
             {WEEK_DAYS.map((day, i) => (
               <div 
                 key={day} 
                 className={cn(
-                  "py-4 text-center text-sm font-extrabold",
-                  i === 0 ? "text-red-500" : i === 6 ? "text-blue-500" : "text-dark/40 dark:text-slate-500"
+                  "py-2.5 text-center text-[12px] md:text-xs font-bold",
+                  i === 0 ? "text-red-500" : i === 6 ? "text-blue-500" : "text-slate-400 dark:text-slate-500"
                 )}
               >
                 {day}
@@ -135,39 +135,39 @@ export default function Calendar() {
                   key={day.toString()}
                   onClick={() => setSelectedDate(day)}
                   className={cn(
-                    "min-h-[100px] md:min-h-[140px] p-2 border-b border-r border-tertiary dark:border-slate-800 cursor-pointer transition-all hover:bg-tertiary/30 dark:hover:bg-slate-800/50 flex flex-col items-start gap-1 relative group",
+                    "min-h-[64px] md:min-h-[96px] p-1.5 md:p-2 border-b border-r border-slate-100 dark:border-slate-800/80 cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 flex flex-col items-start gap-0.5 relative group",
                     (i + 1) % 7 === 0 && "border-r-0",
-                    !isCurrentMonth && "opacity-20 grayscale",
+                    !isCurrentMonth && "opacity-25 grayscale",
                     isSelected && "bg-primary/5 dark:bg-primary/10"
                   )}
                 >
                   <span className={cn(
-                    "size-8 flex items-center justify-center text-sm font-extrabold rounded-full transition-all",
-                    isTodayDate ? "bg-primary text-white shadow-lg shadow-primary/30" : "text-dark dark:text-white",
-                    isSelected && !isTodayDate && "ring-2 ring-primary bg-white dark:bg-slate-800"
+                    "size-5 md:size-6 flex items-center justify-center text-[11px] md:text-xs font-bold rounded-full transition-all",
+                    isTodayDate ? "bg-primary text-white shadow-xs" : "text-dark dark:text-white",
+                    isSelected && !isTodayDate && "ring-1.5 ring-primary bg-white dark:bg-slate-800"
                   )}>
                     {getDate(day)}
                   </span>
                   
-                  {/* Subscription Items (Step 3) */}
-                  <div className="w-full flex flex-col items-center md:items-start gap-1.5 mt-1 overflow-hidden">
-                    {getSubscriptionsForDay(day).slice(0, 3).map((sub) => (
+                  {/* Subscription Items */}
+                  <div className="w-full flex flex-col items-center md:items-start gap-1 mt-0.5 overflow-hidden">
+                    {getSubscriptionsForDay(day).slice(0, 2).map((sub) => (
                       <div 
                         key={sub.id} 
-                        className="flex items-center justify-center md:justify-start gap-1.5 w-full transition-transform group-hover:translate-x-0.5"
+                        className="flex items-center justify-center md:justify-start gap-1 w-full"
                       >
                         <div className={cn(
-                          "size-2 md:size-2.5 rounded-full shrink-0 shadow-sm",
+                          "size-1.5 md:size-2 rounded-full shrink-0",
                           CATEGORY_COLORS[sub.categories?.[0] || sub.category] || CATEGORY_COLORS.Etc
                         )} />
-                        <span className="hidden md:block text-[12px] font-extrabold text-dark/70 dark:text-slate-400 truncate">
+                        <span className="hidden md:block text-[11px] font-medium text-slate-600 dark:text-slate-400 truncate">
                           {sub.service_name}
                         </span>
                       </div>
                     ))}
-                    {getSubscriptionsForDay(day).length > 3 && (
-                      <p className="text-[12px] font-extrabold text-dark/30 dark:text-slate-500 md:pl-1 text-center md:text-left">
-                        + {getSubscriptionsForDay(day).length - 3}
+                    {getSubscriptionsForDay(day).length > 2 && (
+                      <p className="text-[10px] font-bold text-slate-400 md:pl-0.5 text-center md:text-left">
+                        +{getSubscriptionsForDay(day).length - 2}
                       </p>
                     )}
                   </div>
@@ -177,61 +177,62 @@ export default function Calendar() {
           </div>
         </div>
 
-        {/* Selected Date Info (Step 4) */}
-        <div className="w-full mt-6 flex flex-col gap-4">
-          <div className="flex flex-row items-center justify-between gap-2 px-2">
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-              <h3 className="text-lg md:text-xl font-extrabold text-dark dark:text-white whitespace-nowrap">
+        {/* Selected Date Info */}
+        <div className="w-full mt-2 flex flex-col gap-3">
+          <div className="flex flex-row items-center justify-between gap-2 px-1">
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+              <h3 className="text-base md:text-lg font-bold text-dark dark:text-white whitespace-nowrap">
                 {format(selectedDate, 'M월 d일', { locale: ko })} 결제 예정
               </h3>
-              <span className="text-[12px] md:text-sm font-extrabold text-primary bg-primary/10 px-3 py-1 rounded-full w-fit">
+              <span className="text-[11px] md:text-xs font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full w-fit">
                 총 {getSubscriptionsForDay(selectedDate).length}건
               </span>
             </div>
             
             <button 
               onClick={() => openModal({ billing_date: `${getDate(selectedDate)}` })}
-              className="h-[44px] md:h-[52px] px-5 md:px-8 bg-primary text-white rounded-[16px] md:rounded-[20px] flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer group active:scale-95 shrink-0"
+              className="h-[36px] md:h-[38px] px-3.5 md:px-4 bg-primary text-white rounded-xl flex items-center justify-center gap-1 hover:bg-primary/90 transition-all shadow-xs shadow-primary/20 cursor-pointer active:scale-95 shrink-0"
             >
-              <Plus className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:rotate-90" />
-              <span className="font-extrabold text-[14px] md:text-[16px] whitespace-nowrap">이 날짜에 추가</span>
+              <Plus className="w-3.5 h-3.5 stroke-[2.5px]" />
+              <span className="font-bold text-[13px] md:text-[13.5px] whitespace-nowrap">추가</span>
             </button>
           </div>
 
           {getSubscriptionsForDay(selectedDate).length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 w-full">
               {getSubscriptionsForDay(selectedDate).map((sub) => (
                 <div 
                   key={sub.id} 
                   onClick={() => openModal(sub)}
-                  className="bg-white dark:bg-slate-900 border border-tertiary dark:border-slate-700 rounded-[24px] p-4 flex items-center justify-between hover:border-primary dark:hover:border-primary transition-all active:scale-[0.98] cursor-pointer group"
+                  className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3.5 flex items-center justify-between hover:border-primary transition-all active:scale-[0.99] cursor-pointer group shadow-xs"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <ServiceIcon 
                       serviceName={sub.service_name} 
                       category={sub.categories?.[0] || sub.category} 
                       size="md"
+                      className="shrink-0"
                     />
-                    <div className="flex flex-col">
-                      <p className="font-extrabold text-dark dark:text-white group-hover:text-primary transition-colors">
+                    <div className="flex flex-col min-w-0">
+                      <p className="font-bold text-dark dark:text-white group-hover:text-primary transition-colors text-[14px] truncate">
                         {sub.service_name}
                       </p>
-                      <p className="text-xs text-dark/40 dark:text-slate-500 font-bold uppercase tracking-tighter">
+                      <p className="text-[11px] text-slate-400 font-medium">
                         {sub.categories?.[0] || sub.category}
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <p className="font-extrabold text-dark dark:text-white">
+                  <div className="flex flex-col items-end shrink-0 pl-2">
+                    <p className="font-bold text-dark dark:text-white text-[14px]">
                       {sub.price.toLocaleString()}원
                     </p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1 mt-0.5">
                       {sub.billing_cycle === 'yearly' && (
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-md font-extrabold">
+                        <span className="text-[9.5px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-1 py-0.2 rounded font-bold">
                           연간
                         </span>
                       )}
-                      <p className="text-[12px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-extrabold">
+                      <p className="text-[11px] text-slate-400 font-medium truncate max-w-[80px]">
                         {sub.payment_method}
                       </p>
                     </div>
@@ -240,16 +241,16 @@ export default function Calendar() {
               ))}
               
               {/* Daily Total Summary Card */}
-              <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-5 flex items-center justify-between">
-                <p className="font-extrabold text-primary">이날의 합계</p>
-                <p className="text-xl md:text-2xl font-extrabold text-primary">
+              <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl p-3.5 flex items-center justify-between">
+                <p className="font-bold text-[13.5px] text-primary">이날의 합계</p>
+                <p className="text-base md:text-lg font-extrabold text-primary">
                   {getSubscriptionsForDay(selectedDate).reduce((acc, sub) => acc + sub.price, 0).toLocaleString()}원
                 </p>
               </div>
             </div>
           ) : (
-            <div className="w-full py-16 flex flex-col items-center justify-center gap-2 bg-tertiary/10 dark:bg-slate-800/20 rounded-[32px] border-2 border-dashed border-tertiary dark:border-slate-800">
-              <p className="text-dark/30 dark:text-slate-500 font-extrabold text-lg">결제 예정된 항목이 없습니다.</p>
+            <div className="w-full py-10 flex flex-col items-center justify-center gap-1 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
+              <p className="text-slate-400 font-medium text-sm">결제 예정된 항목이 없습니다.</p>
             </div>
           )}
         </div>
@@ -258,7 +259,7 @@ export default function Calendar() {
         <PaymentBriefing 
           currentDate={currentDate} 
           showDetailsList={true} 
-          className="mt-8 border-t border-tertiary dark:border-slate-700 pt-8"
+          className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-6"
         />
       </div>
     </div>
