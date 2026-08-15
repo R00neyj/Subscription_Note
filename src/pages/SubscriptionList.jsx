@@ -124,6 +124,9 @@ export default function SubscriptionList() {
       }, 0)
   }, [sortedSubscriptions])
 
+  // Yearly estimated cost
+  const yearlyCost = totalCost * 12
+
   return (
     <div className="flex flex-col min-h-full">
       <Header />
@@ -141,18 +144,40 @@ export default function SubscriptionList() {
           </div>
         </div>
 
-        {/* Summary Card */}
-        <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full max-w-[200px] shrink-0 transition-all duration-300">
-          <p className="text-[13px] md:text-[15px] font-bold text-primary/70 leading-none mb-1">
-            {selectedCategory === 'all' 
-              ? '총 구독료' 
-              : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} 구독료`}
-          </p>
-          <div className="flex items-baseline gap-[2px]">
-            <span className="text-[22px] md:text-[28px] font-extrabold text-dark dark:text-white leading-none">
-              {totalCost.toLocaleString()}
-            </span>
-            <span className="text-[14px] md:text-[16px] font-bold text-dark/60 dark:text-slate-400">원</span>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-start w-full">
+          {/* 총 구독료 */}
+          <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[200px] transition-all duration-300">
+            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">
+              {selectedCategory === 'all' 
+                ? '총 구독료' 
+                : `${CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} 구독료`}
+            </p>
+            <div className="flex items-center gap-[3px]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+                {totalCost.toLocaleString()}
+              </span>
+              <div className="pt-1">
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 연간 예상 지출 */}
+          <div className="bg-background dark:bg-slate-900 border border-primary/20 dark:border-primary/40 rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-1 w-full md:max-w-[240px] transition-all duration-300">
+            <p className="text-[14px] md:text-[18px] font-bold text-primary leading-[1.4]">
+              {selectedCategory === 'all' 
+                ? '연간 예상 지출' 
+                : `${CATEGORIES.find(c => c.id === selectedCategory)?.label || ''} 연간 지출`}
+            </p>
+            <div className="flex items-center gap-[3px]">
+              <span className="text-[20px] md:text-[28px] font-bold text-dark dark:text-white leading-[1.4]">
+                {yearlyCost.toLocaleString()}
+              </span>
+              <div className="pt-1">
+                <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
+              </div>
+            </div>
           </div>
         </div>
 
