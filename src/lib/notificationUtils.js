@@ -1,5 +1,5 @@
-import { addDays, isSameDay, differenceInCalendarDays, startOfDay, startOfWeek, endOfWeek, eachDayOfInterval, isBefore, getDate } from 'date-fns'
-import { extractDayFromBillingDate, getNextPaymentDate } from './dateUtils'
+import { addDays, isSameDay, differenceInCalendarDays, startOfDay, startOfWeek, endOfWeek, eachDayOfInterval, isBefore } from 'date-fns'
+import { isSubscriptionDueOnDate, getNextPaymentDate } from './dateUtils'
 
 /**
  * 이번 주(월-일)의 모든 결제 일정을 가져옵니다.
@@ -14,8 +14,7 @@ export const getWeeklyUpcomingPayments = (subscriptions) => {
   return subscriptions
     .filter(sub => sub.status === 'active')
     .map(sub => {
-      const billingDay = extractDayFromBillingDate(sub.billing_date)
-      const matchDate = weekInterval.find(date => getDate(date) === billingDay)
+      const matchDate = weekInterval.find(date => isSubscriptionDueOnDate(sub, date))
       
       return {
         ...sub,
@@ -33,13 +32,13 @@ export const checkUpcomingPayments = (subscriptions) => {
 
   return subscriptions.filter(sub => {
     if (sub.status !== 'active') return false
-    const nextDate = getNextPaymentDate(sub.billing_date)
+    const nextDate = getNextPaymentDate(sub)
     if (!nextDate) return false
     
     // 오늘 또는 내일 결제일인지 확인
     return isSameDay(nextDate, today) || isSameDay(nextDate, tomorrow)
   }).map(sub => {
-    const nextDate = getNextPaymentDate(sub.billing_date)
+    const nextDate = getNextPaymentDate(sub)
     return {
       ...sub,
       isToday: isSameDay(nextDate, today)

@@ -3,12 +3,12 @@ import Header from '../components/Header'
 import SubscriptionTable from '../components/SubscriptionTable'
 import SectionHeader from '../components/SectionHeader'
 import CategoryDistributionChart from '../components/CategoryDistributionChart'
+import PaymentBriefing from '../components/PaymentBriefing'
 import { ChevronRight, AlertTriangle, TrendingDown, Info, Star, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { cn, attachParticle } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import NotificationBanner from '../components/NotificationBanner'
-import { getDashboardUpcomingInfo } from '../lib/notificationUtils'
 import { CATEGORY_COLORS, TEXT_COLORS, CATEGORIES } from '../constants/categories'
 import { OPPORTUNITY_COST_ITEMS } from '../constants/opportunityCosts'
 import { detectSubDomain } from '../constants/serviceSubDomains'
@@ -275,11 +275,6 @@ export default function Dashboard() {
     return subs.sort((a, b) => b.price - a.price)[0]
   })
 
-  // Upcoming Payments Info (Today or This Week)
-  const upcomingInfo = useMemo(() => {
-    return getDashboardUpcomingInfo(subscriptions)
-  }, [subscriptions])
-
   // Dynamic Category Data Calculation
   const categoryData = useMemo(() => {
     const activeSubs = subscriptions.filter(s => s.status === 'active')
@@ -333,7 +328,7 @@ export default function Dashboard() {
           className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-4 items-start w-full"
         >
           {/* 총 구독료 */}
-          <div 
+          <motion.div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
@@ -348,7 +343,7 @@ export default function Dashboard() {
                 <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
               </div>
             </div>
-          </div>
+          </motion.div>
           
           {/* 구독중인 서비스 */}
           <motion.div 
@@ -386,7 +381,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* 연간 예상 지출 */}
-          <div 
+          <motion.div 
             variants={cardHover}
             whileHover="hover"
             whileTap="tap"
@@ -401,29 +396,12 @@ export default function Dashboard() {
                 <span className="text-[14px] md:text-[18px] font-medium text-dark dark:text-slate-200 leading-[1.4]">원</span>
               </div>
             </div>
-          </div>
+          </motion.div>
+        </motion.div>
 
-          {/* 곧 결제될 구독 (배너형) */}
-          {upcomingInfo && (
-            <motion.div 
-              variants={itemVariants}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => navigate('/calendar')}
-              className="col-span-2 w-full bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-[24px] px-5 py-4 md:py-6 flex items-center justify-between cursor-pointer group mt-2 transition-colors duration-300"
-            >
-              <div className="flex items-center gap-3 md:gap-4 text-primary">
-                <span className="text-[15px] md:text-[18px] font-extrabold">
-                  {upcomingInfo.type === 'today' ? '오늘' : '이번 주'} 결제 예정: <span className="text-[17px] md:text-[20px] ml-1">{upcomingInfo.items.length}건</span>
-                </span>
-                <span className="text-primary/30 font-light">|</span>
-                <span className="text-[15px] md:text-[18px] font-extrabold">
-                  합계 <span className="text-[17px] md:text-[20px] ml-1">{upcomingInfo.items.reduce((acc, cur) => acc + cur.price, 0).toLocaleString()}원</span>
-                </span>
-              </div>
-              <ChevronRight className="text-primary group-hover:translate-x-1 transition-transform duration-300" size={24} />
-            </motion.div>
-          )}
+        {/* Payment Briefing Section (월간 구독 리포트 아래, 구독 최적화 리포트 위) */}
+        <motion.div variants={itemVariants} className="mt-2 flex flex-col items-start w-full">
+          <PaymentBriefing showDetailsList={false} />
         </motion.div>
 
         {/* Optimization Insights Section */}
