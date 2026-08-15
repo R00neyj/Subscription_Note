@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -30,7 +30,8 @@ gsap.registerPlugin(ScrollTrigger)
 
 export default function Landing() {
   const navigate = useNavigate()
-  const setHasSeenLanding = useSubscriptionStore((state) => state.setHasSeenLanding)
+  const user = useSubscriptionStore((state) => state.user)
+  const setGuestAccess = useSubscriptionStore((state) => state.setGuestAccess)
   const signInWithGoogle = useSubscriptionStore((state) => state.signInWithGoogle)
   const themeMode = useSubscriptionStore((state) => state.themeMode)
   const setThemeMode = useSubscriptionStore((state) => state.setThemeMode)
@@ -284,14 +285,12 @@ export default function Landing() {
   }, { dependencies: [activeStep], scope: containerRef })
 
   const handleStartGuest = () => {
-    setHasSeenLanding(true)
+    setGuestAccess(true)
     navigate('/')
   }
 
   const handleGoogleLogin = async () => {
     await signInWithGoogle()
-    setHasSeenLanding(true)
-    navigate('/')
   }
 
   const toggleTheme = () => {
@@ -377,18 +376,20 @@ export default function Landing() {
               {isDark ? <Sun size={19} /> : <Moon size={19} />}
             </button>
 
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="hidden sm:inline-flex px-4 py-2.5 text-base font-bold text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-primary transition-colors cursor-pointer"
-            >
-              로그인
-            </button>
+            {!user && (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="hidden sm:inline-flex px-4 py-2.5 text-base font-bold text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-primary transition-colors cursor-pointer"
+              >
+                로그인
+              </button>
+            )}
 
             <button
               onClick={handleStartGuest}
               className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-base font-bold shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2"
             >
-              대시보드 시작
+              {user ? '대시보드로 이동' : '대시보드 시작'}
               <ArrowRight size={17} />
             </button>
           </div>
@@ -482,19 +483,31 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-primary hover:bg-primary/90 text-white font-extrabold text-[18px] shadow-xl shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
-            >
-              무료로 시작하기
-              <ArrowRight size={20} />
-            </button>
-            <button
-              onClick={handleStartGuest}
-              className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[18px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
-            >
-              로그인 없이 바로 체험
-            </button>
+            {user ? (
+              <button
+                onClick={() => navigate('/')}
+                className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-primary hover:bg-primary/90 text-white font-extrabold text-[18px] shadow-xl shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+              >
+                내 대시보드로 이동
+                <ArrowRight size={20} />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-primary hover:bg-primary/90 text-white font-extrabold text-[18px] shadow-xl shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  무료로 시작하기
+                  <ArrowRight size={20} />
+                </button>
+                <button
+                  onClick={handleStartGuest}
+                  className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[18px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
+                >
+                  로그인 없이 바로 체험
+                </button>
+              </>
+            )}
           </div>
 
           {/* Feature Tags */}
@@ -871,19 +884,31 @@ export default function Landing() {
           </div>
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="w-full sm:w-auto h-15 px-9 rounded-2xl bg-white text-slate-900 hover:bg-slate-50 font-extrabold text-[18px] shadow-lg shadow-black/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
-            >
-              <GoogleIcon size={22} />
-              Google 계정으로 시작
-            </button>
-            <button
-              onClick={handleStartGuest}
-              className="w-full sm:w-auto h-15 px-9 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-[18px] transition-all active:scale-95 cursor-pointer backdrop-blur-sm"
-            >
-              게스트로 바로 시작
-            </button>
+            {user ? (
+              <button
+                onClick={() => navigate('/')}
+                className="w-full sm:w-auto h-15 px-9 rounded-2xl bg-white text-slate-900 hover:bg-slate-50 font-extrabold text-[18px] shadow-lg shadow-black/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+              >
+                내 대시보드로 이동
+                <ArrowRight size={20} />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="w-full sm:w-auto h-15 px-9 rounded-2xl bg-white text-slate-900 hover:bg-slate-50 font-extrabold text-[18px] shadow-lg shadow-black/20 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  <GoogleIcon size={22} />
+                  Google 계정으로 시작
+                </button>
+                <button
+                  onClick={handleStartGuest}
+                  className="w-full sm:w-auto h-15 px-9 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-[18px] transition-all active:scale-95 cursor-pointer backdrop-blur-sm"
+                >
+                  게스트로 바로 시작
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>

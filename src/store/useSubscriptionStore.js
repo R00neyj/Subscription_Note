@@ -7,10 +7,23 @@ const useSubscriptionStore = create(
     (set, get) => ({
       subscriptions: [],
       isLoading: false,
+      isAuthLoading: true,
       user: null,
+      isGuest: typeof window !== 'undefined' ? sessionStorage.getItem('sublist_guest_access') === 'true' : false,
 
       // Auth Actions
       setUser: (user) => set({ user }),
+      setAuthLoading: (val) => set({ isAuthLoading: val }),
+      setGuestAccess: (val) => {
+        if (typeof window !== 'undefined') {
+          if (val) {
+            sessionStorage.setItem('sublist_guest_access', 'true')
+          } else {
+            sessionStorage.removeItem('sublist_guest_access')
+          }
+        }
+        set({ isGuest: !!val })
+      },
       
       signInWithGoogle: async () => {
         const redirectUrl = window.location.origin
@@ -27,7 +40,10 @@ const useSubscriptionStore = create(
       signOut: async () => {
         const { error } = await supabase.auth.signOut()
         if (!error) {
-          set({ user: null, subscriptions: [] })
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('sublist_guest_access')
+          }
+          set({ user: null, subscriptions: [], isGuest: false })
         }
       },
 
@@ -212,9 +228,12 @@ const useSubscriptionStore = create(
       themeMode: 'system', // 'light' | 'dark' | 'system'
       setThemeMode: (mode) => set({ themeMode: mode }),
 
-      // Landing State
+      // Landing / Guest State (하위 호환 유지)
       hasSeenLanding: false,
-      setHasSeenLanding: (val) => set({ hasSeenLanding: val }),
+      setHasSeenLanding: (val) => {
+        get().setGuestAccess(val)
+        set({ hasSeenLanding: !!val })
+      },
 
       // Tutorial State
       hasSeenTutorial: false,
@@ -248,7 +267,6 @@ const useSubscriptionStore = create(
         user: state.user,
         themeMode: state.themeMode,
         hasSeenTutorial: state.hasSeenTutorial,
-        hasSeenLanding: state.hasSeenLanding,
         notificationsEnabled: state.notificationsEnabled,
         ignoredDuplicates: state.ignoredDuplicates
       }), 
