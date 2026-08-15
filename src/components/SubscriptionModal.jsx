@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { X, Trash2, Star, ExternalLink, Globe, Ban, Bookmark, Sparkles, Check } from 'lucide-react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { X, Trash2, Star, ExternalLink, Globe, Ban, Bookmark, Sparkles, RefreshCw, Check } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
 import { SUBSCRIPTION_PRESETS, getServiceLinks } from '../constants/presets'
@@ -9,6 +9,7 @@ import ServiceIcon from './ServiceIcon'
 import { motion, AnimatePresence } from 'framer-motion'
 
 function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
+  const subscriptions = useSubscriptionStore((state) => state.subscriptions)
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
   const removeSubscription = useSubscriptionStore((state) => state.removeSubscription)
@@ -17,6 +18,7 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
   const isInitialWishlist = initialData?.status === 'wishlist' || (!isEditMode && defaultTab === 'wishlist')
 
   const [entryType, setEntryType] = useState(isInitialWishlist ? 'wishlist' : 'active')
+  const [upgradeFromId, setUpgradeFromId] = useState(initialData?.upgrade_from_id || null)
 
   const [formData, setFormData] = useState({
     service_name: initialData?.service_name || '',
@@ -29,10 +31,31 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
     trial_end_date: initialData?.trial_end_date || '',
     satisfaction: initialData?.satisfaction || 5,
     is_essential: initialData?.is_essential || false,
-    billing_cycle: initialData?.billing_cycle || 'monthly',
-    wish_priority: initialData?.wish_priority || 'medium',
-    memo: initialData?.memo || ''
+    billing_cycle: initialData?.billing_cycle || 'monthly'
   })
+
+  // Active Subscriptions for detecting upgrade match
+  const activeSubs = useMemo(() => {
+    return subscriptions.filter(s => s.status !== 'wishlist' && (!initialData || s.id !== initialData.id))
+  }, [subscriptions, initialData])
+
+  // Automatically detect if an existing active sub matches the current service name
+  const detectedMatchingSub = useMemo(() => {
+    if (entryType !== 'wishlist' || !formData.service_name.trim()) return null
+    const inputNorm = formData.service_name.trim().toLowerCase().replace(/\s+/g, '')
+    
+    return activeSubs.find(sub => {
+      const subNorm = sub.service_name.trim().toLowerCase().replace(/\s+/g, '')
+      return inputNorm.includes(subNorm) || subNorm.includes(inputNorm)
+    })
+  }, [entryType, formData.service_name, activeSubs])
+
+  // When a matching sub is detected for the first time on a new wishlist item, suggest it
+  useEffect(() => {
+    if (detectedMatchingSub && !isEditMode && upgradeFromId === null) {
+      setUpgradeFromId(detectedMatchingSub.id)
+    }
+  }, [detectedMatchingSub, isEditMode, upgradeFromId])
 
   // Autocomplete State
   const [suggestions, setSuggestions] = useState([])
@@ -113,9 +136,27 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
 
   const isWishlist = entryType === 'wishlist'
 
+  const selectedUpgradeSub = useMemo(() => {
+    if (!upgradeFromId) return null
+    return activeSubs.find(s => s.id === upgradeFromId)
+  }, [upgradeFromId, activeSubs])
+
+  // Calculate Net Delta preview
+  const netDeltaPreview = useMemo(() => {
+    if (!selectedUpgradeSub || !formData.price) return null
+    const currentMonthly = selectedUpgradeSub.billing_cycle === 'yearly' 
+      ? Math.floor(selectedUpgradeSub.price / 12) 
+      : selectedUpgradeSub.price
+    const newMonthly = formData.billing_cycle === 'yearly'
+      ? Math.floor(Number(formData.price) / 12)
+      : Number(formData.price)
+    
+    return newMonthly - currentMonthly
+  }, [selectedUpgradeSub, formData.price, formData.billing_cycle])
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!formData.service_name || !formData.price || !formData.category) return
+    if (!formData.service_name.trim() || formData.price === '' || isNaN(Number(formData.price)) || !formData.category) return
     
     // eslint-disable-next-line no-unused-vars
     const { category, ...rest } = formData
@@ -138,9 +179,8 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
       price: Number(formData.price),
       billing_date: isWishlist ? '' : formattedBillingDate,
       payment_method: isWishlist ? '' : (formData.payment_method || '미지정'),
-      trial_end_date: (!isWishlist && formData.is_free_trial) ? formData.trial_end_date : null,
-      wish_priority: isWishlist ? formData.wish_priority : undefined,
-      memo: isWishlist ? formData.memo : undefined
+      upgrade_from_id: isWishlist ? upgradeFromId : null,
+      trial_end_date: (!isWishlist && formData.is_free_trial) ? formData.trial_end_date : null
     }
 
     if (isEditMode) {
@@ -309,6 +349,65 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
             </AnimatePresence>
           </div>
 
+          {/* 1-1. Plan Upgrade / Replacement Switcher (Wishlist Only) */}
+          {isWishlist && (detectedMatchingSub || activeSubs.length > 0) && (
+            <div className="bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 rounded-[14px] p-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={!!upgradeFromId}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setUpgradeFromId(detectedMatchingSub ? detectedMatchingSub.id : (activeSubs[0]?.id || null))
+                      } else {
+                        setUpgradeFromId(null)
+                      }
+                    }}
+                    className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer"
+                  />
+                  <span className="text-[13px] md:text-[13.5px] font-bold text-dark dark:text-white flex items-center gap-1">
+                    <RefreshCw className="w-3.5 h-3.5 text-primary dark:text-blue-400" />
+                    기존 구독 요금제/플랜 교체 고민
+                  </span>
+                </label>
+              </div>
+
+              {upgradeFromId && (
+                <div className="flex flex-col gap-2 pt-1 border-t border-blue-500/10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[12px] text-dark/60 dark:text-slate-400 font-medium shrink-0">
+                      교체 대상:
+                    </span>
+                    <select
+                      value={upgradeFromId || ''}
+                      onChange={(e) => setUpgradeFromId(e.target.value || null)}
+                      className="flex-1 h-[34px] px-2 bg-white dark:bg-slate-700 rounded-[8px] border border-blue-500/30 text-dark dark:text-white text-[13px] font-bold outline-none"
+                    >
+                      {activeSubs.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.service_name} ({s.price.toLocaleString()}원/{s.billing_cycle === 'yearly' ? '년' : '월'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {netDeltaPreview !== null && (
+                    <div className="flex items-center justify-between text-[12px] font-bold px-1 bg-white/70 dark:bg-slate-800/70 p-1.5 rounded-[8px]">
+                      <span className="text-dark/60 dark:text-slate-400">실제 추가 지출 (차액):</span>
+                      <span className={cn(
+                        "font-extrabold",
+                        netDeltaPreview > 0 ? "text-primary dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"
+                      )}>
+                        {netDeltaPreview > 0 ? `+${netDeltaPreview.toLocaleString()}원/월` : `${netDeltaPreview.toLocaleString()}원/월 (절감)`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 2. Category Selection */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] md:text-[14.5px] font-bold text-dark dark:text-white ml-1">
@@ -332,55 +431,6 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
               ))}
             </div>
           </div>
-
-          {/* Wishlist-specific: Priority & Memo */}
-          {isWishlist && (
-            <div className="flex flex-col gap-3 p-3.5 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-[16px]">
-              {/* Priority Selector */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] md:text-[14px] font-bold text-dark dark:text-white">
-                  구독 고민 우선순위
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'high', label: '높음 (곧 결제)', color: 'border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/30' },
-                    { id: 'medium', label: '보통 (저울질 중)', color: 'border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-950/30' },
-                    { id: 'low', label: '낮음 (단순 보관)', color: 'border-slate-400 text-slate-600 bg-slate-100 dark:bg-slate-800' }
-                  ].map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, wish_priority: p.id })}
-                      className={cn(
-                        "h-[36px] rounded-[10px] text-[12.5px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1",
-                        formData.wish_priority === p.id
-                          ? `${p.color} border-2 shadow-xs`
-                          : "bg-white dark:bg-slate-700/50 border-tertiary dark:border-slate-600 text-dark/60 dark:text-slate-400"
-                      )}
-                    >
-                      {formData.wish_priority === p.id && <Check className="w-3.5 h-3.5" />}
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Memo Input */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] md:text-[14px] font-bold text-dark dark:text-white">
-                  고민 메모 (선택)
-                </label>
-                <input
-                  type="text"
-                  maxLength="100"
-                  placeholder="예: 3월 프로모션 할인 확인 후 결제 예정, 친구와 공유 고민"
-                  className="w-full h-[40px] px-3 bg-white dark:bg-slate-700 rounded-[10px] outline-none border border-tertiary dark:border-slate-600 focus:border-amber-500 text-dark dark:text-white text-[13.5px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
-                  value={formData.memo}
-                  onChange={(e) => setFormData({ ...formData, memo: sanitizeInput(e.target.value) })}
-                />
-              </div>
-            </div>
-          )}
 
           {/* 3. Combined Row (Active only): Status, Free Trial, Essential Toggles */}
           {!isWishlist && (

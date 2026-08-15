@@ -111,18 +111,29 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
                                     {/* 카테고리 */}
                                     <td className="w-[100px] md:w-[15%] border-r border-black/5 dark:border-slate-700/50 text-center px-1 md:px-2">
                                         <div className="flex flex-wrap items-center justify-center gap-1 md:gap-1.5">
-                                            {item.categories?.map((cat) => (
-                                                <div
-                                                    key={cat}
-                                                    className="inline-flex items-center justify-center px-2 py-[4px] md:px-3 md:py-[6px] rounded-full bg-slate-100 dark:bg-slate-700 text-dark dark:text-slate-200 text-[11px] md:text-[13px] font-bold leading-none transition-all group-hover:bg-primary group-hover:text-white"
+                                            {item.categories && item.categories.length > 0 ? (
+                                                item.categories.map((cat) => (
+                                                    <span
+                                                        key={cat}
+                                                        className={cn(
+                                                            "inline-block px-2.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] md:text-[12.5px] font-bold leading-none",
+                                                            CATEGORY_COLORS[cat] || "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-200",
+                                                            TEXT_COLORS[cat] || "text-dark dark:text-white"
+                                                        )}
+                                                    >
+                                                        {cat}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span
+                                                    className={cn(
+                                                        "inline-block px-2.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] md:text-[12.5px] font-bold leading-none",
+                                                        CATEGORY_COLORS[item.category] || "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-200",
+                                                        TEXT_COLORS[item.category] || "text-dark dark:text-white"
+                                                    )}
                                                 >
-                                                    {cat}
-                                                </div>
-                                            ))}
-                                            {!item.categories && item.category && (
-                                                <div className="inline-flex items-center justify-center px-2 py-[4px] md:px-3 md:py-[6px] rounded-full bg-slate-100 dark:bg-slate-700 text-dark dark:text-slate-200 text-[11px] md:text-[13px] font-bold leading-none transition-all group-hover:bg-primary group-hover:text-white">
-                                                    {item.category}
-                                                </div>
+                                                    {item.category || "Etc"}
+                                                </span>
                                             )}
                                         </div>
                                     </td>

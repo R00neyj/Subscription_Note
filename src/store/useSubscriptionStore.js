@@ -107,9 +107,6 @@ const useSubscriptionStore = create(
       addSubscription: async (subscription) => {
         const currentUser = get().user
         
-        // eslint-disable-next-line no-unused-vars
-        const { category, ...dbSubscription } = subscription
-
         // Optimistic update
         const tempId = crypto.randomUUID()
         const newSub = { 
@@ -122,18 +119,28 @@ const useSubscriptionStore = create(
         // 로컬 상태에 즉시 추가 (최신순이므로 앞에 추가)
         set((state) => ({ subscriptions: [newSub, ...state.subscriptions] }))
 
-        // 로그인 상태라면 서버에 저장
+        // 로그인 상태라면 서버에 저장 (DB 컬럼 화이트리스트 필터링으로 스키마 에러 방지)
         if (currentUser) {
+          const allowedDbFields = [
+            'service_name', 'categories', 'price', 'billing_date', 'payment_method',
+            'status', 'is_free_trial', 'trial_end_date', 'satisfaction', 'is_essential',
+            'billing_cycle', 'created_at', 'user_id'
+          ]
+          const dbSubscription = Object.keys(subscription).reduce((acc, key) => {
+            if (allowedDbFields.includes(key)) acc[key] = subscription[key]
+            return acc
+          }, {})
+
           const { data, error } = await supabase
             .from('subscriptions')
             .insert([{ ...dbSubscription, user_id: currentUser.id }])
             .select()
           
           if (!error && data && data[0]) {
-            // 서버에서 생성된 실제 데이터(ID 포함)로 로컬 상태 업데이트
+            // 서버에서 생성된 실제 데이터(ID 포함)와 로컬 전용 필드를 결합하여 업데이트
             set((state) => ({
               subscriptions: state.subscriptions.map(sub => 
-                sub.id === tempId ? data[0] : sub
+                sub.id === tempId ? { ...newSub, ...data[0] } : sub
               )
             }))
           } else {
@@ -149,9 +156,6 @@ const useSubscriptionStore = create(
       updateSubscription: async (id, updates) => {
         const currentUser = get().user
 
-        // eslint-disable-next-line no-unused-vars
-        const { category, ...dbUpdates } = updates
-
         // 먼저 로컬 상태 업데이트 (낙관적)
         const previousSubs = get().subscriptions
         set((state) => ({
@@ -160,8 +164,18 @@ const useSubscriptionStore = create(
           )
         }))
 
-        // 로그인 상태라면 서버에 업데이트
+        // 로그인 상태라면 서버에 업데이트 (DB 컬럼 화이트리스트 필터링)
         if (currentUser) {
+          const allowedDbFields = [
+            'service_name', 'categories', 'price', 'billing_date', 'payment_method',
+            'status', 'is_free_trial', 'trial_end_date', 'satisfaction', 'is_essential',
+            'billing_cycle', 'created_at', 'user_id'
+          ]
+          const dbUpdates = Object.keys(updates).reduce((acc, key) => {
+            if (allowedDbFields.includes(key)) acc[key] = updates[key]
+            return acc
+          }, {})
+
           const { error } = await supabase
             .from('subscriptions')
             .update(dbUpdates)
@@ -216,11 +230,17 @@ const useSubscriptionStore = create(
       },
 
       // Wishlist Actions
-      promoteToActive: async (id, { billing_date, payment_method, ...additionalUpdates }) => {
+      promoteToActive: async (id, { billing_date, payment_method, replaceSubId, ...additionalUpdates }) => {
+        // 교체 대상 기존 구독이 있으면 비활성화(disable) 처리
+        if (replaceSubId) {
+          await get().updateSubscription(replaceSubId, { status: 'disable' })
+        }
+
         return get().updateSubscription(id, {
           status: 'active',
           billing_date: String(billing_date || '1'),
           payment_method: payment_method || '기타',
+          upgrade_from_id: null,
           ...additionalUpdates
         })
       },

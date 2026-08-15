@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { X, ArrowUpRight, Calendar, CreditCard, Sparkles } from 'lucide-react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { X, ArrowUpRight, Calendar, CreditCard, Sparkles, RefreshCw } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import ServiceIcon from './ServiceIcon'
 import { cn, sanitizeInput } from '../lib/utils'
@@ -7,11 +7,32 @@ import { cn, sanitizeInput } from '../lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 
 function PromoteModalContent({ item, onClose }) {
+  const subscriptions = useSubscriptionStore((state) => state.subscriptions)
   const promoteToActive = useSubscriptionStore((state) => state.promoteToActive)
+
+  const activeSubs = useMemo(() => {
+    return subscriptions.filter(s => s.status !== 'wishlist')
+  }, [subscriptions])
+
+  // Detect matching target sub to replace
+  const matchedExistingSub = useMemo(() => {
+    if (item.upgrade_from_id) {
+      const found = activeSubs.find(s => s.id === item.upgrade_from_id)
+      if (found) return found
+    }
+    const itemNorm = item.service_name.trim().toLowerCase().replace(/\s+/g, '')
+    return activeSubs.find(sub => {
+      const subNorm = sub.service_name.trim().toLowerCase().replace(/\s+/g, '')
+      return itemNorm.includes(subNorm) || subNorm.includes(itemNorm)
+    })
+  }, [item, activeSubs])
+
+  const [shouldReplace, setShouldReplace] = useState(!!matchedExistingSub)
+  const [selectedReplaceId, setSelectedReplaceId] = useState(matchedExistingSub?.id || null)
 
   const [formData, setFormData] = useState({
     billing_date: item.billing_date?.replace(/[^0-9]/g, '') || '',
-    payment_method: item.payment_method || '',
+    payment_method: item.payment_method || (matchedExistingSub?.payment_method || ''),
     satisfaction: 5
   })
 
@@ -64,7 +85,8 @@ function PromoteModalContent({ item, onClose }) {
     promoteToActive(item.id, {
       billing_date: formattedBillingDate,
       payment_method: formData.payment_method || '미지정',
-      satisfaction: formData.satisfaction
+      satisfaction: formData.satisfaction,
+      replaceSubId: shouldReplace ? selectedReplaceId : null
     })
 
     handleCloseInternal()
@@ -98,44 +120,67 @@ function PromoteModalContent({ item, onClose }) {
 
       {/* Content */}
       <div className="p-6 flex flex-col gap-4.5">
-        {/* Service Info Summary Card */}
-        <div className="flex items-center justify-between p-4 bg-tertiary/60 dark:bg-slate-700/50 rounded-[18px] border border-tertiary dark:border-slate-600">
-          <div className="flex items-center gap-3">
-            <ServiceIcon serviceName={item.service_name} category={item.category || item.categories?.[0]} size="md" />
-            <div className="flex flex-col">
-              <span className="font-bold text-dark dark:text-white text-[15px]">
+        {/* Item Summary Card */}
+        <div className="p-4 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-[20px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <ServiceIcon 
+              serviceName={item.service_name} 
+              category={item.categories?.[0] || item.category || 'Etc'} 
+              size="md" 
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-extrabold text-[16px] text-dark dark:text-white truncate">
                 {item.service_name}
               </span>
-              <span className="text-[12px] text-dark/50 dark:text-slate-400 font-medium">
-                {item.category || item.categories?.[0]} · {isMonthly ? '월간 결제' : '연간 결제'}
+              <span className="text-[12.5px] text-emerald-600 dark:text-emerald-400 font-bold">
+                {item.category || item.categories?.[0]} · {isMonthly ? '월간' : '연간'} 구독
               </span>
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-[16px] font-extrabold text-primary dark:text-blue-400">
+          <div className="text-right shrink-0">
+            <span className="text-[18px] font-extrabold text-dark dark:text-white block">
               {item.price?.toLocaleString()}원
-            </span>
-            <span className="text-[11px] text-dark/40 dark:text-slate-400 block font-medium">
-              /{isMonthly ? '월' : '년'}
             </span>
           </div>
         </div>
 
-        {/* Form */}
+        {/* Existing Sub Replacement Switcher (if detected) */}
+        {matchedExistingSub && (
+          <div className="p-3.5 bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 rounded-[16px] flex flex-col gap-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={shouldReplace}
+                onChange={(e) => setShouldReplace(e.target.checked)}
+                className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer"
+              />
+              <span className="text-[13px] font-bold text-dark dark:text-white flex items-center gap-1">
+                <RefreshCw className="w-3.5 h-3.5 text-primary dark:text-blue-400" />
+                기존 구독 [{matchedExistingSub.service_name}] 요금제 교체
+              </span>
+            </label>
+            {shouldReplace && (
+              <p className="text-[11.5px] text-dark/60 dark:text-slate-400 font-medium pl-6 leading-tight">
+                승격 완료 시 기존 <span className="font-bold text-dark dark:text-white">{matchedExistingSub.service_name}</span>({matchedExistingSub.price?.toLocaleString()}원)은 비활성화 처리되어 중복 결제를 방지합니다.
+              </p>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Billing Date Input */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13.5px] font-bold text-dark dark:text-white flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-primary" />
-              결제일 ({isMonthly ? '매달 일자' : '매년 날짜'}) <span className="text-red-500">*</span>
+            <label className="text-[13.5px] md:text-[14px] font-bold text-dark dark:text-white flex items-center gap-1.5 ml-0.5">
+              <Calendar className="w-4 h-4 text-emerald-500" />
+              결제일 지정 <span className="text-red-500">*</span>
             </label>
             <input
               required
               type="number"
               min="1"
               max={isMonthly ? 31 : 1231}
-              placeholder={isMonthly ? "일자 입력 (1 ~ 31)" : "MMDD 입력 (예: 0315)"}
-              className="w-full h-[44px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[15px] font-bold placeholder:text-dark/40 dark:placeholder:text-slate-400"
+              placeholder={isMonthly ? "결제 일자 (예: 25일이면 25)" : "MMDD 형식 (예: 0315)"}
+              className="w-full h-[46px] px-4 bg-tertiary dark:bg-slate-700 rounded-[14px] outline-none border-2 border-transparent focus:border-emerald-500 transition-all text-dark dark:text-white text-[15px] font-bold placeholder:text-dark/30 dark:placeholder:text-slate-500"
               value={formData.billing_date}
               onChange={(e) => setFormData({ ...formData, billing_date: e.target.value })}
               autoFocus
@@ -144,26 +189,26 @@ function PromoteModalContent({ item, onClose }) {
 
           {/* Payment Method Input */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13.5px] font-bold text-dark dark:text-white flex items-center gap-1.5">
-              <CreditCard className="w-4 h-4 text-primary" />
+            <label className="text-[13.5px] md:text-[14px] font-bold text-dark dark:text-white flex items-center gap-1.5 ml-0.5">
+              <CreditCard className="w-4 h-4 text-emerald-500" />
               결제 수단 (선택)
             </label>
             <input
               type="text"
               maxLength="20"
-              placeholder="예: 신한카드, 카카오페이, 토스뱅크"
-              className="w-full h-[44px] px-4 bg-tertiary dark:bg-slate-700 rounded-[12px] outline-none border-2 border-transparent focus:border-primary transition-all text-dark dark:text-white text-[14.5px] font-medium placeholder:text-dark/40 dark:placeholder:text-slate-400"
+              placeholder="예: 현대카드, 신한체크, 카카오페이"
+              className="w-full h-[46px] px-4 bg-tertiary dark:bg-slate-700 rounded-[14px] outline-none border-2 border-transparent focus:border-emerald-500 transition-all text-dark dark:text-white text-[15px] font-medium placeholder:text-dark/30 dark:placeholder:text-slate-500"
               value={formData.payment_method}
               onChange={(e) => setFormData({ ...formData, payment_method: sanitizeInput(e.target.value) })}
             />
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div className="flex gap-2.5 pt-2">
             <button
               type="button"
               onClick={handleCloseInternal}
-              className="h-[46px] px-4 bg-tertiary dark:bg-slate-700 hover:bg-tertiary/80 text-dark/70 dark:text-slate-300 rounded-[14px] font-bold text-[15px] transition-all cursor-pointer"
+              className="h-[48px] px-4 bg-tertiary dark:bg-slate-700 hover:bg-tertiary/80 text-dark/70 dark:text-slate-300 rounded-[14px] font-bold text-[15px] transition-all cursor-pointer"
             >
               취소
             </button>
@@ -171,13 +216,13 @@ function PromoteModalContent({ item, onClose }) {
               type="submit"
               disabled={!isFormValid}
               className={cn(
-                "flex-1 h-[46px] rounded-[14px] font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all shadow-md",
+                "flex-1 h-[48px] rounded-[14px] font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all shadow-md",
                 isFormValid
-                  ? "bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-emerald-600/20"
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer shadow-emerald-500/20 active:scale-98"
                   : "bg-gray-200 dark:bg-slate-700 text-dark/30 dark:text-slate-500 cursor-not-allowed"
               )}
             >
-              <span>구독 시작 및 활성화</span>
+              <span>{shouldReplace ? '플랜 교체 및 구독 시작' : '구독 시작하기'}</span>
               <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>
@@ -188,11 +233,9 @@ function PromoteModalContent({ item, onClose }) {
 }
 
 export default function PromoteModal() {
-  const promoteModal = useSubscriptionStore((state) => state.promoteModal)
+  const isOpen = useSubscriptionStore((state) => state.promoteModal?.isOpen)
+  const item = useSubscriptionStore((state) => state.promoteModal?.item)
   const closePromoteModal = useSubscriptionStore((state) => state.closePromoteModal)
-
-  const item = promoteModal.item
-  const isOpen = promoteModal.isOpen
 
   return (
     <AnimatePresence>
@@ -201,13 +244,9 @@ export default function PromoteModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[110] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
+          className="fixed inset-0 z-[120] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
         >
-          <PromoteModalContent
-            key={item.id}
-            item={item}
-            onClose={closePromoteModal}
-          />
+          <PromoteModalContent item={item} onClose={closePromoteModal} />
         </motion.div>
       )}
     </AnimatePresence>

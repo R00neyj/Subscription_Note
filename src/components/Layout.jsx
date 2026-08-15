@@ -11,7 +11,7 @@ export default function Layout() {
   const modalData = useSubscriptionStore((state) => state.modal.data)
   const closeModal = useSubscriptionStore((state) => state.closeModal)
 
-  const showFAB = location.pathname === '/' || location.pathname === '/list'
+  const showFAB = location.pathname === '/' || location.pathname === '/list' || location.pathname === '/wishlist'
 
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] text-[14px] md:text-[16px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">

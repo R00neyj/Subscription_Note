@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { Bookmark } from 'lucide-react'
 import { cn } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { useEffectiveTheme } from '../hooks/useEffectiveTheme'
@@ -6,6 +7,7 @@ import { useEffectiveTheme } from '../hooks/useEffectiveTheme'
 const navItems = [
   { path: '/', activeIcon: '/name=home, fill=true.svg', inactiveIcon: '/name=home, fill=false.svg', label: '홈' },
   { path: '/list', activeIcon: '/name=subscribe, fill=true.svg', inactiveIcon: '/name=subscribe, fill=false.svg', label: '구독목록' },
+  { path: '/wishlist', isLucide: true, icon: Bookmark, label: '위시리스트' },
   { path: '/calendar', activeIcon: '/name=calendar, fill=true.svg', inactiveIcon: '/name=calendar, fill=false.svg', label: '캘린더' },
   { path: '/settings', activeIcon: '/name=settings, fill=true.svg', inactiveIcon: '/name=settings, fill=false.svg', label: '설정' },
 ]
@@ -29,7 +31,7 @@ export default function Navigation() {
 
   return (
     <nav id="step-nav-bottom" className="fixed bottom-0 left-0 right-0 bg-tertiary dark:bg-slate-950 md:sticky md:top-0 md:w-[90px] md:shrink-0 md:h-screen md:flex md:flex-col md:justify-between md:items-center md:py-6 md:pb-4 z-50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
-      <div className="flex md:flex-col items-center justify-around w-full md:w-auto md:space-y-10">
+      <div className="flex md:flex-col items-center justify-around w-full md:w-auto md:space-y-8">
         {/* btn (Add Button) */}
         <button 
           id="step-add-pc"
@@ -43,9 +45,11 @@ export default function Navigation() {
         </button>
 
         {/* Nav (Container for menu items) */}
-        <div className="flex md:flex-col w-full md:w-[56px] md:h-[195px] justify-around md:justify-start items-start p-0 relative">
+        <div className="flex md:flex-col w-full md:w-[56px] md:h-auto justify-around md:justify-start items-start p-0 relative md:gap-1.5">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
+            const IconComponent = item.icon
+
             return (
               <Link
                 key={item.path}
@@ -58,14 +62,25 @@ export default function Navigation() {
                   "flex items-center justify-center w-[56px] h-[32px] px-[16px] py-[4px] rounded-[32px] transition-all",
                   isActive ? "bg-primary shadow-md shadow-primary/20" : "group-hover:bg-white/50 dark:group-hover:bg-slate-700"
                 )}>
-                  <img 
-                    src={isActive ? item.activeIcon : item.inactiveIcon} 
-                    alt={item.label} 
-                    className={cn(
-                      "w-6 h-6 shrink-0 transition-all", 
-                      isActive ? "brightness-0 invert scale-110" : "dark:invert"
-                    )} 
-                  />
+                  {item.isLucide && IconComponent ? (
+                    <IconComponent 
+                      className={cn(
+                        "w-5 h-5 shrink-0 transition-all",
+                        isActive 
+                          ? "text-white fill-white scale-110" 
+                          : "text-dark/70 dark:text-slate-400 group-hover:text-dark dark:group-hover:text-white"
+                      )} 
+                    />
+                  ) : (
+                    <img 
+                      src={isActive ? item.activeIcon : item.inactiveIcon} 
+                      alt={item.label} 
+                      className={cn(
+                        "w-6 h-6 shrink-0 transition-all", 
+                        isActive ? "brightness-0 invert scale-110" : "dark:invert"
+                      )} 
+                    />
+                  )}
                 </div>
                 {/* Label */}
                 <span className={cn(

@@ -1,7 +1,7 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react"
 import { cn } from "../lib/utils"
 import { CATEGORY_COLORS, TEXT_COLORS } from "../constants/categories"
-import { Sparkles, Trash2, ArrowUpRight, MessageSquare, Clock } from "lucide-react"
+import { Sparkles, Trash2, ArrowUpRight, Clock, RefreshCw } from "lucide-react"
 import ServiceIcon from "./ServiceIcon"
 import useSubscriptionStore from "../store/useSubscriptionStore"
 
@@ -28,10 +28,11 @@ const SortableHeader = ({ label, sortKey, width, sortConfig, onSort, isLast = fa
   )
 }
 
-export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) {
+export default function WishlistTable({ data, activeSubs = [], onRowClick, sortConfig, onSort }) {
   const [parent] = useAutoAnimate()
   const openPromoteModal = useSubscriptionStore((state) => state.openPromoteModal)
   const removeSubscription = useSubscriptionStore((state) => state.removeSubscription)
+  const openModal = useSubscriptionStore((state) => state.openModal)
 
   const getDaysAgo = (createdAt) => {
     if (!createdAt) return 1
@@ -40,31 +41,17 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
     return Math.max(1, diffDays)
   }
 
-  const getPriorityBadge = (priority) => {
-    switch (priority) {
-      case 'high':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-[12px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-            높음
-          </span>
-        )
-      case 'low':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-[12px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-            낮음
-          </span>
-        )
-      case 'medium':
-      default:
-        return (
-          <span className="px-2.5 py-1 rounded-full text-[12px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            보통
-          </span>
-        )
+  const getMatchedUpgrade = (item) => {
+    if (item.upgrade_from_id) {
+      const found = activeSubs.find(s => s.id === item.upgrade_from_id)
+      if (found) return found
     }
+    const itemNorm = item.service_name.trim().toLowerCase().replace(/\s+/g, '')
+    return activeSubs.find(sub => {
+      const subNorm = sub.service_name.trim().toLowerCase().replace(/\s+/g, '')
+      return itemNorm.includes(subNorm) || subNorm.includes(itemNorm)
+    })
   }
-
-  const openModal = useSubscriptionStore((state) => state.openModal)
 
   if (data.length === 0) {
     return (
@@ -93,19 +80,18 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
     <div className="w-full relative">
       <div className="w-full overflow-hidden rounded-[24px] border border-tertiary dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-300 shadow-sm">
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full min-w-[750px] md:min-w-[900px] table-fixed border-collapse">
+          <table className="w-full min-w-[700px] md:min-w-[850px] table-fixed border-collapse">
             <thead className="bg-dark dark:bg-slate-950">
               <tr className="h-[54px]">
-                <th className="w-[45px] md:w-[5%] border-r border-white/10 dark:border-slate-800 px-2 text-center font-extrabold text-[13px] md:text-[15px] text-white">
+                <th className="w-[45px] md:w-[6%] border-r border-white/10 dark:border-slate-800 px-2 text-center font-extrabold text-[13px] md:text-[15px] text-white">
                   #
                 </th>
-                <SortableHeader label="서비스명" sortKey="service_name" width="w-[180px] md:w-[22%]" sortConfig={sortConfig} onSort={onSort} />
-                <SortableHeader label="카테고리" sortKey="category" width="w-[100px] md:w-[13%]" sortConfig={sortConfig} onSort={onSort} />
-                <SortableHeader label="예상 구독료" sortKey="price" width="w-[120px] md:w-[15%]" sortConfig={sortConfig} onSort={onSort} />
-                <SortableHeader label="우선순위" sortKey="wish_priority" width="w-[100px] md:w-[12%]" sortConfig={sortConfig} onSort={onSort} />
-                <SortableHeader label="고민 기간" sortKey="created_at" width="w-[110px] md:w-[13%]" sortConfig={sortConfig} onSort={onSort} />
-                <th className="w-[140px] md:w-[20%] text-center font-extrabold text-[13px] md:text-[15px] text-white">
-                  구독 전환 / 관리
+                <SortableHeader label="서비스명" sortKey="service_name" width="w-[200px] md:w-[28%]" sortConfig={sortConfig} onSort={onSort} />
+                <SortableHeader label="카테고리" sortKey="category" width="w-[120px] md:w-[16%]" sortConfig={sortConfig} onSort={onSort} />
+                <SortableHeader label="예상 구독료" sortKey="price" width="w-[150px] md:w-[22%]" sortConfig={sortConfig} onSort={onSort} />
+                <SortableHeader label="고민 기간" sortKey="created_at" width="w-[110px] md:w-[14%]" sortConfig={sortConfig} onSort={onSort} />
+                <th className="w-[130px] md:w-[14%] text-center font-extrabold text-[13px] md:text-[15px] text-white">
+                  구독 전환 / 삭제
                 </th>
               </tr>
             </thead>
@@ -114,6 +100,15 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
                 const daysAgo = getDaysAgo(item.created_at)
                 const isYearly = item.billing_cycle === 'yearly'
                 const monthlyPrice = isYearly ? Math.floor(item.price / 12) : item.price
+                const matchedUpgrade = getMatchedUpgrade(item)
+
+                let netDelta = null
+                if (matchedUpgrade) {
+                  const activeMonthly = matchedUpgrade.billing_cycle === 'yearly'
+                    ? Math.floor(matchedUpgrade.price / 12)
+                    : matchedUpgrade.price
+                  netDelta = monthlyPrice - activeMonthly
+                }
 
                 return (
                   <tr
@@ -122,26 +117,26 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
                     onClick={() => onRowClick && onRowClick(item)}
                   >
                     {/* 순번 */}
-                    <td className="w-[45px] md:w-[5%] border-r border-black/5 dark:border-slate-700/50 text-center font-medium text-dark/40 dark:text-slate-500 text-[13px] md:text-[15px]">
+                    <td className="w-[45px] md:w-[6%] border-r border-black/5 dark:border-slate-700/50 text-center font-medium text-dark/40 dark:text-slate-500 text-[13px] md:text-[15px]">
                       {index + 1}
                     </td>
 
-                    {/* 서비스명 + 메모 툴팁/아이콘 */}
-                    <td className="w-[180px] md:w-[22%] border-r border-black/5 dark:border-slate-700/50 px-4 md:px-5">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                    {/* 서비스명 */}
+                    <td className="w-[200px] md:w-[28%] border-r border-black/5 dark:border-slate-700/50 px-4 md:px-5">
+                      <div className="flex items-center gap-3 min-w-0">
                         <ServiceIcon 
                           serviceName={item.service_name} 
                           category={item.categories?.[0] || item.category || "Etc"} 
                           className="group-hover:scale-105 shrink-0 transition-transform"
                         />
                         <div className="flex flex-col min-w-0">
-                          <span className="font-bold text-dark dark:text-white text-[14px] md:text-[15px] truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          <span className="font-bold text-dark dark:text-white text-[14.5px] md:text-[15.5px] truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                             {item.service_name}
                           </span>
-                          {item.memo && (
-                            <span className="text-[12px] text-dark/40 dark:text-slate-400 truncate flex items-center gap-1 font-normal">
-                              <MessageSquare className="w-3 h-3 shrink-0 opacity-60" />
-                              {item.memo}
+                          {matchedUpgrade && (
+                            <span className="text-[11.5px] text-blue-600 dark:text-blue-400 font-bold truncate flex items-center gap-1">
+                              <RefreshCw className="w-3 h-3 shrink-0" />
+                              {matchedUpgrade.service_name} 플랜 교체
                             </span>
                           )}
                         </div>
@@ -149,9 +144,9 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
                     </td>
 
                     {/* 카테고리 */}
-                    <td className="w-[100px] md:w-[13%] border-r border-black/5 dark:border-slate-700/50 px-2 text-center">
+                    <td className="w-[120px] md:w-[16%] border-r border-black/5 dark:border-slate-700/50 px-2 text-center">
                       <span className={cn(
-                        "inline-block px-2.5 py-1 rounded-full text-[12px] font-bold",
+                        "inline-block px-3 py-1 rounded-full text-[12px] font-bold",
                         CATEGORY_COLORS[item.category || item.categories?.[0]] || "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-200",
                         TEXT_COLORS[item.category || item.categories?.[0]] || "text-dark dark:text-white"
                       )}>
@@ -159,33 +154,37 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
                       </span>
                     </td>
 
-                    {/* 예상 금액 */}
-                    <td className="w-[120px] md:w-[15%] border-r border-black/5 dark:border-slate-700/50 px-3 text-right">
+                    {/* 예상 금액 및 순차액(Delta) */}
+                    <td className="w-[150px] md:w-[22%] border-r border-black/5 dark:border-slate-700/50 px-4 text-right">
                       <div className="flex flex-col items-end">
-                        <span className="font-extrabold text-dark dark:text-white text-[14px] md:text-[15px]">
+                        <span className="font-extrabold text-dark dark:text-white text-[14.5px] md:text-[15.5px]">
                           {item.price?.toLocaleString()}원
                         </span>
-                        <span className="text-[11px] text-dark/40 dark:text-slate-400">
-                          {isYearly ? `(월 약 ${monthlyPrice.toLocaleString()}원)` : '/월'}
-                        </span>
+                        {netDelta !== null ? (
+                          <span className={cn(
+                            "text-[11px] font-extrabold",
+                            netDelta >= 0 ? "text-primary dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"
+                          )}>
+                            {netDelta >= 0 ? `(실제 추가: +${netDelta.toLocaleString()}원)` : `(절감: ${netDelta.toLocaleString()}원)`}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-dark/40 dark:text-slate-400">
+                            {isYearly ? `(월 약 ${monthlyPrice.toLocaleString()}원)` : '/월'}
+                          </span>
+                        )}
                       </div>
                     </td>
 
-                    {/* 우선순위 */}
-                    <td className="w-[100px] md:w-[12%] border-r border-black/5 dark:border-slate-700/50 px-2 text-center">
-                      {getPriorityBadge(item.wish_priority)}
-                    </td>
-
                     {/* 고민 기간 */}
-                    <td className="w-[110px] md:w-[13%] border-r border-black/5 dark:border-slate-700/50 px-2 text-center">
-                      <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-dark/60 dark:text-slate-300">
+                    <td className="w-[110px] md:w-[14%] border-r border-black/5 dark:border-slate-700/50 px-2 text-center">
+                      <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-dark/70 dark:text-slate-300">
                         <Clock className="w-3.5 h-3.5 text-amber-500" />
                         {daysAgo === 1 ? '오늘 담음' : `${daysAgo}일차`}
                       </span>
                     </td>
 
                     {/* 액션 (구독 전환 / 삭제) */}
-                    <td className="w-[140px] md:w-[20%] px-3 text-center">
+                    <td className="w-[130px] md:w-[14%] px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
@@ -193,7 +192,7 @@ export default function WishlistTable({ data, onRowClick, sortConfig, onSort }) 
                           className="h-[34px] px-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white rounded-[10px] text-[12.5px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
                           title="실제 구독으로 전환 및 결제일 입력"
                         >
-                          <span>구독 시작</span>
+                          <span>{matchedUpgrade ? '교체 승격' : '구독 시작'}</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </button>
                         <button

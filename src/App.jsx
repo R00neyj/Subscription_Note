@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import SubscriptionList from './pages/SubscriptionList'
+import Wishlist from './pages/Wishlist'
 import Calendar from './pages/Calendar'
 import Settings from './pages/Settings'
 import SearchResults from './pages/SearchResults'
@@ -90,6 +91,7 @@ export default function App() {
         <Route element={canAccessApp ? <Layout /> : <Navigate to="/landing" replace />}>
           <Route index element={<Dashboard />} />
           <Route path="list" element={<SubscriptionList />} />
+          <Route path="wishlist" element={<Wishlist />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="settings" element={<Settings />} />
           <Route path="search" element={<SearchResults />} />
