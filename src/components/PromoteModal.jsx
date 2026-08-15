@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { X, ArrowUpRight, Calendar, CreditCard, Sparkles, RefreshCw } from 'lucide-react'
+import { X, ArrowUpRight, Calendar, CreditCard, Sparkles, RefreshCw, Globe, Ban, ExternalLink } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import ServiceIcon from './ServiceIcon'
+import { getServiceLinks } from '../constants/presets'
 import { cn, sanitizeInput } from '../lib/utils'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
@@ -35,6 +36,10 @@ function PromoteModalContent({ item, onClose }) {
     payment_method: item.payment_method || (matchedExistingSub?.payment_method || ''),
     satisfaction: 5
   })
+
+  // Service Links
+  const newServiceLinks = getServiceLinks(item.service_name)
+  const oldServiceLinks = matchedExistingSub ? getServiceLinks(matchedExistingSub.service_name) : {}
 
   // Mobile Back button support
   const pushedRef = useRef(false)
@@ -98,7 +103,7 @@ function PromoteModalContent({ item, onClose }) {
       animate={window.innerWidth < 768 ? { y: 0 } : { scale: 1, opacity: 1 }}
       exit={window.innerWidth < 768 ? { y: "100%" } : { scale: 0.9, opacity: 0 }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="bg-white dark:bg-slate-800 w-full md:max-w-[460px] rounded-t-[28px] md:rounded-[28px] overflow-hidden border-none md:border border-tertiary dark:border-slate-700 shadow-2xl flex flex-col transition-colors"
+      className="bg-white dark:bg-slate-800 w-full md:max-w-[480px] rounded-t-[28px] md:rounded-[28px] overflow-hidden border-none md:border border-tertiary dark:border-slate-700 shadow-2xl flex flex-col transition-colors"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-tertiary dark:border-slate-700 shrink-0">
@@ -119,7 +124,7 @@ function PromoteModalContent({ item, onClose }) {
       </div>
 
       {/* Content */}
-      <div className="p-6 flex flex-col gap-4.5">
+      <div className="p-6 flex flex-col gap-4">
         {/* Item Summary Card */}
         <div className="p-4 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-[20px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -144,6 +149,43 @@ function PromoteModalContent({ item, onClose }) {
           </div>
         </div>
 
+        {/* Quick Website Navigation Bar for Immediate Action */}
+        {(newServiceLinks.subscribe_url || oldServiceLinks.cancel_url) && (
+          <div className="grid grid-cols-2 gap-2">
+            {newServiceLinks.subscribe_url ? (
+              <a
+                href={newServiceLinks.subscribe_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-[38px] px-3 rounded-[12px] bg-primary/10 hover:bg-primary text-primary hover:text-white dark:bg-slate-700/80 dark:text-blue-300 dark:hover:bg-primary dark:hover:text-white border border-primary/20 hover:border-primary flex items-center justify-center gap-1.5 font-bold text-[12.5px] transition-all cursor-pointer group shrink-0"
+                title={`${item.service_name} 공식 홈페이지 및 결제 페이지 새 창 열기`}
+              >
+                <Globe className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">공식 결제 페이지</span>
+                <ExternalLink className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100" />
+              </a>
+            ) : (
+              <div />
+            )}
+
+            {shouldReplace && (oldServiceLinks.cancel_url || oldServiceLinks.subscribe_url) ? (
+              <a
+                href={oldServiceLinks.cancel_url || oldServiceLinks.subscribe_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-[38px] px-3 rounded-[12px] bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 hover:text-white dark:hover:text-white dark:bg-slate-700/80 border border-rose-500/20 hover:border-rose-500 flex items-center justify-center gap-1.5 font-bold text-[12.5px] transition-all cursor-pointer group shrink-0"
+                title={`기존 ${matchedExistingSub?.service_name} 구독 해지/관리 페이지 새 창 열기`}
+              >
+                <Ban className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">기존 플랜 해지/관리</span>
+                <ExternalLink className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100" />
+              </a>
+            ) : (
+              <div />
+            )}
+          </div>
+        )}
+
         {/* Existing Sub Replacement Switcher (if detected) */}
         {matchedExistingSub && (
           <div className="p-3.5 bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 rounded-[16px] flex flex-col gap-2">
@@ -167,7 +209,7 @@ function PromoteModalContent({ item, onClose }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           {/* Billing Date Input */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[13.5px] md:text-[14px] font-bold text-dark dark:text-white flex items-center gap-1.5 ml-0.5">
