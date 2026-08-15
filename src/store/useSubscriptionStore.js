@@ -215,14 +215,29 @@ const useSubscriptionStore = create(
         }
       },
 
+      // Wishlist Actions
+      promoteToActive: async (id, { billing_date, payment_method, ...additionalUpdates }) => {
+        return get().updateSubscription(id, {
+          status: 'active',
+          billing_date: String(billing_date || '1'),
+          payment_method: payment_method || '기타',
+          ...additionalUpdates
+        })
+      },
+
       // UI State
       searchQuery: '',
       setSearchQuery: (query) => set({ searchQuery: query }),
 
       // Modal State
-      modal: { isOpen: false, data: null },
-      openModal: (data = null) => set(() => ({ modal: { isOpen: true, data } })),
-      closeModal: () => set(() => ({ modal: { isOpen: false, data: null } })),
+      modal: { isOpen: false, data: null, defaultTab: 'active' },
+      openModal: (data = null, defaultTab = 'active') => set(() => ({ modal: { isOpen: true, data, defaultTab } })),
+      closeModal: () => set(() => ({ modal: { isOpen: false, data: null, defaultTab: 'active' } })),
+
+      // Promote Modal State (위시리스트 -> 구독 승격 전용)
+      promoteModal: { isOpen: false, item: null },
+      openPromoteModal: (item) => set(() => ({ promoteModal: { isOpen: true, item } })),
+      closePromoteModal: () => set(() => ({ promoteModal: { isOpen: false, item: null } })),
 
       // Theme State
       themeMode: 'system', // 'light' | 'dark' | 'system'

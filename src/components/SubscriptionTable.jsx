@@ -25,7 +25,6 @@ const SortableHeader = ({ label, sortKey, width, sortConfig, onSort, isLast = fa
 };
 
 export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort }) {
-    // eslint-disable-next-line no-unused-vars
     const [parent] = useAutoAnimate(/* config */);
 
     return (
@@ -162,22 +161,31 @@ export default function SubscriptionTable({ data, onRowClick, sortConfig, onSort
                                                     <CalendarDays size={16} md:size={18} strokeWidth={2.5} />
                                                 </div>
                                             )}
-                                            {/* 활성화/비활성화 상태도 동일한 사각형 배지 스타일로 통일 */}
-                                            <div
-                                                title={item.status === "active" ? "구독 중" : "비활성"}
-                                                className={cn(
-                                                    "flex items-center justify-center size-[24px] md:size-[28px] rounded-[8px] transition-all duration-300 shrink-0",
-                                                    item.status === "active" 
-                                                        ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/10"
-                                                        : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
-                                                )}
-                                            >
-                                                {item.status === "active" ? (
-                                                    <Check size={16} md:size={18} strokeWidth={3} />
-                                                ) : (
-                                                    <Minus size={16} md:size={18} strokeWidth={3} />
-                                                )}
-                                            </div>
+                                            {/* 활성화/비활성화/위시리스트 상태 배지 */}
+                                            {item.status === "wishlist" ? (
+                                                <div
+                                                    title="위시리스트 (고민 중)"
+                                                    className="flex items-center justify-center size-[24px] md:size-[28px] rounded-[8px] bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shrink-0"
+                                                >
+                                                    <span className="text-[11px] font-black">W</span>
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    title={item.status === "active" ? "구독 중" : "비활성"}
+                                                    className={cn(
+                                                        "flex items-center justify-center size-[24px] md:size-[28px] rounded-[8px] transition-all duration-300 shrink-0",
+                                                        item.status === "active" 
+                                                            ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/10"
+                                                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
+                                                    )}
+                                                >
+                                                    {item.status === "active" ? (
+                                                        <Check size={16} md:size={18} strokeWidth={3} />
+                                                    ) : (
+                                                        <Minus size={16} md:size={18} strokeWidth={3} />
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

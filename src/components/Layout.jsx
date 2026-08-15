@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import Navigation from './Navigation'
 import SubscriptionModal from './SubscriptionModal'
+import PromoteModal from './PromoteModal'
 import FloatingActionButton from './FloatingActionButton'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 
@@ -34,6 +35,9 @@ export default function Layout() {
         initialData={modalData}
         key={modalData ? `edit-${modalData.id}` : 'new'} 
       />
+
+      {/* Promote Modal (Wishlist -> Active) */}
+      <PromoteModal />
     </div>
   )
 }

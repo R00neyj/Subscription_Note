@@ -192,9 +192,9 @@ export default function Dashboard() {
     setSelectedCategory(prev => prev === categoryId ? null : categoryId)
   }
 
-  // Sort Logic (Same as SubscriptionList)
+  // Sort Logic (Same as SubscriptionList, Active & Disabled only)
   const sortedSubscriptions = useMemo(() => {
-    let data = [...subscriptions]
+    let data = subscriptions.filter(s => s.status !== 'wishlist')
 
     // 1. Filter by Selected Category
     if (selectedCategory) {
