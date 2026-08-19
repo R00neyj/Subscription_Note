@@ -110,13 +110,17 @@ export default function Calendar() {
           </div>
 
           {/* Weekdays Header */}
-          <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-850">
+          <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
             {WEEK_DAYS.map((day, i) => (
               <div 
                 key={day} 
                 className={cn(
                   "py-2.5 text-center text-[12px] md:text-xs font-bold",
-                  i === 0 ? "text-red-500" : i === 6 ? "text-blue-500" : "text-slate-400 dark:text-slate-500"
+                  // 다크에서는 한 단계 밝은 쪽으로 간다. slate-500 은 slate-900 배경에서
+                  // 대비 3.75:1 로 WCAG AA(4.5:1) 에 못 미쳐 회색으로 뭉개져 보였다.
+                  i === 0 ? "text-red-500 dark:text-red-400"
+                    : i === 6 ? "text-blue-500 dark:text-blue-400"
+                    : "text-slate-500 dark:text-slate-400"
                 )}
               >
                 {day}

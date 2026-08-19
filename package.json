@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-guides.mjs",
+    "build": "node scripts/check-tailwind-classes.mjs && vite build && node scripts/generate-guides.mjs",
     "lint": "eslint .",
+    "check:tw": "node scripts/check-tailwind-classes.mjs",
     "preview": "vite preview",
     "build:guides": "node scripts/generate-guides.mjs",
     "og:image": "node scripts/generate-og-image.mjs"

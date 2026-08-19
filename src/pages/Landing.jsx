@@ -970,7 +970,7 @@ export default function Landing() {
             <div className="space-y-3.5">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-extrabold text-base flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+                className="w-full h-14 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-extrabold text-base flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               >
                 <GoogleIcon size={22} />
                 Google 계정으로 계속하기

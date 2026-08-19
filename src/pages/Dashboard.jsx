@@ -795,7 +795,7 @@ export default function Dashboard() {
 
                       {/* Ignored duplicates restoration footer */}
                       {ignoredDuplicates.length > 0 && (
-                        <motion.div variants={itemVariants} className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-850 rounded-[18px] text-slate-500 text-[12px] border border-slate-200/50 dark:border-slate-750">
+                        <motion.div variants={itemVariants} className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/50 rounded-[18px] text-slate-500 text-[12px] border border-slate-200/50 dark:border-slate-700">
                           <span>알림 제외된 중복 그룹: <strong className="text-dark dark:text-slate-300">{ignoredDuplicates.length}개</strong></span>
                           <button
                             type="button"

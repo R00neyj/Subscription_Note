@@ -96,7 +96,7 @@ export default function WishlistTable({
       {/* 1. Mobile List View (md 미만: 가로 스크롤 없는 콤팩트 카드 리스트) */}
       <div className="md:hidden flex flex-col w-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/80 shadow-xs" ref={parent}>
         {/* Mobile Header Toolbar for Bulk Select */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
           <div 
             onClick={() => onToggleSelectAllWish && onToggleSelectAllWish()}
             className="flex items-center gap-2 cursor-pointer select-none"
