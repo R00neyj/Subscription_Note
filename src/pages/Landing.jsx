@@ -942,7 +942,7 @@ export default function Landing() {
             href="/guide/"
             className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary underline underline-offset-4 transition-colors"
           >
-            넷플릭스·유튜브 등 152개 서비스 구독 해지 방법 모음
+            넷플릭스·유튜브 등 126개 서비스 구독 해지 방법 모음
           </a>
         </p>
         <p>© 2026 구독노트. 계좌 연동 없는 구독 관리 도구.</p>
