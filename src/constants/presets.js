@@ -994,7 +994,9 @@ const RAW_PRESETS = [
   {
     nameKo: "줌 프로",
     nameEn: "Zoom Pro",
-    price: 19833,
+    // 공식 페이지가 VAT 제외로 표기(19,833원)해 다른 원화 항목과 기준이 어긋나 있었다.
+    // 실제 청구액에 맞춰 VAT 10% 를 더한 값으로 통일한다.
+    price: 21816,
     category: "Work",
     subscribe_url: "https://zoom.us/pricing",
     cancel_url: "https://zoom.us/billing",
@@ -1572,14 +1574,28 @@ const RAW_PRESETS = [
 export const USD_KRW = 1412
 export const FX_BASE_DATE = '2026-08-19'
 
+// 해외 전자적 용역(SaaS)에 붙는 부가가치세율.
+//
+// 해외 사업자의 요금 페이지에 적힌 달러 금액은 통상 세금 제외 표기이고, 한국 개인이
+// 결제하면 부가가치세법 제53조의2에 따라 10%가 더 붙는다. 반면 원화 공식가로 적는
+// 항목(넷플릭스, 챗GPT 등)은 총액표시제상 이미 VAT 가 포함된 값이다.
+// 두 기준이 섞이면 카드 명세서와 대조할 때 달러 항목만 10% 낮게 보이므로,
+// 여기서 VAT 를 더해 "실제 청구액" 기준으로 통일한다.
+//
+// 사업자등록번호를 등록한 B2B 결제는 면세되는 경우가 있으나, 이 앱은 개인 구독 관리를
+// 전제로 하므로 B2C(과세) 기준을 따른다.
+// 환율과 세금은 갱신 주기가 다르므로 USD_KRW 에 녹이지 않고 상수를 분리해 둔다.
+export const OVERSEAS_VAT_RATE = 0.1
+
 /**
- * 원화 공식가가 있는 서비스(넷플릭스, 챗GPT 등)는 `price` 를 직접 적는다.
- * 달러로만 청구되는 서비스는 `priceUsd` 만 적고 원화는 여기서 환산한다.
+ * 원화 공식가가 있는 서비스(넷플릭스, 챗GPT 등)는 `price` 를 직접 적는다(VAT 포함가).
+ * 달러로만 청구되는 서비스는 `priceUsd` 에 세전 정가만 적고, 원화 환산과 VAT 가산은
+ * 여기서 일괄 처리한다.
  */
 export const SUBSCRIPTION_PRESETS = RAW_PRESETS.map((preset) =>
   preset.priceUsd == null
     ? preset
-    : { ...preset, price: Math.round(preset.priceUsd * USD_KRW) }
+    : { ...preset, price: Math.round(preset.priceUsd * USD_KRW * (1 + OVERSEAS_VAT_RATE)) }
 )
 
 /**
