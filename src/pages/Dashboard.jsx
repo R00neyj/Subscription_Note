@@ -6,11 +6,11 @@ import CategoryDistributionChart from '../components/CategoryDistributionChart'
 import PaymentBriefing from '../components/PaymentBriefing'
 import { ChevronRight, AlertTriangle, TrendingDown, Info, Star, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { cn, attachParticle } from '../lib/utils'
+import { cn } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import NotificationBanner from '../components/NotificationBanner'
 import { CATEGORY_COLORS, TEXT_COLORS, CATEGORIES } from '../constants/categories'
-import { OPPORTUNITY_COST_ITEMS } from '../constants/opportunityCosts'
+import { buildWorkCost, getWagePreset, WAGE_PRESETS } from '../constants/laborCost'
 import { detectSubDomain } from '../constants/serviceSubDomains'
 import ServiceIcon from '../components/ServiceIcon'
 // eslint-disable-next-line no-unused-vars
@@ -58,6 +58,10 @@ export default function Dashboard() {
   const openModal = useSubscriptionStore((state) => state.openModal)
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
   const ignoredDuplicates = useSubscriptionStore((state) => state.ignoredDuplicates || [])
+  const hourlyWage = useSubscriptionStore((state) => state.hourlyWage)
+  const wagePresetId = useSubscriptionStore((state) => state.wagePresetId)
+  const setWagePreset = useSubscriptionStore((state) => state.setWagePreset)
+  const wageBasisLabel = getWagePreset(wagePresetId).basisLabel
   const ignoreDuplicateGroup = useSubscriptionStore((state) => state.ignoreDuplicateGroup)
   const resetIgnoredDuplicates = useSubscriptionStore((state) => state.resetIgnoredDuplicates)
 
@@ -144,35 +148,9 @@ export default function Dashboard() {
 
     const costData = periods.map(p => {
       const amount = monthlyTotal * p.mult
-      // Find best match for this amount
-      const match = [...OPPORTUNITY_COST_ITEMS].reverse().find(item => amount >= item.price) || OPPORTUNITY_COST_ITEMS[0]
-      
-      // Generate dynamic message based on price range with natural Korean particles
-      let message = ''
-      if (amount <= 0) {
-        message = '현재 정기 결제 중인 구독 서비스가 없습니다.'
-      } else {
-        const objWithEul = attachParticle(match.name, '을/를')
-        const count = Math.floor(amount / match.price)
-
-        if (match.price >= 100000000) {
-          message = `${objWithEul} 마련할 수 있는 거대한 목돈이에요.`
-        } else if (match.price >= 20000000) {
-          message = `통장에서 ${match.name} 한 대 값이 조용히 빠져나간 셈이에요.`
-        } else if (match.price >= 10000000) {
-          message = `벌써 ${objWithEul} 마련하고도 남을 만큼의 소중한 돈이에요.`
-        } else if (match.price >= 1000000) {
-          message = `벌써 ${objWithEul} 사고도 남을 만큼의 소중한 돈이에요.`
-        } else if (match.price >= 100000) {
-          message = `${objWithEul} 손에 넣을 수 있는 넉넉한 금액입니다.`
-        } else if (count > 1) {
-          message = `${objWithEul} 무려 ${count}번이나 즐길 수 있는 금액이에요.`
-        } else {
-          message = `${objWithEul} 즐길 수 있는 소중한 금액이에요.`
-        }
-      }
-
-      return { ...p, amount, match, message }
+      // 물건 비유 대신 "이 돈을 벌려면 며칠을 일해야 하나"로 환산한다.
+      // 기준 시급이 없으면 최저시급으로 폴백하므로 설정 없이도 항상 동작한다.
+      return { ...p, amount, work: buildWorkCost(amount, hourlyWage) }
     })
 
     return {
@@ -182,7 +160,17 @@ export default function Dashboard() {
       // Card default shows 3-year (index 2)
       defaultCost: costData.find(p => p.key === 'three') || costData[0]
     }
-  }, [subscriptions, ignoredDuplicates])
+  }, [subscriptions, ignoredDuplicates, hourlyWage])
+
+  // 모달은 열릴 당시의 스냅샷이 아니라 항상 현재 insights 를 본다.
+  // 그래야 기준 시급 칩을 누르거나 중복 알림을 끄는 즉시 화면에 반영된다.
+  const activeInsightData = useMemo(() => {
+    if (!activeInsight || !insights) return []
+    if (activeInsight.type === 'cost') return insights.costData
+    if (activeInsight.type === 'satisfaction') return insights.lowSatisfaction
+    if (activeInsight.type === 'duplicates') return insights.duplicates
+    return []
+  }, [activeInsight, insights])
 
   useEffect(() => {
     // 튜토리얼을 보지 않았다면 자동으로 시작 (약간의 지연 후)
@@ -368,10 +356,7 @@ export default function Dashboard() {
                 variants={cardHover}
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() => setActiveInsight({ 
-                  type: 'cost', 
-                  data: insights.costData
-                })}
+                onClick={() => setActiveInsight({ type: 'cost' })}
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden group shadow-xs"
               >
                 <div className="flex items-center gap-1.5 text-primary">
@@ -381,12 +366,12 @@ export default function Dashboard() {
                 <div className="flex flex-col gap-0.5 mt-0.5">
                   <div className="flex items-baseline gap-1">
                     <span className="text-[17px] md:text-[20px] font-bold text-dark dark:text-white group-hover:text-primary transition-colors">
-                      {insights.defaultCost.label} {insights.defaultCost.amount.toLocaleString()}
+                      {insights.defaultCost.periodLabel}이면 {insights.defaultCost.work.duration}
                     </span>
-                    <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">원</span>
+                    <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">치 근무</span>
                   </div>
                   <p className="text-[11.5px] md:text-[12.5px] text-red-500 font-bold line-clamp-1">
-                    {insights.defaultCost.match.icon} {insights.defaultCost.message}
+                    {insights.defaultCost.work.icon} {insights.defaultCost.work.message}
                   </p>
                 </div>
               </motion.div>
@@ -396,7 +381,7 @@ export default function Dashboard() {
                 variants={cardHover}
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() => setActiveInsight({ type: 'satisfaction', data: insights.lowSatisfaction })}
+                onClick={() => setActiveInsight({ type: 'satisfaction' })}
                 className={cn(
                   "bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border shadow-xs transition-colors",
                   insights.lowSatisfaction.length > 0 
@@ -430,7 +415,7 @@ export default function Dashboard() {
                 variants={cardHover}
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() => setActiveInsight({ type: 'duplicates', data: insights.duplicates })}
+                onClick={() => setActiveInsight({ type: 'duplicates' })}
                 className={cn(
                   "bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl p-3.5 md:p-4.5 flex flex-col items-start gap-1 w-full cursor-pointer overflow-hidden border shadow-xs transition-colors",
                   insights.duplicates.length > 0
@@ -487,7 +472,7 @@ export default function Dashboard() {
                 <div className="p-4 pt-5 pb-5 border-b border-tertiary dark:border-slate-700 flex items-center justify-between shrink-0">
                   <h3 className="text-[22px] font-bold text-dark dark:text-white">
                     {activeInsight.type === 'cost' && '장기 지출 분석'}
-                    {activeInsight.type === 'satisfaction' && (activeInsight.data.length > 0 ? '낮은 만족도 서비스' : '만족도 분석 결과')}
+                    {activeInsight.type === 'satisfaction' && (activeInsightData.length > 0 ? '낮은 만족도 서비스' : '만족도 분석 결과')}
                     {activeInsight.type === 'duplicates' && '비슷한 서비스 상세 분석'}
                   </h3>
                   <button 
@@ -508,17 +493,43 @@ export default function Dashboard() {
                       className="flex flex-col gap-4"
                     >
                       <motion.div variants={itemVariants} className="text-center space-y-2 mb-4 break-keep px-2">
-                        <p className="text-[13px] md:text-[14px] text-slate-500 font-bold">지금까지의 구독료를 모았다면?</p>
+                        <p className="text-[13px] md:text-[14px] text-slate-500 font-bold">이 구독료를 벌려면 얼마나 일해야 할까요?</p>
                         <h4 className="text-[20px] md:text-[22px] font-bold text-dark dark:text-white leading-[1.5]">
-                          작은 금액이라도 시간이 지나면<br/>
+                          구독료로 나가는 돈은 결국<br/>
                           <span className="text-primary font-extrabold underline decoration-primary/20 decoration-4 underline-offset-4 decoration-clone inline">
-                            상상 이상의 가치
-                          </span>가 됩니다.
+                            내가 일한 시간
+                          </span>입니다.
                         </h4>
                       </motion.div>
 
+                      {/* 기준 시급 선택 — 설정 페이지까지 가지 않아도 여기서 바로 바꾼다 */}
+                      <motion.div variants={itemVariants} className="flex flex-col items-center gap-2 -mt-2 mb-1">
+                        <p className="text-[11.5px] md:text-[12px] font-bold text-slate-400 dark:text-slate-500">
+                          내 소득 기준으로 다시 계산하기
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-1.5">
+                          {WAGE_PRESETS.map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => setWagePreset(preset.id)}
+                              className={cn(
+                                "px-3 py-1.5 text-[12px] font-bold rounded-full border transition-all cursor-pointer active:scale-95",
+                                wagePresetId === preset.id
+                                  ? "bg-primary text-white border-primary shadow-xs"
+                                  : "bg-slate-100 dark:bg-slate-800 border-transparent text-slate-500 dark:text-slate-400 hover:text-dark dark:hover:text-white"
+                              )}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold">
+                          {wageBasisLabel} · 1일 8시간 근무 환산
+                        </p>
+                      </motion.div>
+
                       <div className="grid grid-cols-1 gap-3">
-                        {activeInsight.data.map((item, i) => (
+                        {activeInsightData.map((item, i) => (
                           <motion.div 
                             key={i} 
                             variants={itemVariants}
@@ -535,19 +546,19 @@ export default function Dashboard() {
 
                             {/* Left: Icon Area */}
                             <div className="size-16 bg-white dark:bg-slate-900 rounded-[20px] flex items-center justify-center text-[32px] shrink-0 shadow-sm border border-primary/5">
-                              {item.match.icon}
+                              {item.work.icon}
                             </div>
 
                             {/* Right: Text Area */}
                             <div className="flex flex-col gap-0.5 pr-2 md:pr-16">
                               <span className="text-[13px] font-bold text-primary/60 uppercase tracking-tight">
-                                {item.periodLabel || item.label}만 모아도
+                                {item.periodLabel || item.label} 구독하면
                               </span>
                               <h5 className="text-[17px] md:text-[19px] font-extrabold text-dark dark:text-white leading-tight break-keep">
-                                {item.match.name}
+                                {item.work.headline}
                               </h5>
                               <p className="text-[12px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-                                {item.message}
+                                {item.work.message}
                               </p>
                             </div>
                           </motion.div>
@@ -556,7 +567,7 @@ export default function Dashboard() {
 
                       <motion.div variants={itemVariants} className="bg-amber-50 dark:bg-amber-950/20 rounded-[24px] p-5 border border-amber-100 dark:border-amber-900/30 mt-2 mb-2">
                         <p className="text-[13px] md:text-[14px] text-amber-700 dark:text-amber-400 leading-relaxed font-bold text-center break-keep">
-                          소액이라도 장기적으로는 꽤 큰 자산입니다.<br/>꼭 필요한 서비스만 남기고 나머지는 더 유용한 곳에 활용하는 게 좋습니다.
+                          매달 빠져나가는 금액은 작아 보여도, 결국 내 근무일로 갚고 있는 셈입니다.<br/>정말 그만큼 일할 가치가 있는 서비스만 남겨보세요.
                         </p>
                       </motion.div>
                     </motion.div>
@@ -569,7 +580,7 @@ export default function Dashboard() {
                       animate="visible"
                       className="space-y-4"
                     >
-                      {activeInsight.data.length > 0 ? (
+                      {activeInsightData.length > 0 ? (
                         <motion.div variants={itemVariants} className="bg-red-50 dark:bg-red-950/20 p-4 rounded-[20px] border border-red-100 dark:border-red-900/30 mb-2">
                           <p className="text-[14px] font-bold text-red-600 dark:text-red-400 text-center break-keep">
                             만족도가 낮은 서비스들을 발견했습니다.<br/>
@@ -585,7 +596,7 @@ export default function Dashboard() {
                         </motion.div>
                       )}
 
-                      {activeInsight.data.map(sub => (
+                      {activeInsightData.map(sub => (
                         <motion.div 
                           key={sub.id} 
                           variants={itemVariants}

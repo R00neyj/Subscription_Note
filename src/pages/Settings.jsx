@@ -1,4 +1,5 @@
 import useSubscriptionStore from '../store/useSubscriptionStore'
+import { WAGE_PRESETS, MINIMUM_WAGE } from '../constants/laborCost'
 import { cn } from '../lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -22,6 +23,8 @@ export default function Settings() {
   const setThemeMode = useSubscriptionStore((state) => state.setThemeMode)
   const resetTutorial = useSubscriptionStore((state) => state.resetTutorial)
   const setHasSeenLanding = useSubscriptionStore((state) => state.setHasSeenLanding)
+  const wagePresetId = useSubscriptionStore((state) => state.wagePresetId) || 'minimum'
+  const setWagePreset = useSubscriptionStore((state) => state.setWagePreset)
   const notificationsEnabled = useSubscriptionStore((state) => state.notificationsEnabled)
   const setNotificationsEnabled = useSubscriptionStore((state) => state.setNotificationsEnabled)
 
@@ -145,6 +148,32 @@ export default function Settings() {
                 )} 
               />
             </button>
+          </div>
+
+          {/* 노동 시간 환산 기준 */}
+          <div className="p-3.5 md:p-5 flex flex-col gap-3 transition-colors">
+            <div className="space-y-0.5">
+              <h3 className="text-[14.5px] md:text-base font-bold text-dark dark:text-white">노동 시간 환산 기준</h3>
+              <p className="text-[11.5px] md:text-xs text-slate-500 dark:text-slate-400">
+                구독료를 근무 시간으로 바꿔 보여줄 때 쓰는 기준입니다. 기본값은 {MINIMUM_WAGE.year}년 최저시급 {MINIMUM_WAGE.hourly.toLocaleString()}원입니다.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {WAGE_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => setWagePreset(preset.id)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer",
+                    wagePresetId === preset.id
+                      ? "bg-primary text-white border-primary shadow-xs"
+                      : "bg-slate-100 dark:bg-slate-800 border-transparent text-slate-500 dark:text-slate-400 hover:text-dark dark:hover:text-white"
+                  )}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 테마 설정 */}

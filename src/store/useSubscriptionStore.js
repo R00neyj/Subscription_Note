@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+
+import { DEFAULT_WAGE_PRESET_ID, getWagePreset } from '../constants/laborCost'
 import { supabase } from '../lib/supabase'
 
 // DB 컬럼 화이트리스트. 서버로 보내는 모든 경로(추가/수정/로컬 동기화)가 이 목록을 공유해야
@@ -331,6 +333,14 @@ const useSubscriptionStore = create(
       notificationsEnabled: true,
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
 
+      // 노동 시간 환산 기준 시급 (미설정 시 최저시급으로 폴백)
+      wagePresetId: DEFAULT_WAGE_PRESET_ID,
+      hourlyWage: null,
+      setWagePreset: (presetId) => set({
+        wagePresetId: presetId,
+        hourlyWage: getWagePreset(presetId).hourly
+      }),
+
       // Duplicate Optimization Exceptions
       ignoredDuplicates: [],
       ignoreDuplicateGroup: (groupKey) => set((state) => ({
@@ -349,7 +359,9 @@ const useSubscriptionStore = create(
         themeMode: state.themeMode,
         hasSeenTutorial: state.hasSeenTutorial,
         notificationsEnabled: state.notificationsEnabled,
-        ignoredDuplicates: state.ignoredDuplicates
+        ignoredDuplicates: state.ignoredDuplicates,
+        wagePresetId: state.wagePresetId,
+        hourlyWage: state.hourlyWage
       }), 
     }
   )
