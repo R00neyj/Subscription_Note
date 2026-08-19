@@ -4,31 +4,35 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="canonical" href="https://sub-list-dashbord.netlify.app/" />
+    <link rel="canonical" href="__SITE_URL__/" />
     <meta name="robots" content="index,follow" />
     
     <!-- Primary Meta Tags -->
-    <title>구독노트 | 당신의 일상을 바꾸는 구독 관리</title>
-    <meta name="title" content="구독노트 | 당신의 일상을 바꾸는 구독 관리" />
-    <meta name="description" content="혹시 오늘도 보지 않는 영상에 소중한 하루치를 지불하셨나요? 숨겨진 구독료를 찾아내어 당신의 꿈을 위한 자본으로 바꿔보세요." />
-    <meta name="keywords" content="구독관리, 구독노트, 자산관리, 고정지출, 구독다이어트, 기회비용" />
+    <title>구독노트 | 구독료 계산기 · 안 쓰는 구독 정리</title>
+    <meta name="title" content="구독노트 | 구독료 계산기 · 안 쓰는 구독 정리" />
+    <meta name="description" content="계좌 연동 없이 30초. 쓰고 있는 구독을 적으면 월 지출, 연간 지출, 3년 누적 금액까지 바로 계산됩니다. 회원가입 없이 무료로 사용하세요." />
+    <meta name="keywords" content="구독료 계산기, 구독 관리, 구독 해지, 넷플릭스 해지, 유튜브 프리미엄 해지, 고정지출 정리, 구독 다이어트" />
     <meta name="author" content="구독노트 팀" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="구독노트" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:url" content="https://sub-list-dashbord.netlify.app/" />
-    <meta property="og:title" content="구독노트 | 당신의 일상을 바꾸는 구독 관리" />
-    <meta property="og:description" content="숨겨진 구독료를 찾아내어 당신의 꿈을 위한 자본으로 바꿔보세요. 잊고 있던 나의 가능성을 깨우는 파트너, 구독노트." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="구독노트 | 구독료 계산기 · 안 쓰는 구독 정리" />
+    <meta property="og:description" content="내 구독료가 3년이면 얼마인지 30초 만에 확인하세요. 계좌 연동도, 앱 설치도, 회원가입도 필요 없습니다." />
+    <meta property="og:image" content="__SITE_URL__/og-image.png" />
+    <meta property="og:image:alt" content="구독노트 - 안 쓰는 구독을 30초 만에 찾아내는 구독료 계산기" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://sub-list-dashbord.netlify.app/" />
-    <meta property="twitter:title" content="구독노트 | 당신의 일상을 바꾸는 구독 관리" />
-    <meta property="twitter:description" content="숨겨진 구독료를 찾아내어 당신의 꿈을 위한 자본으로 바꿔보세요." />
-    <meta property="twitter:image" content="/og-image.png" />
+    <meta property="twitter:url" content="__SITE_URL__/" />
+    <meta property="twitter:title" content="구독노트 | 구독료 계산기 · 안 쓰는 구독 정리" />
+    <meta property="twitter:description" content="내 구독료가 3년이면 얼마인지 30초 만에 확인하세요. 계좌 연동도, 앱 설치도, 회원가입도 필요 없습니다." />
+    <meta property="twitter:image" content="__SITE_URL__/og-image.png" />
 
     <!-- Mobile & PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -44,10 +48,222 @@
     <!-- google 서치 어드바이저 -->
     <meta name="google-site-verification" content="SfISQ4QH1uTyYEwh_Dzl2TzujOEORaGiunH8E0zE8vU" />
 
+    <!--
+      다크 모드 선반영(pre-paint).
+      앱의 테마는 prefers-color-scheme 가 아니라 zustand persist(localStorage
+      'subscription-storage' -> state.themeMode: 'light' | 'dark' | 'system')로 정해지고,
+      App.jsx 가 마운트된 뒤에야 <html> 에 .dark 를 붙인다. 그 전까지는 아래 SEO
+      fallback 과 body 배경이 항상 라이트로 그려져 다크 사용자에게 흰 화면이 번쩍인다.
+      useEffectiveTheme.js 와 같은 규칙을 여기서 미리 한 번 계산해 준다.
+      규칙이 바뀌면 두 곳을 같이 고쳐야 한다.
+    -->
+    <script>
+      (function () {
+        var mode = 'system';
+        // localStorage 접근이 막혀도(시크릿/추적방지/인앱 브라우저) 아래 시스템 설정
+        // 판단까지 건너뛰지 않도록 try 를 분리해 둔다.
+        try {
+          var raw = localStorage.getItem('subscription-storage');
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && parsed.state && parsed.state.themeMode) mode = parsed.state.themeMode;
+          }
+        } catch (e) { /* 저장값을 못 읽으면 'system' 으로 둔다 */ }
+        try {
+          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (mode === 'dark' || (mode === 'system' && systemDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) { /* matchMedia 미지원이면 라이트 */ }
+      })();
+    </script>
+
+    <!--
+      SEO fallback 전용 스타일. 외부 CSS 를 기다리지 않도록 인라인으로 둔다.
+      #seo-fallback 는 React 마운트 시 통째로 사라지므로 Tailwind 와 충돌하지 않는다.
+    -->
+    <style>
+      html { background: #F8FAFC; }
+      html.dark { background: #0B1120; }
+      body { margin: 0; }
+
+      #seo-fallback {
+        --sf-fg: #0F172A;
+        --sf-muted: #475569;
+        --sf-primary: #2563EB;
+        --sf-card: #FFFFFF;
+        --sf-line: #E2E8F0;
+        --sf-ok: #10B981;
+        font-family: "Pretendard", system-ui, -apple-system, "Malgun Gothic", sans-serif;
+        letter-spacing: -0.03em;
+        word-break: keep-all;
+        color: var(--sf-fg);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 88px 24px 64px;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+      }
+      html.dark #seo-fallback {
+        --sf-fg: #F1F5F9;
+        --sf-muted: #94A3B8;
+        --sf-primary: #60A5FA;
+        --sf-card: #1E293B;
+        --sf-line: #334155;
+      }
+
+      #seo-fallback .sf-badge {
+        display: inline-block;
+        margin: 0 0 24px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.1);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        color: var(--sf-primary);
+        font-size: 15px;
+        font-weight: 800;
+      }
+      #seo-fallback h1 {
+        margin: 0 0 24px;
+        font-size: clamp(38px, 7vw, 76px);
+        font-weight: 900;
+        line-height: 1.15;
+      }
+      #seo-fallback h1 em { font-style: normal; color: var(--sf-primary); }
+      #seo-fallback .sf-desc {
+        margin: 0 auto 32px;
+        max-width: 760px;
+        font-size: clamp(19px, 2.4vw, 24px);
+        font-weight: 500;
+        line-height: 1.6;
+        color: var(--sf-muted);
+      }
+      #seo-fallback .sf-tags {
+        list-style: none;
+        margin: 0 0 56px;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px 28px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--sf-muted);
+      }
+      #seo-fallback .sf-tags li::before { content: "✓ "; color: var(--sf-ok); font-weight: 900; }
+
+      #seo-fallback h2 {
+        margin: 0 0 24px;
+        font-size: clamp(24px, 3.4vw, 34px);
+        font-weight: 900;
+      }
+      #seo-fallback .sf-features {
+        list-style: none;
+        margin: 0 0 48px;
+        padding: 0;
+        display: grid;
+        gap: 14px;
+        text-align: left;
+      }
+      #seo-fallback .sf-features li {
+        padding: 20px 22px;
+        border-radius: 16px;
+        background: var(--sf-card);
+        border: 1px solid var(--sf-line);
+        font-size: 16px;
+        line-height: 1.65;
+        color: var(--sf-muted);
+      }
+      #seo-fallback .sf-features strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--sf-fg);
+      }
+
+      #seo-fallback .sf-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+      #seo-fallback .sf-links a {
+        display: inline-block;
+        padding: 14px 24px;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        background: var(--sf-card);
+        border: 1px solid var(--sf-line);
+        color: var(--sf-fg);
+      }
+      #seo-fallback .sf-links a.sf-primary {
+        background: #2563EB;
+        border-color: #2563EB;
+        color: #FFFFFF;
+      }
+    </style>
 
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      크롤러 / noscript 용 정적 텍스트.
+      이 SPA 는 서버 렌더링이 없어서 #root 가 비어 있으면 본문 텍스트가 0 이다.
+      구글은 JS 를 렌더링해 주지만 네이버는 사실상 못 읽으므로, 홈(/)이 통째로
+      색인에서 빠진다. 아래 블록이 그 구멍을 메운다.
+
+      React 19 의 createRoot(container) 는 최초 렌더에서 container 의 기존 자식을
+      전부 지우므로, 이 마크업은 앱이 뜨는 순간 교체된다. 사용자 화면에는 영향이 없다.
+
+      ※ 문구는 src/pages/Landing.jsx 의 히어로 + stepsData 를 그대로 옮긴 것이다.
+        랜딩 카피를 고치면 여기도 같이 고쳐야 한다. (실제 화면과 다른 문구를 두면
+        클로킹으로 취급될 수 있다)
+    -->
+    <div id="root">
+      <div id="seo-fallback">
+        <p class="sf-badge">계좌 연동 없이 30초, 회원가입도 필요 없습니다</p>
+
+        <h1>안 쓰는 구독,<br /><em>30초 만에</em> 찾아냅니다</h1>
+
+        <p class="sf-desc">
+          쓰고 있는 구독 이름만 적으면 월 지출과 연간 지출,
+          그리고 <strong>3년이면 얼마가 되는지</strong>까지 바로 계산됩니다.
+        </p>
+
+        <ul class="sf-tags">
+          <li>계좌·카드 연동 없음</li>
+          <li>회원가입 없이 바로 사용</li>
+          <li>광고 없는 오픈소스</li>
+        </ul>
+
+        <h2>구독노트가 하는 일</h2>
+        <ul class="sf-features">
+          <li>
+            <strong>흩어진 고정비를 한 화면에</strong>
+            OTT, 업무 도구, 멤버십을 카드별로 헤아릴 필요 없습니다. 이름만 적으면 카테고리별 비중과 월·연간 합계가 바로 나옵니다.
+          </li>
+          <li>
+            <strong>결제일마다 가슴 철렁할 일 없도록</strong>
+            결제일 하루 전 알림과 월간 타임라인으로, 통장에서 언제 얼마가 빠져나갈지 미리 알 수 있습니다.
+          </li>
+          <li>
+            <strong>새로 들일 구독과 끊을 구독을 나란히</strong>
+            가계부는 이미 쓴 돈만 보여줍니다. 구독노트는 &ldquo;이걸 들이면 +얼마, 저걸 빼면 −얼마&rdquo;를 한 화면에서 저울질하게 해줍니다.
+          </li>
+          <li>
+            <strong>금융 정보 없이 구독만 관리합니다</strong>
+            계좌·카드를 연동하지 않으니 넘길 개인정보도 없습니다. 원하면 Google 계정으로 기기 간 동기화만 켜세요. 코드는 GitHub에 공개돼 있습니다.
+          </li>
+        </ul>
+
+        <div class="sf-links">
+          <a class="sf-primary" href="/landing">구독노트 소개 보기</a>
+          <a href="/guide/">구독 서비스 해지 방법 모아보기</a>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

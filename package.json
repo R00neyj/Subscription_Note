@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-guides.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:guides": "node scripts/generate-guides.mjs",
+    "og:image": "node scripts/generate-og-image.mjs"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",

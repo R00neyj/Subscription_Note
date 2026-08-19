@@ -4,7 +4,7 @@
 
 ## 배포 주소
 
-[구독노트](https://sub-list-dashbord.netlify.app/)
+[구독노트](https://gudoknote.netlify.app/)
 
 ## ✨ 주요 기능
 

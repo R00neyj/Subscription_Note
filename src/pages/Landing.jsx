@@ -90,22 +90,39 @@ export default function Landing() {
   // 1. Master Scrollytelling & Hero Initial Animations
   useGSAP(() => {
     // Hero Intro Elastic Animation
+    //
+    // from() 대신 set() + to() 를 쓴다. from() 은 immediateRender 로 시작값을 다시 적용하는데,
+    // 아래 pin ScrollTrigger 가 refresh 되면 이미 끝난 트윈의 시작값이 되살아나
+    // 히어로 CTA 버튼이 opacity:0 인 채로 남는 문제가 있었다.
+    // to() 는 되돌아갈 시작값을 들고 있지 않으므로 refresh 에 영향을 받지 않는다.
+    // GSAP 자체가 실패해도 버튼은 그냥 보이는 쪽으로 망가진다.
+    gsap.set(".hero-badge", { opacity: 0, y: -30, scale: 0.8 })
+    gsap.set(".hero-split-word", {
+      y: "120%",
+      rotateX: 50,
+      scale: 0.85,
+      opacity: 0,
+      transformOrigin: "bottom center"
+    })
+    gsap.set(".hero-desc", { opacity: 0, y: 30 })
+    gsap.set(".hero-cta-btn", { opacity: 0, scale: 0.85 })
+    gsap.set(".hero-feature-tags", { opacity: 0, y: 20 })
+
     const heroTl = gsap.timeline({ defaults: { ease: "back.out(1.8)", duration: 1 } })
     heroTl
-      .from(".hero-badge", { opacity: 0, y: -30, scale: 0.8 })
-      .from(".hero-split-word", {
-        y: "120%",
-        rotateX: 50,
-        scale: 0.85,
-        opacity: 0,
+      .to(".hero-badge", { opacity: 1, y: 0, scale: 1 })
+      .to(".hero-split-word", {
+        y: "0%",
+        rotateX: 0,
+        scale: 1,
+        opacity: 1,
         stagger: 0.065,
         duration: 1.05,
-        ease: "back.out(2.4)",
-        transformOrigin: "bottom center"
+        ease: "back.out(2.4)"
       }, "-=0.6")
-      .from(".hero-desc", { opacity: 0, y: 30, duration: 0.9, ease: "power2.out" }, "-=0.5")
-      .from(".hero-cta-btn", { opacity: 0, scale: 0.85, stagger: 0.15, ease: "elastic.out(1.1, 0.5)" }, "-=0.6")
-      .from(".hero-feature-tags", { opacity: 0, y: 20, stagger: 0.1, duration: 0.6 }, "-=0.5")
+      .to(".hero-desc", { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, "-=0.5")
+      .to(".hero-cta-btn", { opacity: 1, scale: 1, stagger: 0.15, ease: "elastic.out(1.1, 0.5)" }, "-=0.6")
+      .to(".hero-feature-tags", { opacity: 1, y: 0, stagger: 0.1, duration: 0.6 }, "-=0.5")
 
     // Floating Hero Badges (Jelly floating)
     gsap.to(chip1Ref.current, {
@@ -304,8 +321,8 @@ export default function Landing() {
       stepNumber: "01",
       badge: "중복 결제 방지",
       title: <>흩어진 고정비를<br />한 화면에</>,
-      description: "OTT, 업무 도구, 멤버십까지 여러 카드와 계좌로 분산된 지출을 직관적인 카테고리 카드로 통합 정리합니다.",
-      highlight: "총 5개 서비스 · 월 68,790원 파악",
+      description: "OTT, 업무 도구, 멤버십을 카드별로 헤아릴 필요 없습니다. 이름만 적으면 카테고리별 비중과 월·연간 합계가 바로 나옵니다.",
+      highlight: "5개 서비스 · 월 68,790원 · 연 825,480원",
       icon: Layers,
       color: "text-blue-500 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/50"
     },
@@ -313,26 +330,26 @@ export default function Landing() {
       stepNumber: "02",
       badge: "예측 가능한 일정",
       title: <>결제일마다<br />가슴 철렁할 일 없도록</>,
-      description: "이번 주 다가오는 결제 D-Day 알림과 월간 지출 타임라인으로 예산 초과를 사전에 완벽히 방어합니다.",
-      highlight: "이번 주 2건(₩31,900) 결제 예정 브리핑",
+      description: "결제일 하루 전 알림과 월간 타임라인으로, 통장에서 언제 얼마가 빠져나갈지 미리 알 수 있습니다.",
+      highlight: "3일 이내 2건 · 31,900원 결제 예정",
       icon: Calendar,
       color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50"
     },
     {
       stepNumber: "03",
-      badge: "지능형 지출 다이어트",
-      title: <>안 쓰는 구독은<br />즉시 찾아 슬림하게</>,
-      description: "클릭 한 번으로 비활성화 토글을 켜고 꺼보세요. 아낀 금액이 실시간으로 누적되어 새로운 위시리스트가 됩니다.",
-      highlight: "방치된 구독 1개 정리 시 연 204,000원 절약",
+      badge: "구독 다이어트 시뮬레이터",
+      title: <>새로 들일 구독과<br />끊을 구독을 나란히</>,
+      description: "가계부는 이미 쓴 돈만 보여줍니다. 구독노트는 \"이걸 들이면 +얼마, 저걸 빼면 −얼마\"를 한 화면에서 저울질하게 해줍니다.",
+      highlight: "1개 정리 시 연 204,000원 · 3년 612,000원",
       icon: Flame,
       color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/50"
     },
     {
       stepNumber: "04",
-      badge: "멀티 디바이스 & 보안",
-      title: <>어디서나 안전한<br />클라우드 동기화</>,
-      description: "Google OAuth와 RLS 데이터 격리 기술로 철저히 보호되며, PWA를 통해 스마트폰에서도 앱처럼 바로 실행됩니다.",
-      highlight: "100% 개인 데이터 암호화 격리 & PWA 지원",
+      badge: "계좌는 연결하지 않습니다",
+      title: <>금융 정보 없이<br />구독만 관리합니다</>,
+      description: "계좌·카드를 연동하지 않으니 넘길 개인정보도 없습니다. 원하면 Google 계정으로 기기 간 동기화만 켜세요. 코드는 GitHub에 공개돼 있습니다.",
+      highlight: "계좌 연동 없음 · 광고 없음 · 오픈소스",
       icon: ShieldCheck,
       color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/50"
     }
@@ -439,16 +456,16 @@ export default function Landing() {
         <div className="text-center max-w-[960px] mx-auto space-y-6 md:space-y-7 relative z-10">
           <div className="hero-badge inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-extrabold text-sm md:text-base mb-1">
             <Sparkles size={18} />
-            <span>매달 새어나가는 고정비 지출 통제 솔루션</span>
+            <span>계좌 연동 없이 30초, 회원가입도 필요 없습니다</span>
           </div>
 
-          <h1 
+          <h1
             className="hero-title text-[38px] sm:text-[56px] md:text-[76px] font-black leading-[1.15] tracking-tight text-slate-900 dark:text-white"
             style={{ perspective: "1000px" }}
           >
-            {/* Line 1: 혹시 오늘도 보지 않는 구독에 */}
+            {/* Line 1: 안 쓰는 구독, */}
             <span className="block overflow-hidden py-1">
-              {["혹시", "오늘도", "보지", "않는", "구독에"].map((word, i) => (
+              {["안", "쓰는", "구독,"].map((word, i) => (
                 <span key={i} className="inline-block overflow-hidden mr-2 md:mr-3.5 align-top">
                   <span className="hero-split-word inline-block">
                     {word}
@@ -457,29 +474,29 @@ export default function Landing() {
               ))}
             </span>
 
-            {/* Line 2: 소중한 하루치를 지불하셨나요? */}
+            {/* Line 2: 30초 만에 찾아냅니다 */}
             <span className="block overflow-hidden py-1">
               <span className="inline-block overflow-hidden mr-2 md:mr-3.5 align-top">
                 <span className="hero-split-word inline-block bg-gradient-to-r from-primary via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  소중한
+                  30초
                 </span>
               </span>
               <span className="inline-block overflow-hidden mr-2 md:mr-3.5 align-top">
                 <span className="hero-split-word inline-block bg-gradient-to-r from-primary via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  하루치를
+                  만에
                 </span>
               </span>
               <span className="inline-block overflow-hidden align-top">
                 <span className="hero-split-word inline-block">
-                  지불하셨나요?
+                  찾아냅니다
                 </span>
               </span>
             </span>
           </h1>
 
           <p className="hero-desc text-[19px] sm:text-[22px] md:text-[24px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-[760px] mx-auto">
-            흩어진 결제 일정부터 D-Day 결제 브리핑, 스마트 다이어트까지.<br className="hidden sm:block" />
-            구독노트로 불필요한 누수를 막고 원하는 목표를 달성하세요.
+            쓰고 있는 구독 이름만 적으면 월 지출과 연간 지출,<br className="hidden sm:block" />
+            그리고 <strong className="font-extrabold text-slate-800 dark:text-slate-200">3년이면 얼마가 되는지</strong>까지 바로 계산됩니다.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -493,36 +510,37 @@ export default function Landing() {
               </button>
             ) : (
               <>
+                {/* 마찰이 가장 적은 경로를 기본 CTA로 둔다 */}
                 <button
-                  onClick={() => setIsAuthModalOpen(true)}
+                  onClick={handleStartGuest}
                   className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-primary hover:bg-primary/90 text-white font-extrabold text-[18px] shadow-xl shadow-primary/25 transition-all active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
                 >
-                  무료로 시작하기
+                  30초 만에 계산해보기
                   <ArrowRight size={20} />
                 </button>
                 <button
-                  onClick={handleStartGuest}
+                  onClick={() => setIsAuthModalOpen(true)}
                   className="hero-cta-btn w-full sm:w-auto h-15 px-9 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[18px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
                 >
-                  로그인 없이 바로 체험
+                  Google로 시작해 기기 간 동기화
                 </button>
               </>
             )}
           </div>
 
-          {/* Feature Tags */}
+          {/* Feature Tags — 기능 자랑이 아니라 가입을 막는 이유를 먼저 지운다 */}
           <div className="hero-feature-tags pt-8 flex flex-wrap items-center justify-center gap-8 text-sm md:text-base text-slate-500 dark:text-slate-400 font-bold">
             <div className="flex items-center gap-2">
               <Check className="text-emerald-500 stroke-[3]" size={18} />
-              <span>간편 Google 로그인 연동</span>
+              <span>계좌·카드 연동 없음</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="text-emerald-500 stroke-[3]" size={18} />
-              <span>PWA 스마트폰 앱 설치</span>
+              <span>회원가입 없이 바로 사용</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="text-emerald-500 stroke-[3]" size={18} />
-              <span>다크모드 & 실시간 계산</span>
+              <span>광고 없는 오픈소스</span>
             </div>
           </div>
         </div>
@@ -804,7 +822,7 @@ export default function Landing() {
         <div className="text-center max-w-[760px] mx-auto mb-16 space-y-3.5 md:space-y-4">
           <div>
             <span className="inline-block text-xs md:text-sm font-extrabold text-primary tracking-wider uppercase px-4 py-1.5 rounded-full bg-primary/10 mb-1.5">
-              Why Sub-list Dashboard?
+              왜 구독노트인가
             </span>
           </div>
           <h2 className="text-[32px] sm:text-[44px] font-black tracking-tight text-slate-900 dark:text-white leading-[1.2]">
@@ -876,10 +894,10 @@ export default function Landing() {
               </span>
             </div>
             <h2 className="text-[32px] sm:text-[46px] md:text-[58px] font-black leading-tight tracking-tight">
-              지금 바로, 당신의 지갑을 위한<br />스마트한 구독 관리를 시작하세요.
+              끊을지 말지는 나중에.<br />먼저 얼마인지부터 보세요.
             </h2>
             <p className="text-white/85 font-medium text-lg sm:text-xl">
-              가입 절차 없이 즉시 대시보드를 둘러보거나, Google 계정으로 모든 기기에서 동기화하세요.
+              구독 3~4개만 적어도 1분 안에 3년치 금액이 나옵니다. 회원가입은 그다음에 생각해도 됩니다.
             </p>
           </div>
 
@@ -915,7 +933,16 @@ export default function Landing() {
 
       {/* 6. Footer */}
       <footer className="py-12 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-sm text-slate-400 font-medium">
-        <p>© 2026 Sub-list Dashboard. All rights reserved. Made for smarter subscriptions.</p>
+        {/* 정적 해지 가이드로 가는 크롤 경로 — 검색 유입의 진입점이 된다 */}
+        <p className="mb-3">
+          <a
+            href="/guide/"
+            className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary underline underline-offset-4 transition-colors"
+          >
+            넷플릭스·유튜브 등 152개 서비스 구독 해지 방법 모음
+          </a>
+        </p>
+        <p>© 2026 구독노트. 계좌 연동 없는 구독 관리 도구.</p>
       </footer>
 
       {/* 7. Auth Choice Modal Overlay */}

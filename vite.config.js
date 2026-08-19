@@ -1,11 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { SITE_URL } from "./site.config.js";
+
+// index.html 의 canonical / og:url / twitter:url 을 site.config.js 값으로 치환한다.
+// 도메인이 배포 산출물 여러 곳에 흩어지지 않도록 단일 출처를 유지하기 위함.
+const injectSiteUrl = () => ({
+  name: "inject-site-url",
+  transformIndexHtml: (html) => html.replaceAll("__SITE_URL__", SITE_URL),
+});
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    injectSiteUrl(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
