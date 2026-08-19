@@ -35,6 +35,16 @@ const RAW_PRESETS = [
     price: 14900,
     category: "OTT",
     subscribe_url: "https://www.youtube.com/premium",
+    cancel_url: "https://www.youtube.com/paid_memberships",
+    verifiedAt: "2026-08-20"
+  },
+  {
+    nameKo: "유튜브 프리미엄 라이트",
+    nameEn: "YouTube Premium Lite",
+    price: 8500,
+    verifiedAt: "2026-08-20",
+    category: "OTT",
+    subscribe_url: "https://www.youtube.com/premium",
     cancel_url: "https://www.youtube.com/paid_memberships"
   },
   {
@@ -96,20 +106,31 @@ const RAW_PRESETS = [
     cancel_url: "https://watcha.com/settings"
   },
   {
-    nameKo: "라프텔",
-    nameEn: "Laftel",
+    nameKo: "라프텔 베이직",
+    nameEn: "Laftel Basic",
     price: 9900,
+    category: "OTT",
+    subscribe_url: "https://laftel.net",
+    cancel_url: "https://laftel.net/settings",
+    verifiedAt: "2026-08-20"
+  },
+  {
+    nameKo: "라프텔 프리미엄",
+    nameEn: "Laftel Premium",
+    price: 14900,
+    verifiedAt: "2026-08-20",
     category: "OTT",
     subscribe_url: "https://laftel.net",
     cancel_url: "https://laftel.net/settings"
   },
   {
-    nameKo: "애플 TV+",
-    nameEn: "Apple TV+",
+    nameKo: "애플 TV",
+    nameEn: "Apple TV",
     price: 6500,
     category: "OTT",
     subscribe_url: "https://tv.apple.com",
-    cancel_url: "https://support.apple.com/HT202039"
+    cancel_url: "https://support.apple.com/HT202039",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "파라마운트+",
@@ -474,7 +495,26 @@ const RAW_PRESETS = [
   {
     nameKo: "구글 AI 울트라",
     nameEn: "Google AI Ultra",
-    price: 360000,
+    price: 119000,
+    category: "Work",
+    subscribe_url: "https://gemini.google.com/advanced",
+    cancel_url: "https://myaccount.google.com/subscriptions",
+    verifiedAt: "2026-08-20"
+  },
+  {
+    nameKo: "구글 AI 울트라 (20배)",
+    nameEn: "Google AI Ultra 20x",
+    price: 300000,
+    verifiedAt: "2026-08-20",
+    category: "Work",
+    subscribe_url: "https://gemini.google.com/advanced",
+    cancel_url: "https://myaccount.google.com/subscriptions"
+  },
+  {
+    nameKo: "구글 AI 플러스",
+    nameEn: "Google AI Plus",
+    price: 7500,
+    verifiedAt: "2026-08-20",
     category: "Work",
     subscribe_url: "https://gemini.google.com/advanced",
     cancel_url: "https://myaccount.google.com/subscriptions"
@@ -611,13 +651,32 @@ const RAW_PRESETS = [
     verifiedAt: "2026-08-19"
   },
   {
+    nameKo: "깃허브 코파일럿 프로+",
+    nameEn: "Github Copilot Pro Plus",
+    priceUsd: 39,
+    verifiedAt: "2026-08-20",
+    category: "Work",
+    subscribe_url: "https://github.com/features/copilot",
+    cancel_url: "https://github.com/settings/billing"
+  },
+  {
+    nameKo: "깃허브 코파일럿 맥스",
+    nameEn: "Github Copilot Max",
+    priceUsd: 100,
+    verifiedAt: "2026-08-20",
+    category: "Work",
+    subscribe_url: "https://github.com/features/copilot",
+    cancel_url: "https://github.com/settings/billing"
+  },
+  {
     nameKo: "깃허브 코파일럿 (연간)",
     nameEn: "Github Copilot Yearly",
-    price: 145000,
+    priceUsd: 100,
     category: "Work",
     billing_cycle: "yearly",
     subscribe_url: "https://github.com/features/copilot",
-    cancel_url: "https://github.com/settings/billing"
+    cancel_url: "https://github.com/settings/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "미드저니 베이직",
@@ -847,19 +906,29 @@ const RAW_PRESETS = [
     cancel_url: "https://webflow.com/dashboard/account/billing"
   },
   {
-    nameKo: "엔바토 엘리먼츠",
-    nameEn: "Envato Elements",
-    price: 45000,
+    nameKo: "엔바토 엘리먼츠 코어",
+    nameEn: "Envato Elements Core",
+    priceUsd: 16.5,
+    category: "Work",
+    subscribe_url: "https://elements.envato.com/pricing",
+    cancel_url: "https://elements.envato.com/account",
+    verifiedAt: "2026-08-20"
+  },
+  {
+    nameKo: "엔바토 엘리먼츠 플러스",
+    nameEn: "Envato Elements Plus",
+    priceUsd: 39,
+    verifiedAt: "2026-08-20",
     category: "Work",
     subscribe_url: "https://elements.envato.com/pricing",
     cancel_url: "https://elements.envato.com/account"
   },
   {
-    nameKo: "엔바토 엘리먼츠 (연간)",
-    nameEn: "Envato Elements Yearly",
-    price: 264000,
+    nameKo: "엔바토 엘리먼츠 얼티밋",
+    nameEn: "Envato Elements Ultimate",
+    priceUsd: 168,
+    verifiedAt: "2026-08-20",
     category: "Work",
-    billing_cycle: "yearly",
     subscribe_url: "https://elements.envato.com/pricing",
     cancel_url: "https://elements.envato.com/account"
   },
@@ -933,12 +1002,13 @@ const RAW_PRESETS = [
     cancel_url: "https://monday.com/billing"
   },
   {
-    nameKo: "아사나 프리미엄",
-    nameEn: "Asana Premium",
-    price: 15500,
+    nameKo: "아사나 스타터",
+    nameEn: "Asana Starter",
+    price: 15951,
     category: "Work",
     subscribe_url: "https://asana.com/pricing",
-    cancel_url: "https://app.asana.com/0/admin-console/billing"
+    cancel_url: "https://app.asana.com/0/admin-console/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "투두이스트 프로",
@@ -949,12 +1019,13 @@ const RAW_PRESETS = [
     cancel_url: "https://todoist.com/app/settings/subscription"
   },
   {
-    nameKo: "리니어 플러스",
-    nameEn: "Linear Plus",
-    price: 11500,
+    nameKo: "리니어 베이직",
+    nameEn: "Linear Basic",
+    priceUsd: 10,
     category: "Work",
     subscribe_url: "https://linear.app/pricing",
-    cancel_url: "https://linear.app/settings/billing"
+    cancel_url: "https://linear.app/settings/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "레이캐스트 프로",
@@ -973,20 +1044,22 @@ const RAW_PRESETS = [
     cancel_url: "https://account.jetbrains.com"
   },
   {
-    nameKo: "재피어 스타터",
-    nameEn: "Zapier Starter",
-    price: 29000,
+    nameKo: "재피어 프로페셔널",
+    nameEn: "Zapier Professional",
+    priceUsd: 29.99,
     category: "Work",
     subscribe_url: "https://zapier.com/pricing",
-    cancel_url: "https://zapier.com/app/billing"
+    cancel_url: "https://zapier.com/app/billing",
+    verifiedAt: "2026-08-20"
   },
   {
-    nameKo: "그래머리 프리미엄",
-    nameEn: "Grammarly Premium",
-    price: 17500,
+    nameKo: "그래머리 프로",
+    nameEn: "Grammarly Pro",
+    priceUsd: 12,
     category: "Work",
-    subscribe_url: "https://www.grammarly.com/premium",
-    cancel_url: "https://account.grammarly.com/subscription"
+    subscribe_url: "https://www.grammarly.com/plans",
+    cancel_url: "https://account.grammarly.com/subscription",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "넷리파이 퍼스널",
@@ -1005,22 +1078,6 @@ const RAW_PRESETS = [
     subscribe_url: "https://www.netlify.com/pricing/",
     cancel_url: "https://app.netlify.com/teams/billing",
     verifiedAt: "2026-08-19"
-  },
-  {
-    nameKo: "넷리파이 비즈니스",
-    nameEn: "Netlify Business",
-    price: 144000,
-    category: "Work",
-    subscribe_url: "https://www.netlify.com/pricing/",
-    cancel_url: "https://app.netlify.com/teams/billing"
-  },
-  {
-    nameKo: "넷리파이 빌드 추가 (1개)",
-    nameEn: "Netlify Add-on Concurrent Build",
-    price: 58000,
-    category: "Work",
-    subscribe_url: "https://www.netlify.com/pricing/",
-    cancel_url: "https://app.netlify.com/teams/billing"
   },
 
   // ==========================================
@@ -1340,8 +1397,8 @@ const RAW_PRESETS = [
     cancel_url: "https://www.welaaa.com/my/membership"
   },
   {
-    nameKo: "예스24 북클럽",
-    nameEn: "Yes24 Book Club",
+    nameKo: "크레마클럽",
+    nameEn: "Cremaclub",
     price: 5500,
     category: "Etc",
     subscribe_url: "https://bookclub.yes24.com",
@@ -1473,6 +1530,10 @@ const RAW_PRESETS = [
 //
 // 기준: 월간 결제 정가. 연간 선결제 할인가는 조건부이므로 쓰지 않는다
 // (연간 플랜은 "(연간)" 항목으로 따로 있다).
+//
+// 다만 공식 요금 페이지에 월간/연간 토글이 없고 값을 하나만 노출하는 곳
+// (리니어 $10, 그래머리 $12, 엔바토 $16.50 등)은 그 노출값을 그대로 쓴다.
+// 사용자가 그 페이지에서 실제로 보게 되는 숫자와 맞추는 쪽이 낫다고 판단했다.
 export const USD_KRW = 1412
 export const FX_BASE_DATE = '2026-08-19'
 

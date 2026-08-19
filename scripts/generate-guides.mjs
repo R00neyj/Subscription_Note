@@ -37,7 +37,7 @@ const CATEGORY_LABELS = {
 // ─────────────────────────────────────────────────────────────
 
 // 영문명 뒤에 붙는 요금제 수식어. 같은 서비스의 플랜들을 한 페이지로 모으기 위해 떼어낸다.
-const PLAN_TOKEN = /^(premium|basic|standard|standerd|plus|pro|max|yearly|annual|monthly|lite|light|individual|family|duo|student|personal|business|team|starter|essential|unlimited|advanced|with|ads|ad-supported|\d+(gb|tb))$/i
+const PLAN_TOKEN = /^(premium|basic|standard|standerd|plus|pro|max|yearly|annual|monthly|lite|light|individual|family|duo|student|personal|business|enterprise|organization|team|starter|essential|unlimited|advanced|professional|core|ultimate|ultra|full|dev|collab|with|ads|ad-supported|\d+(gb|tb)|\d+x)$/i
 
 const baseName = (nameEn) => {
   const words = nameEn.trim().split(/\s+/)
