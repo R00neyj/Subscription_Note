@@ -1,22 +1,30 @@
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import SubscriptionTable from '../components/SubscriptionTable'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES, CATEGORY_COLORS, TEXT_COLORS } from '../constants/categories'
 import SectionHeader from '../components/SectionHeader'
 import CategoryDistributionChart from '../components/CategoryDistributionChart'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 export default function SubscriptionList() {
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  // 홈 대시보드의 카테고리 차트에서 넘어온 드릴다운을 그대로 받는다 (/list?category=OTT)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedCategory = searchParams.get('category') || 'all'
+
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-  
+
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
   const openModal = useSubscriptionStore((state) => state.openModal)
 
   // Toggle Category Logic
   const toggleCategory = (categoryId) => {
-    setSelectedCategory(categoryId)
+    if (!categoryId || categoryId === 'all') {
+      setSearchParams({}, { replace: true })
+    } else {
+      setSearchParams({ category: categoryId }, { replace: true })
+    }
   }
 
   // Active Subscriptions only
@@ -134,8 +142,24 @@ export default function SubscriptionList() {
         
         {/* Section Header with CTA */}
         <div className="flex items-center justify-between gap-3 w-full">
-          <SectionHeader title="구독 목록" className="w-auto" />
-          
+          <div className="flex items-center gap-2 min-w-0">
+            <SectionHeader title="구독 목록" className="w-auto" />
+
+            {/* 홈에서 넘어온 필터가 걸려 있다는 걸 명시하고, 한 번에 해제할 수 있게 한다 */}
+            {selectedCategory !== 'all' && (
+              <button
+                type="button"
+                onClick={() => toggleCategory('all')}
+                className="flex items-center gap-1 h-[28px] px-2.5 rounded-lg bg-primary/10 text-primary dark:text-blue-400 text-[12px] font-bold hover:bg-primary/15 transition-all cursor-pointer shrink-0"
+              >
+                <span className="truncate max-w-[100px]">
+                  {CATEGORIES.find(c => c.id === selectedCategory)?.label || selectedCategory}
+                </span>
+                <X className="w-3 h-3 stroke-[3px]" />
+              </button>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => openModal(null, 'active')}

@@ -27,6 +27,7 @@ import { getSubscriptionPaymentDateInMonth } from '../lib/dateUtils'
 import { getWeeklyUpcomingPayments } from '../lib/notificationUtils'
 import ServiceIcon from './ServiceIcon'
 import useSubscriptionStore from '../store/useSubscriptionStore'
+import EmptyState from './EmptyState'
 
 export default function PaymentBriefing({ 
   currentDate = new Date(),
@@ -370,11 +371,7 @@ export default function PaymentBriefing({
             </div>
           </div>
         ) : (
-          <div className="w-full py-8 flex items-center justify-center bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl">
-            <p className="text-slate-400 text-sm font-medium">
-              {isMonthly ? '이번 달에 결제 일정이 없습니다.' : '이번 주에 예정된 결제 항목이 없습니다.'}
-            </p>
-          </div>
+          <EmptyState message={isMonthly ? '이번 달에 결제 일정이 없습니다.' : '이번 주에 예정된 결제 항목이 없습니다.'} />
         )}
 
         {/* Details List (Only when showDetailsList is true) */}
@@ -488,9 +485,7 @@ export default function PaymentBriefing({
                 })}
               </div>
             ) : (
-              <div className="w-full py-8 flex items-center justify-center bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl">
-                <p className="text-slate-400 text-sm font-medium">해당하는 결제 항목이 없습니다.</p>
-              </div>
+              <EmptyState message="해당하는 결제 항목이 없습니다." />
             )}
           </>
         )}

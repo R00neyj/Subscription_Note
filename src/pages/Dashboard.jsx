@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
 import Header from '../components/Header'
-import SubscriptionTable from '../components/SubscriptionTable'
 import SectionHeader from '../components/SectionHeader'
 import CategoryDistributionChart from '../components/CategoryDistributionChart'
 import PaymentBriefing from '../components/PaymentBriefing'
@@ -15,6 +14,7 @@ import { detectSubDomain } from '../constants/serviceSubDomains'
 import ServiceIcon from '../components/ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
+import EmptyState from '../components/EmptyState'
 
 // Animation variants
 const containerVariants = {
@@ -47,8 +47,6 @@ const cardHover = {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
   const [activeInsight, setActiveInsight] = useState(null) // 모달 제어용
   
   // Store Data
@@ -193,70 +191,22 @@ export default function Dashboard() {
     }
   }, [hasSeenTutorial, isTutorialOpen, setTutorialOpen])
 
+  // 카테고리 드릴다운은 목록/관리를 담당하는 구독 탭으로 넘긴다.
+  // 홈은 요약과 인사이트만 책임지고, 필터링된 목록은 한 곳에서만 보여준다.
   const handleCategoryClick = (categoryId) => {
-    setSelectedCategory(prev => prev === categoryId ? null : categoryId)
+    navigate(`/list?category=${encodeURIComponent(categoryId)}`)
   }
 
-  // Sort Logic (Same as SubscriptionList, Active & Disabled only)
-  const sortedSubscriptions = useMemo(() => {
-    let data = subscriptions.filter(s => s.status !== 'wishlist')
-
-    // 1. Filter by Selected Category
-    if (selectedCategory) {
-      data = data.filter(sub => 
-        sub.category === selectedCategory || 
-        (sub.categories && sub.categories.includes(selectedCategory))
-      )
-    }
-
-    // 2. Sort
-    data.sort((a, b) => {
-      // 2.1. Primary Sort: Status (Active first)
-      if (a.status !== b.status) {
-        return a.status === 'active' ? -1 : 1
-      }
-
-      // 2.2. Secondary Sort: User Configuration
-      if (sortConfig.key) {
-        let aValue = a[sortConfig.key]
-        let bValue = b[sortConfig.key]
-
-        // Handle category specially (might be in categories array)
-        if (sortConfig.key === 'category') {
-          aValue = a.category || a.categories?.[0] || ''
-          bValue = b.category || b.categories?.[0] || ''
-        }
-
-        if (sortConfig.key === 'price') {
-           return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
-        }
-        if (sortConfig.key === 'billing_date') {
-            const getDay = (str) => parseInt(str.replace(/[^0-9]/g, '')) || 0
-            aValue = getDay(aValue)
-            bValue = getDay(bValue)
-            return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue
-        }
-        // Handle strings (service_name, payment_method)
-        if (typeof aValue === 'string') {
-          return sortConfig.direction === 'asc' 
-            ? aValue.localeCompare(bValue) 
-            : bValue.localeCompare(aValue)
-        }
-      } else {
-        // Default: Sort by newest (created_at descending)
+  // 홈에는 최근 등록한 3건만 미리보기로 노출한다 (전체 목록은 구독 탭)
+  const recentSubscriptions = useMemo(() => {
+    return subscriptions
+      .filter(s => s.status !== 'wishlist')
+      .sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'active' ? -1 : 1
         return new Date(b.created_at || 0) - new Date(a.created_at || 0)
-      }
-      return 0
-    })
-    return data
-  }, [subscriptions, sortConfig, selectedCategory])
-
-  const handleSort = (key) => {
-    setSortConfig((current) => ({
-      key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
-    }))
-  }
+      })
+      .slice(0, 3)
+  }, [subscriptions])
   
   const totalCost = useSubscriptionStore((state) => 
     state.subscriptions
@@ -879,52 +829,73 @@ export default function Dashboard() {
          <motion.div id="step-chart" variants={itemVariants} className="mt-8 flex flex-col items-start w-full gap-4">
             <SectionHeader title="카테고리별 비중" />
             
-            <CategoryDistributionChart 
+            <CategoryDistributionChart
               categoryData={categoryData}
-              selectedCategory={selectedCategory}
+              selectedCategory={null}
               onCategoryClick={handleCategoryClick}
             />
          </motion.div>
 
-        {/* Subscription Table */}
-        <motion.div id="step-recent" variants={itemVariants} className="flex flex-col gap-4 mt-8 w-full">
-            <div className="flex items-center justify-between w-full">
+        {/* Recent Subscriptions Preview (전체 목록은 구독 탭에서) */}
+        <motion.div id="step-recent" variants={itemVariants} className="flex flex-col gap-3 mt-8 w-full">
+            <div className="flex items-center justify-between w-full gap-3">
               <h3 className="text-lg font-extrabold text-dark dark:text-white">
-                {selectedCategory ? `${selectedCategory} 목록` : '최근 구독 내역'}
+                최근 등록한 구독
               </h3>
+              <Link
+                to="/list"
+                className="flex items-center gap-0.5 text-[13px] font-bold text-primary dark:text-blue-400 hover:underline shrink-0 cursor-pointer"
+              >
+                전체 보기
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            
-            {sortedSubscriptions.length > 0 ? (
-              <SubscriptionTable 
-                data={selectedCategory ? sortedSubscriptions : sortedSubscriptions.slice(0, 5)} 
-                onRowClick={(item) => openModal(item)}
-                sortConfig={sortConfig}
-                onSort={handleSort}
-              />
-            ) : (
-              <div className="w-full h-[120px] flex items-center justify-center bg-tertiary/50 dark:bg-slate-800/50 rounded-[24px] text-dark/40 dark:text-slate-500 font-extrabold">
-                아직 등록된 구독 서비스가 없어요.
+
+            {recentSubscriptions.length > 0 ? (
+              <div className="flex flex-col w-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/80 shadow-xs">
+                {recentSubscriptions.map((sub) => {
+                  const isYearly = sub.billing_cycle === 'yearly'
+                  const monthlyPrice = isYearly ? Math.floor(sub.price / 12) : sub.price
+
+                  return (
+                    <div
+                      key={sub.id}
+                      onClick={() => openModal(sub)}
+                      className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                        <ServiceIcon
+                          serviceName={sub.service_name}
+                          category={sub.categories?.[0] || sub.category || 'Etc'}
+                          size="md"
+                        />
+                        <div className="flex flex-col min-w-0">
+                          <span className={cn(
+                            "font-bold text-[14px] truncate",
+                            sub.status === 'active' ? "text-dark dark:text-white" : "text-slate-400 dark:text-slate-500 line-through"
+                          )}>
+                            {sub.service_name}
+                          </span>
+                          <span className="text-[11.5px] text-slate-400 dark:text-slate-500 font-medium truncate">
+                            {sub.status === 'active' ? (sub.billing_date || '결제일 미설정') : '정지됨'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-[13.5px] font-extrabold text-dark dark:text-white block">
+                          {monthlyPrice.toLocaleString()}원
+                        </span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                          {isYearly ? '월 환산' : '/월'}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )}
-            
-            {!selectedCategory && (
-              <motion.div className="flex justify-center w-full">
-                <Link to="/list" className="mt-2 flex items-center gap-1 px-6 py-3 bg-background dark:bg-slate-700 rounded-[20px] text-dark dark:text-white font-extrabold hover:bg-tertiary dark:hover:bg-slate-600 transition-all active:scale-95 group cursor-pointer shadow-sm">
-                  더 보기
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </motion.div>
-            )}
-            
-            {selectedCategory && (
-              <motion.div className="flex justify-center w-full">
-                <button 
-                  onClick={() => setSelectedCategory(null)}
-                  className="mt-2 flex items-center gap-1 px-6 py-3 bg-background dark:bg-slate-700 rounded-[20px] text-dark dark:text-white font-extrabold hover:bg-tertiary dark:hover:bg-slate-600 transition-all active:scale-95 cursor-pointer shadow-sm"
-                >
-                  전체 목록 보기
-                </button>
-              </motion.div>
+            ) : (
+              <EmptyState message="아직 등록된 구독 서비스가 없습니다." />
             )}
         </motion.div>
 

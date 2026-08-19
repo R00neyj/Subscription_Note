@@ -38,6 +38,7 @@ import ServiceIcon from '../components/ServiceIcon'
 import PaymentBriefing from '../components/PaymentBriefing'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORY_COLORS } from '../constants/categories'
+import EmptyState from '../components/EmptyState'
 
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -249,9 +250,7 @@ export default function Calendar() {
               </div>
             </div>
           ) : (
-            <div className="w-full py-10 flex flex-col items-center justify-center gap-1 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
-              <p className="text-slate-400 font-medium text-sm">결제 예정된 항목이 없습니다.</p>
-            </div>
+            <EmptyState message="결제 예정된 항목이 없습니다." />
           )}
         </div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { cn } from '../lib/utils'
+import EmptyState from './EmptyState'
 
 export default function CategoryDistributionChart({ 
   categoryData, 
@@ -10,9 +11,7 @@ export default function CategoryDistributionChart({
 
   if (categoryData.length === 0) {
     return (
-      <div className="w-full h-[100px] flex items-center justify-center bg-tertiary dark:bg-slate-900 rounded-[24px] text-dark/40 dark:text-slate-500">
-        구독 데이터가 없습니다.
-      </div>
+      <EmptyState message="구독 데이터가 없습니다." />
     )
   }
 

@@ -20,8 +20,8 @@ const TUTORIAL_STEPS = [
     target: "#step-chart",
   },
   {
-    title: "최근 구독 내역",
-    description: "현재 이용 중인 구독 서비스들을 확인하고, 상세 내역을 편하게 관리하세요.",
+    title: "최근 등록한 구독",
+    description: "방금 추가한 구독을 바로 확인하고, '전체 보기'로 구독 탭에 들어가 상세히 관리하세요.",
     target: "#step-recent",
   },
   {
@@ -30,9 +30,14 @@ const TUTORIAL_STEPS = [
     target: window.innerWidth >= 768 ? "#step-add-pc" : "#step-fab",
   },
   {
-    title: "나에게 맞는 테마 설정",
-    description: "눈이 편안한 다크모드나 나만의 설정을 통해 구독노트를 더 쾌적하게 꾸며보세요.",
-    target: window.innerWidth >= 768 ? "#step-dark-pc" : "#step-settings-mobile",
+    title: "구독 다이어트",
+    description: "'다이어트' 탭에서 새로 들일 구독과 덜어낼 구독을 함께 저울질하며 월 지출을 시뮬레이션해 보세요.",
+    target: "#step-nav-bottom",
+  },
+  {
+    title: "테마와 설정",
+    description: "화면 오른쪽 위에서 다크모드를 켜고 끄거나, 설정으로 이동해 알림과 계정을 관리할 수 있어요.",
+    target: "#step-theme-toggle",
   }
 ]
 
