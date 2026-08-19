@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { X, Check, CopyPlus, Sparkles } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import ServiceIcon from './ServiceIcon'
-import { cn } from '../lib/utils'
+import { cn, createBackdropClose } from '../lib/utils'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -64,6 +64,7 @@ export default function ImportFromActiveModal({ isOpen, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onMouseDown={createBackdropClose(onClose)}
           className="fixed inset-0 z-[110] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
         >
           <motion.div 

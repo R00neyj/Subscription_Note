@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion'
+import { createBackdropClose } from '../lib/utils'
 import { 
   Sparkles, 
   Calendar, 
@@ -946,9 +949,26 @@ export default function Landing() {
       </footer>
 
       {/* 7. Auth Choice Modal Overlay */}
-      {isAuthModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="w-full max-w-[460px] bg-white dark:bg-slate-900 rounded-[34px] p-7 sm:p-9 border border-slate-200 dark:border-slate-800 shadow-2xl relative animate-fade-slide-in">
+      {/*
+        마운트 시에만 도는 CSS 애니메이션(animate-fade-slide-in)이라 닫을 때는 즉시 사라졌다.
+        다른 모달과 같은 방식으로 AnimatePresence 를 씌워 닫힘 트랜지션을 맞춘다.
+      */}
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={createBackdropClose(() => setIsAuthModalOpen(false))}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-[460px] bg-white dark:bg-slate-900 rounded-[34px] p-7 sm:p-9 border border-slate-200 dark:border-slate-800 shadow-2xl relative"
+            >
             <button
               onClick={() => setIsAuthModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold cursor-pointer"
@@ -987,9 +1007,10 @@ export default function Landing() {
             <p className="mt-6 text-center text-xs text-slate-400 font-medium">
               언제든지 설정 페이지에서 Google 계정을 연동할 수 있습니다.
             </p>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )

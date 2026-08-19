@@ -3,7 +3,7 @@ import { X, Trash2, Star, ExternalLink, Globe, Ban, Bookmark, Sparkles, RefreshC
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
 import { SUBSCRIPTION_PRESETS, getServiceLinks } from '../constants/presets'
-import { cn, sanitizeInput } from '../lib/utils'
+import { cn, sanitizeInput, createBackdropClose, closeModalViaHistory } from '../lib/utils'
 import { formatYearlyBillingDate } from '../lib/dateUtils'
 import ServiceIcon from './ServiceIcon'
 // eslint-disable-next-line no-unused-vars
@@ -740,6 +740,7 @@ export default function SubscriptionModal({ isOpen, onClose, initialData = null 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onMouseDown={createBackdropClose(() => closeModalViaHistory(onClose))}
           className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
         >
           <SubscriptionModalContent

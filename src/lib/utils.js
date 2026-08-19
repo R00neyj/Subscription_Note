@@ -60,3 +60,31 @@ export function attachParticle(word, particle) {
   return word
 }
 
+
+/**
+ * 모달 배경(딤 영역)을 눌렀을 때만 닫기 위한 핸들러를 만든다.
+ *
+ * click 이 아니라 mousedown 을 보는 이유: 모달 안에서 드래그로 텍스트를 선택하다
+ * 배경에서 손을 떼면 click 은 두 지점의 공통 조상인 배경에서 발생해, 글자를 긁기만
+ * 해도 모달이 닫힌다. mousedown 은 실제로 누른 지점에서만 발생해 이 오작동이 없다.
+ *
+ * 내부 패널에 stopPropagation 을 거는 방식 대신 target === currentTarget 을 쓰는 이유:
+ * 전파를 막으면 패널 안의 이벤트를 통째로 삼켜 다른 기능과 충돌할 수 있다.
+ *
+ * @param {() => void} onClose 배경을 눌렀을 때 실행할 닫기 동작
+ */
+export const createBackdropClose = (onClose) => (e) => {
+  if (e.target === e.currentTarget) onClose()
+}
+
+/**
+ * 모바일에서 모달은 히스토리 항목을 하나 push 해 두고 뒤로가기로 닫는다
+ * (SubscriptionModal / PromoteModal 참고). 배경 클릭으로 닫을 때도 같은 경로를 타야
+ * push 해 둔 항목이 남아 뒤로가기 한 번을 잡아먹는 일이 없다.
+ *
+ * 모달이 열려 있는 동안 모바일에서는 항상 push 된 상태이므로 별도 플래그 없이 판단한다.
+ */
+export const closeModalViaHistory = (onClose) => {
+  if (window.innerWidth < 768) window.history.back()
+  else onClose()
+}

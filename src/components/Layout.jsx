@@ -28,12 +28,17 @@ export default function Layout() {
       {/* Extended FAB */}
       {showFAB && <FloatingActionButton />}
 
-      {/* Global Modal */}
+      {/*
+        Global Modal
+        여기에 key 를 걸지 말 것. closeModal 이 data 를 null 로 만드는 순간 key 가
+        edit-N -> new 로 바뀌어 React 가 내부 AnimatePresence 째로 갈아끼우고,
+        닫힘 트랜지션이 재생되지 않는다. 폼 상태 초기화는 SubscriptionModal 안에서
+        SubscriptionModalContent 에 건 key 가 담당한다.
+      */}
       <SubscriptionModal 
         isOpen={modalOpen} 
         onClose={closeModal} 
         initialData={modalData}
-        key={modalData ? `edit-${modalData.id}` : 'new'} 
       />
 
       {/* Promote Modal (Wishlist -> Active) */}

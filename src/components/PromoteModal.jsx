@@ -3,7 +3,7 @@ import { X, ArrowUpRight, Calendar, CreditCard, Sparkles, RefreshCw, Globe, Ban,
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import ServiceIcon from './ServiceIcon'
 import { getServiceLinks } from '../constants/presets'
-import { cn, sanitizeInput } from '../lib/utils'
+import { cn, sanitizeInput, createBackdropClose, closeModalViaHistory } from '../lib/utils'
 import { formatYearlyBillingDate } from '../lib/dateUtils'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
@@ -283,6 +283,7 @@ export default function PromoteModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onMouseDown={createBackdropClose(() => closeModalViaHistory(closePromoteModal))}
           className="fixed inset-0 z-[120] flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
         >
           <PromoteModalContent item={item} onClose={closePromoteModal} />

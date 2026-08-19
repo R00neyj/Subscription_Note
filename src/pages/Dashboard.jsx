@@ -6,7 +6,7 @@ import CategoryDistributionChart from '../components/CategoryDistributionChart'
 import PaymentBriefing from '../components/PaymentBriefing'
 import { ChevronRight, AlertTriangle, TrendingDown, Info, Star, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { cn } from '../lib/utils'
+import { cn, createBackdropClose } from '../lib/utils'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import NotificationBanner from '../components/NotificationBanner'
 import { CATEGORY_COLORS, TEXT_COLORS, CATEGORIES } from '../constants/categories'
@@ -459,6 +459,7 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              onMouseDown={createBackdropClose(() => setActiveInsight(null))}
               className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             >
               <motion.div 
