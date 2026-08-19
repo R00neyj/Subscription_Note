@@ -697,12 +697,13 @@ const RAW_PRESETS = [
     cancel_url: "https://www.midjourney.com/account"
   },
   {
-    nameKo: "딥엘 프로 (Starter)",
-    nameEn: "DeepL Pro Starter",
-    price: 12000,
+    nameKo: "딥엘 프로 (개인)",
+    nameEn: "DeepL Pro Individual",
+    priceUsd: 10.49,
     category: "Work",
     subscribe_url: "https://www.deepl.com/pro",
-    cancel_url: "https://www.deepl.com/account/subscription"
+    cancel_url: "https://www.deepl.com/account/subscription",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "어도비 CC 프로 (모든 앱)",
@@ -803,83 +804,93 @@ const RAW_PRESETS = [
   {
     nameKo: "피그마 프로 (디자인)",
     nameEn: "Figma Professional Full",
-    price: 29000,
+    priceUsd: 20,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 프로 (디자인) (연간)",
     nameEn: "Figma Professional Yearly",
-    price: 210000,
+    priceUsd: 192,
     category: "Work",
     billing_cycle: "yearly",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 프로 (개발)",
     nameEn: "Figma Professional Dev",
-    price: 22000,
+    priceUsd: 15,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 프로 (협업)",
     nameEn: "Figma Professional Collab",
-    price: 7500,
+    priceUsd: 5,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 조직 (디자인)",
     nameEn: "Figma Organization Full",
-    price: 80000,
+    priceUsd: 55,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 조직 (개발)",
     nameEn: "Figma Organization Dev",
-    price: 36500,
+    priceUsd: 25,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 조직 (협업)",
     nameEn: "Figma Organization Collab",
-    price: 7500,
+    priceUsd: 5,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 엔터프라이즈 (디자인)",
     nameEn: "Figma Enterprise Full",
-    price: 130000,
+    priceUsd: 90,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 엔터프라이즈 (개발)",
     nameEn: "Figma Enterprise Dev",
-    price: 51000,
+    priceUsd: 35,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "피그마 엔터프라이즈 (협업)",
     nameEn: "Figma Enterprise Collab",
-    price: 7500,
+    priceUsd: 5,
     category: "Work",
     subscribe_url: "https://www.figma.com/pricing/",
-    cancel_url: "https://www.figma.com/settings"
+    cancel_url: "https://www.figma.com/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "캔바 프로",
@@ -892,18 +903,20 @@ const RAW_PRESETS = [
   {
     nameKo: "프레이머 프로",
     nameEn: "Framer Pro",
-    price: 29000,
+    price: 29873,
     category: "Work",
     subscribe_url: "https://www.framer.com/pricing/",
-    cancel_url: "https://www.framer.com/account"
+    cancel_url: "https://www.framer.com/account",
+    verifiedAt: "2026-08-20"
   },
   {
-    nameKo: "웹플로우 스타터",
-    nameEn: "Webflow Starter",
-    price: 20000,
+    nameKo: "웹플로우 베이직",
+    nameEn: "Webflow Basic",
+    priceUsd: 15,
     category: "Work",
     subscribe_url: "https://webflow.com/pricing",
-    cancel_url: "https://webflow.com/dashboard/account/billing"
+    cancel_url: "https://webflow.com/dashboard/account/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "엔바토 엘리먼츠 코어",
@@ -972,26 +985,29 @@ const RAW_PRESETS = [
   {
     nameKo: "슬랙 프로",
     nameEn: "Slack Pro",
-    price: 10500,
+    priceUsd: 8.75,
     category: "Work",
     subscribe_url: "https://slack.com/pricing",
-    cancel_url: "https://my.slack.com/admin/billing"
+    cancel_url: "https://my.slack.com/admin/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "줌 프로",
     nameEn: "Zoom Pro",
-    price: 23000,
+    price: 19833,
     category: "Work",
     subscribe_url: "https://zoom.us/pricing",
-    cancel_url: "https://zoom.us/billing"
+    cancel_url: "https://zoom.us/billing",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "미로 스타터",
     nameEn: "Miro Starter",
-    price: 11500,
+    priceUsd: 10,
     category: "Work",
     subscribe_url: "https://miro.com/pricing/",
-    cancel_url: "https://miro.com/app/settings"
+    cancel_url: "https://miro.com/app/settings",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "먼데이닷컴 베이직",
@@ -1013,10 +1029,11 @@ const RAW_PRESETS = [
   {
     nameKo: "투두이스트 프로",
     nameEn: "Todoist Pro",
-    price: 7000,
+    priceUsd: 7,
     category: "Work",
     subscribe_url: "https://todoist.com/pricing",
-    cancel_url: "https://todoist.com/app/settings/subscription"
+    cancel_url: "https://todoist.com/app/settings/subscription",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "리니어 베이직",
@@ -1030,18 +1047,21 @@ const RAW_PRESETS = [
   {
     nameKo: "레이캐스트 프로",
     nameEn: "Raycast Pro",
-    price: 11500,
+    priceUsd: 10,
     category: "Work",
     subscribe_url: "https://www.raycast.com/pro",
-    cancel_url: "https://www.raycast.com/settings/billing"
+    cancel_url: "https://www.raycast.com/settings/billing",
+    verifiedAt: "2026-08-20"
   },
   {
-    nameKo: "젯브레인 올 프로덕트",
-    nameEn: "JetBrains All Products",
-    price: 35000,
+    nameKo: "젯브레인 올 프로덕트 (연간)",
+    nameEn: "JetBrains All Products Yearly",
+    priceUsd: 719,
     category: "Work",
     subscribe_url: "https://www.jetbrains.com/all/",
-    cancel_url: "https://account.jetbrains.com"
+    cancel_url: "https://account.jetbrains.com",
+    billing_cycle: "yearly",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "재피어 프로페셔널",
