@@ -28,6 +28,7 @@ import { getWeeklyUpcomingPayments } from '../lib/notificationUtils'
 import ServiceIcon from './ServiceIcon'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import EmptyState from './EmptyState'
+import { subsectionTitleClass } from './SubsectionHeader'
 
 export default function PaymentBriefing({ 
   currentDate = new Date(),
@@ -216,9 +217,7 @@ export default function PaymentBriefing({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-0.5">
         <div className="flex items-center gap-2 flex-wrap">
           <CalendarIcon size={20} className="text-primary" />
-          <h3 className="text-base md:text-lg font-bold text-dark dark:text-white">
-            결제 브리핑
-          </h3>
+          <h3 className={subsectionTitleClass}>결제 브리핑</h3>
           <span className="text-[11px] md:text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
             {isMonthly 
               ? format(currentDate, 'yyyy년 M월', { locale: ko }) 

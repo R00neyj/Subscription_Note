@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
+import SubsectionHeader from '../components/SubsectionHeader'
 import CategoryDistributionChart from '../components/CategoryDistributionChart'
 import PaymentBriefing from '../components/PaymentBriefing'
 import { ChevronRight, AlertTriangle, TrendingDown, Info, Star, X } from 'lucide-react'
@@ -360,7 +361,7 @@ export default function Dashboard() {
         {/* Optimization Insights Section */}
         {insights && (
           <motion.div variants={itemVariants} className="mt-4 md:mt-6 flex flex-col items-start w-full gap-3">
-            <SectionHeader title="구독 최적화 리포트" />
+            <SubsectionHeader title="구독 최적화 리포트" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-3.5 w-full">
               {/* Long-term Cost Card */}
               <motion.div 
@@ -827,8 +828,8 @@ export default function Dashboard() {
 
         {/* Chart Section */}
          <motion.div id="step-chart" variants={itemVariants} className="mt-8 flex flex-col items-start w-full gap-4">
-            <SectionHeader title="카테고리별 비중" />
-            
+            <SubsectionHeader title="카테고리별 비중" />
+
             <CategoryDistributionChart
               categoryData={categoryData}
               selectedCategory={null}
@@ -838,18 +839,18 @@ export default function Dashboard() {
 
         {/* Recent Subscriptions Preview (전체 목록은 구독 탭에서) */}
         <motion.div id="step-recent" variants={itemVariants} className="flex flex-col gap-3 mt-8 w-full">
-            <div className="flex items-center justify-between w-full gap-3">
-              <h3 className="text-lg font-extrabold text-dark dark:text-white">
-                최근 등록한 구독
-              </h3>
-              <Link
-                to="/list"
-                className="flex items-center gap-0.5 text-[13px] font-bold text-primary dark:text-blue-400 hover:underline shrink-0 cursor-pointer"
-              >
-                전체 보기
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            <SubsectionHeader
+              title="최근 등록한 구독"
+              action={
+                <Link
+                  to="/list"
+                  className="flex items-center gap-0.5 text-[13px] font-bold text-primary dark:text-blue-400 hover:underline shrink-0 cursor-pointer"
+                >
+                  전체 보기
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              }
+            />
 
             {recentSubscriptions.length > 0 ? (
               <div className="flex flex-col w-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/80 shadow-xs">
