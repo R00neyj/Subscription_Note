@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { SUBSCRIPTION_PRESETS, getPriceVerifiedAt } from '../src/constants/presets.js'
+import { SUBSCRIPTION_PRESETS, getPriceVerifiedAt, USD_KRW } from '../src/constants/presets.js'
 import { SITE_URL as SITE, BRAND } from '../site.config.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -319,6 +319,7 @@ const servicePage = (service, siblings) => {
 
     <h2>요금제별 금액</h2>
     <p class="note">${esc(priceLabel)} · 요금은 변경될 수 있으니 정확한 금액은 공식 페이지에서 다시 확인해 주세요.</p>
+    ${plans.some((p) => p.priceUsd != null) ? `<p class="note">이 서비스는 달러로 청구됩니다. 표의 원화 금액은 1달러 = ${won(USD_KRW)}원으로 환산한 값이며, 실제 청구액은 카드사 환율에 따라 달라집니다.</p>` : ''}
     <div class="scroller">
       <table>
         <thead>

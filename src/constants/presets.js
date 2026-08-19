@@ -17,7 +17,7 @@ export const PRICE_BASE_DATE = '2026-08-19'
  *   → 현재는 어떤 프리셋에도 verifiedAt 이 붙어 있지 않다. 검증되지 않은 항목에
  *     임의로 날짜를 채워 넣지 말 것.
  */
-export const SUBSCRIPTION_PRESETS = [
+const RAW_PRESETS = [
   // ==========================================
   // 1. OTT
   // ==========================================
@@ -541,50 +541,56 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "클로드 프로",
     nameEn: "Claude Pro",
-    price: 29000,
+    priceUsd: 22,
     category: "Work",
     subscribe_url: "https://claude.ai",
-    cancel_url: "https://claude.ai/settings/billing"
+    cancel_url: "https://claude.ai/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "클로드 맥스 5x",
     nameEn: "Claude Max 5x",
-    price: 145000,
+    priceUsd: 100,
     category: "Work",
     subscribe_url: "https://claude.ai",
-    cancel_url: "https://claude.ai/settings/billing"
+    cancel_url: "https://claude.ai/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "클로드 맥스 20x",
     nameEn: "Claude Max 20x",
-    price: 290000,
+    priceUsd: 200,
     category: "Work",
     subscribe_url: "https://claude.ai",
-    cancel_url: "https://claude.ai/settings/billing"
+    cancel_url: "https://claude.ai/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "클로드 팀 (Standard)",
     nameEn: "Claude Team Standard",
-    price: 43500,
+    priceUsd: 25,
     category: "Work",
     subscribe_url: "https://claude.ai",
-    cancel_url: "https://claude.ai/settings/billing"
+    cancel_url: "https://claude.ai/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "클로드 팀 (Premium)",
     nameEn: "Claude Team Premium",
-    price: 217500,
+    priceUsd: 125,
     category: "Work",
     subscribe_url: "https://claude.ai",
-    cancel_url: "https://claude.ai/settings/billing"
+    cancel_url: "https://claude.ai/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "퍼플렉시티 프로",
     nameEn: "Perplexity Pro",
-    price: 29000,
+    priceUsd: 20,
     category: "Work",
     subscribe_url: "https://www.perplexity.ai/pro",
-    cancel_url: "https://www.perplexity.ai/settings/account"
+    cancel_url: "https://www.perplexity.ai/settings/account",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "퍼플렉시티 프로 (연간)",
@@ -598,10 +604,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "깃허브 코파일럿",
     nameEn: "Github Copilot",
-    price: 14500,
+    priceUsd: 10,
     category: "Work",
     subscribe_url: "https://github.com/features/copilot",
-    cancel_url: "https://github.com/settings/billing"
+    cancel_url: "https://github.com/settings/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "깃허브 코파일럿 (연간)",
@@ -615,10 +622,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "미드저니 베이직",
     nameEn: "Midjourney Basic",
-    price: 14500,
+    priceUsd: 10,
     category: "Work",
     subscribe_url: "https://www.midjourney.com",
-    cancel_url: "https://www.midjourney.com/account"
+    cancel_url: "https://www.midjourney.com/account",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "미드저니 베이직 (연간)",
@@ -983,18 +991,20 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "넷리파이 퍼스널",
     nameEn: "Netlify Personal",
-    price: 13000,
+    priceUsd: 9,
     category: "Work",
     subscribe_url: "https://www.netlify.com/pricing/",
-    cancel_url: "https://app.netlify.com/teams/billing"
+    cancel_url: "https://app.netlify.com/teams/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "넷리파이 프로",
     nameEn: "Netlify Pro",
-    price: 29000,
+    priceUsd: 20,
     category: "Work",
     subscribe_url: "https://www.netlify.com/pricing/",
-    cancel_url: "https://app.netlify.com/teams/billing"
+    cancel_url: "https://app.netlify.com/teams/billing",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "넷리파이 비즈니스",
@@ -1454,6 +1464,27 @@ export const SUBSCRIPTION_PRESETS = [
     cancel_url: "https://my.kakao.com"
   }
 ]
+
+// 달러로 청구되는 해외 서비스의 원화 환산 기준.
+//
+// 항목마다 환율을 적어 두면 값이 어긋난다. 실제로 클로드 팀은 1,740원/달러,
+// 클로드 맥스는 1,450원/달러가 내포돼 있어 같은 회사 상품인데 가정이 달랐다.
+// 환율이 바뀌면 이 상수 한 줄만 고치면 priceUsd 를 가진 항목이 전부 다시 계산된다.
+//
+// 기준: 월간 결제 정가. 연간 선결제 할인가는 조건부이므로 쓰지 않는다
+// (연간 플랜은 "(연간)" 항목으로 따로 있다).
+export const USD_KRW = 1412
+export const FX_BASE_DATE = '2026-08-19'
+
+/**
+ * 원화 공식가가 있는 서비스(넷플릭스, 챗GPT 등)는 `price` 를 직접 적는다.
+ * 달러로만 청구되는 서비스는 `priceUsd` 만 적고 원화는 여기서 환산한다.
+ */
+export const SUBSCRIPTION_PRESETS = RAW_PRESETS.map((preset) =>
+  preset.priceUsd == null
+    ? preset
+    : { ...preset, price: Math.round(preset.priceUsd * USD_KRW) }
+)
 
 /**
  * 프리셋의 가격 기준일을 반환한다.
