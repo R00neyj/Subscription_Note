@@ -16,7 +16,11 @@ export default defineConfig({
     react(),
     injectSiteUrl(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'autoUpdate' 로 두면 vite-plugin-pwa 의 register 코드가 onNeedRefresh 를
+      // 아예 호출하지 않고 새 SW 활성화 즉시 window.location.reload() 를 실행한다.
+      // 그러면 SWUpdatePrompt 의 업데이트 안내가 뜰 수 없고, 사용자가 입력하던
+      // 내용이 예고 없이 날아간다. 갱신 시점은 사용자가 고르게 한다.
+      registerType: 'prompt',
       injectRegister: 'auto',
       strategies: 'injectManifest',
       srcDir: 'src',
@@ -25,11 +29,24 @@ export default defineConfig({
         enabled: true,
         type: 'module'
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', '*.svg', '*.png'],
+      // '*.svg', '*.png' 로 뭉뚱그리면 앱 실행에는 쓰이지 않는 스크린샷·OG 이미지까지
+      // 프리캐시에 들어가 최초 설치 때 500KB 가까이 헛되이 내려받는다.
+      // 오프라인에서 실제로 필요한 것만 명시한다.
+      includeAssets: [
+        'favicon.ico',
+        'favicon.svg',
+        'favicon-96x96.png',
+        'apple-touch-icon.png',
+        'web-app-manifest-192x192.png',
+        'logo_d.svg',
+        'name=*.svg',
+      ],
       manifest: {
         name: '구독노트 - 스마트한 구독 관리',
         short_name: '구독노트',
         description: '나의 모든 구독 서비스를 한눈에 관리하는 대시보드',
+        lang: 'ko',
+        dir: 'ltr',
         theme_color: '#F8FAFC',
         background_color: '#F8FAFC',
         display: 'standalone',

@@ -18,7 +18,7 @@ export default {
         overlay: 'rgba(37, 99, 235, 0.1)',
       },
       fontFamily: {
-        sans: ['Pretendard', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Pretendard Variable', 'Pretendard', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       }
     },
   },

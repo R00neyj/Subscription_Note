@@ -11,7 +11,7 @@
   --color-dark: #1E293B;
   --color-overlay: rgba(37, 99, 235, 0.1);
   
-  --font-sans: "Pretendard", "ui-sans-serif", "system-ui", "sans-serif";
+  --font-sans: "Pretendard Variable", "Pretendard", "ui-sans-serif", "system-ui", "sans-serif";
 
   /* Easing Functions */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -19,7 +19,7 @@
 }
 
 :root {
-  font-family: "Pretendard", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   
