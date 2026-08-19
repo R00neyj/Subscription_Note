@@ -167,7 +167,7 @@ export default function Settings() {
             <div className="p-3.5 md:p-5 flex items-center justify-between transition-colors">
               <div className="space-y-0.5">
                 <h3 className="text-[14.5px] md:text-base font-bold text-dark dark:text-white">진동 피드백</h3>
-                <p className="text-[11.5px] md:text-xs text-slate-500 dark:text-slate-400">탭 전환과 저장·삭제에 짧은 진동을 줍니다.</p>
+                <p className="text-[11.5px] md:text-xs text-slate-500 dark:text-slate-400">탭 전환과 저장·삭제에 짧은 진동을 줍니다. 방해금지 모드에서는 울리지 않습니다.</p>
               </div>
               <button
                 onClick={handleToggleHaptics}

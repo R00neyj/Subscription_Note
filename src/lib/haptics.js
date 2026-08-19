@@ -11,7 +11,7 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
  */
 
 export const HAPTIC = {
-  tap: 10,               // 탭 전환처럼 "눌렸다"만 알리는 최소 신호
+  tap: 15,               // 탭 전환처럼 "눌렸다"만 알리는 최소 신호. 10ms 는 LRA 모터에서 인지가 어렵다
   success: 18,           // 저장·추가 완료
   warning: [12, 40, 12], // 삭제처럼 되돌리기 어려운 동작
 }
