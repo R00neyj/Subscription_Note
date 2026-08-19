@@ -333,6 +333,10 @@ const useSubscriptionStore = create(
       notificationsEnabled: true,
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
 
+      // 햅틱(진동) 피드백 — 안드로이드에서만 실제로 울리고, 미지원 기기에서는 값과 무관하게 무시된다
+      hapticsEnabled: true,
+      setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
+
       // 노동 시간 환산 기준 시급 (미설정 시 최저시급으로 폴백)
       wagePresetId: DEFAULT_WAGE_PRESET_ID,
       hourlyWage: null,
@@ -359,6 +363,7 @@ const useSubscriptionStore = create(
         themeMode: state.themeMode,
         hasSeenTutorial: state.hasSeenTutorial,
         notificationsEnabled: state.notificationsEnabled,
+        hapticsEnabled: state.hapticsEnabled,
         ignoredDuplicates: state.ignoredDuplicates,
         wagePresetId: state.wagePresetId,
         hourlyWage: state.hourlyWage

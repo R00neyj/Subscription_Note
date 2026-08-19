@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../lib/utils'
+import { haptic } from '../lib/haptics'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 
 // 탭은 "지금 얼마 쓰나 / 뭘 쓰나 / 뭘 줄일까 / 언제 빠져나가나" 네 질문에 하나씩 대응한다.
@@ -38,6 +39,7 @@ export default function Navigation() {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => haptic()}
                 className="flex flex-col items-center justify-center w-[64px] md:w-[60px] h-[58px] md:h-[58px] py-1 gap-[3px] transition-all group active:scale-95 cursor-pointer"
               >
                 {/* size-56 (Icon Container) */}

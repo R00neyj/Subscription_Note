@@ -5,6 +5,7 @@ import { CATEGORIES } from '../constants/categories'
 import { SUBSCRIPTION_PRESETS, getServiceLinks } from '../constants/presets'
 import { cn, sanitizeInput, createBackdropClose, closeModalViaHistory } from '../lib/utils'
 import { formatYearlyBillingDate } from '../lib/dateUtils'
+import { haptic, HAPTIC } from '../lib/haptics'
 import ServiceIcon from './ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
@@ -185,13 +186,15 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
     } else {
       addSubscription(payload)
     }
-    
+
+    haptic(HAPTIC.success)
     handleCloseInternal()
   }
 
   const handleDelete = () => {
     if (isEditMode && window.confirm('정말로 이 항목을 삭제하시겠습니까?')) {
       removeSubscription(initialData.id)
+      haptic(HAPTIC.warning)
       handleCloseInternal()
     }
   }

@@ -7,6 +7,7 @@ import { Github } from 'lucide-react'
 import Header from '../components/Header'
 import SectionHeader from '../components/SectionHeader'
 import { subscribeToPush } from '../lib/notificationUtils'
+import { haptic, isHapticsSupported } from '../lib/haptics'
 import { supabase } from '../lib/supabase'
 import GoogleIcon from '../components/GoogleIcon'
 
@@ -27,6 +28,17 @@ export default function Settings() {
   const setWagePreset = useSubscriptionStore((state) => state.setWagePreset)
   const notificationsEnabled = useSubscriptionStore((state) => state.notificationsEnabled)
   const setNotificationsEnabled = useSubscriptionStore((state) => state.setNotificationsEnabled)
+  const hapticsEnabled = useSubscriptionStore((state) => state.hapticsEnabled)
+  const setHapticsEnabled = useSubscriptionStore((state) => state.setHapticsEnabled)
+  // 진동 지원 여부는 기기 특성이라 마운트 시 한 번만 판별한다
+  const [hapticsSupported] = useState(isHapticsSupported)
+
+  const handleToggleHaptics = () => {
+    const next = !hapticsEnabled
+    setHapticsEnabled(next)
+    // 켜는 순간 어떤 느낌인지 바로 확인할 수 있게 한 번 울려준다
+    if (next) haptic()
+  }
 
   const handleToggleNotifications = async () => {
     const newState = !notificationsEnabled
@@ -149,6 +161,30 @@ export default function Settings() {
               />
             </button>
           </div>
+
+          {/* 햅틱 설정 — 진동 하드웨어가 있는 기기에서만 노출 */}
+          {hapticsSupported && (
+            <div className="p-3.5 md:p-5 flex items-center justify-between transition-colors">
+              <div className="space-y-0.5">
+                <h3 className="text-[14.5px] md:text-base font-bold text-dark dark:text-white">진동 피드백</h3>
+                <p className="text-[11.5px] md:text-xs text-slate-500 dark:text-slate-400">탭 전환과 저장·삭제에 짧은 진동을 줍니다.</p>
+              </div>
+              <button
+                onClick={handleToggleHaptics}
+                className={cn(
+                  "relative w-[44px] h-[26px] rounded-full transition-colors duration-200 cursor-pointer shrink-0",
+                  hapticsEnabled ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"
+                )}
+              >
+                <div
+                  className={cn(
+                    "absolute top-[2px] left-[2px] size-[22px] bg-white rounded-full shadow-xs transition-transform duration-200",
+                    hapticsEnabled ? "translate-x-[18px]" : "translate-x-0"
+                  )}
+                />
+              </button>
+            </div>
+          )}
 
           {/* 노동 시간 환산 기준 */}
           <div className="p-3.5 md:p-5 flex flex-col gap-3 transition-colors">

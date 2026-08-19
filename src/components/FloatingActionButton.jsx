@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { cn } from '../lib/utils'
+import { haptic } from '../lib/haptics'
 
 export default function FloatingActionButton() {
   const openModal = useSubscriptionStore((state) => state.openModal)
@@ -42,7 +43,10 @@ export default function FloatingActionButton() {
   return (
     <button
       id="step-fab"
-      onClick={() => openModal()}
+      onClick={() => {
+        haptic()
+        openModal()
+      }}
       aria-label="구독 추가"
       className={cn(
         "md:hidden fixed bottom-[74px] right-4 z-[60] flex items-center justify-center size-[48px] bg-primary text-white rounded-full shadow-md shadow-primary/30 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 cursor-pointer",
