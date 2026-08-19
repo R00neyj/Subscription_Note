@@ -1,3 +1,22 @@
+/**
+ * 이 카탈로그 가격의 "기준일".
+ * 구독료는 시간이 지나면 실제 가격과 달라질 수 있다. 프리셋 각각에 별도의 검증일
+ * (아래 `verifiedAt`)이 없으면, 그 프리셋의 가격은 이 날짜를 기준으로 표기된 것으로
+ * 간주한다. 즉 "이 카탈로그를 마지막으로 훑어본 시점"을 뜻하며, 개별 항목의 가격을
+ * 실제로 하나하나 재확인했다는 뜻은 아니다.
+ * 카탈로그 가격을 전반적으로 재검토/갱신할 때마다 이 값을 갱신할 것.
+ */
+export const PRICE_BASE_DATE = '2026-08-19'
+
+/**
+ * SUBSCRIPTION_PRESETS 의 각 원소는 아래 필드를 가진다.
+ * - nameKo, nameEn, price, category, billing_cycle, subscribe_url, cancel_url
+ * - verifiedAt (선택) — 'YYYY-MM-DD' 형식. 이 프리셋의 가격을 실제로 공식 페이지에서
+ *   확인한 날짜. **실제로 가격을 확인한 항목에만 나중에 붙인다.** 값이 없는 항목은
+ *   PRICE_BASE_DATE 를 기준일로 취급한다 (아래 getPriceVerifiedAt 참고).
+ *   → 현재는 어떤 프리셋에도 verifiedAt 이 붙어 있지 않다. 검증되지 않은 항목에
+ *     임의로 날짜를 채워 넣지 말 것.
+ */
 export const SUBSCRIPTION_PRESETS = [
   // ==========================================
   // 1. OTT
@@ -103,7 +122,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "넷플릭스 광고형",
     nameEn: "Netflix Ad-supported",
-    price: 5500,
+    price: 7000,
+    verifiedAt: "2026-08-19",
     category: "OTT",
     subscribe_url: "https://www.netflix.com",
     cancel_url: "https://www.netflix.com/youraccount"
@@ -195,7 +215,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "스포티파이",
     nameEn: "Spotify",
-    price: 10900,
+    price: 11990,
+    verifiedAt: "2026-08-19",
     category: "Music",
     subscribe_url: "https://www.spotify.com",
     cancel_url: "https://www.spotify.com/account/overview/"
@@ -203,18 +224,20 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "멜론 스트리밍",
     nameEn: "Melon",
-    price: 10900,
+    price: 8690,
     category: "Music",
     subscribe_url: "https://www.melon.com",
-    cancel_url: "https://member.melon.com/my/pay/use.htm"
+    cancel_url: "https://member.melon.com/my/pay/use.htm",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "지니뮤직",
     nameEn: "Genie Music",
-    price: 9600,
+    price: 9240,
     category: "Music",
     subscribe_url: "https://www.genie.co.kr",
-    cancel_url: "https://www.genie.co.kr/my/buyList"
+    cancel_url: "https://www.genie.co.kr/my/buyList",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "애플 뮤직",
@@ -249,54 +272,6 @@ export const SUBSCRIPTION_PRESETS = [
     cancel_url: "https://vibe.naver.com/membership/my"
   },
   {
-    nameKo: "타이달",
-    nameEn: "Tidal",
-    price: 13000,
-    category: "Music",
-    subscribe_url: "https://tidal.com",
-    cancel_url: "https://account.tidal.com"
-  },
-  {
-    nameKo: "사운드클라우드 Go+",
-    nameEn: "SoundCloud Go+",
-    price: 10000,
-    category: "Music",
-    subscribe_url: "https://soundcloud.com/go",
-    cancel_url: "https://soundcloud.com/you/settings"
-  },
-  {
-    nameKo: "디저",
-    nameEn: "Deezer",
-    price: 12000,
-    category: "Music",
-    subscribe_url: "https://www.deezer.com",
-    cancel_url: "https://www.deezer.com/account"
-  },
-  {
-    nameKo: "아마존 뮤직",
-    nameEn: "Amazon Music",
-    price: 11000,
-    category: "Music",
-    subscribe_url: "https://music.amazon.com",
-    cancel_url: "https://www.amazon.com/mc/manage"
-  },
-  {
-    nameKo: "AWA",
-    nameEn: "AWA",
-    price: 9000,
-    category: "Music",
-    subscribe_url: "https://awa.fm",
-    cancel_url: "https://awa.fm/account"
-  },
-  {
-    nameKo: "KKBOX",
-    nameEn: "KKBOX",
-    price: 8000,
-    category: "Music",
-    subscribe_url: "https://www.kkbox.com",
-    cancel_url: "https://account.kkbox.com"
-  },
-  {
     nameKo: "QQ뮤직",
     nameEn: "QQ Music",
     price: 5000,
@@ -307,26 +282,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "이다지오",
     nameEn: "Idagio",
-    price: 12000,
+    price: 12500,
+    verifiedAt: "2026-08-19",
     category: "Music",
     subscribe_url: "https://www.idagio.com",
     cancel_url: "https://app.idagio.com/account"
-  },
-  {
-    nameKo: "무드믹스",
-    nameEn: "Moodmix",
-    price: 15000,
-    category: "Music",
-    subscribe_url: "https://moodmix.com",
-    cancel_url: "https://moodmix.com/account"
-  },
-  {
-    nameKo: "사운드스트림",
-    nameEn: "Soundstream",
-    price: 7000,
-    category: "Music",
-    subscribe_url: "https://soundstream.bar",
-    cancel_url: "https://soundstream.bar/account"
   },
   {
     nameKo: "냅스터",
@@ -335,14 +295,6 @@ export const SUBSCRIPTION_PRESETS = [
     category: "Music",
     subscribe_url: "https://order.napster.com",
     cancel_url: "https://account.napster.com"
-  },
-  {
-    nameKo: "판도라",
-    nameEn: "Pandora",
-    price: 11000,
-    category: "Music",
-    subscribe_url: "https://www.pandora.com",
-    cancel_url: "https://www.pandora.com/account/subscription"
   },
 
   // ==========================================
@@ -401,10 +353,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "신세계 유니버스 (G마켓)",
     nameEn: "Smile Club",
-    price: 3000,
+    price: 30000,
     category: "Shopping",
     subscribe_url: "https://universe.gmarket.co.kr",
-    cancel_url: "https://my.gmarket.co.kr/smileclub"
+    cancel_url: "https://my.gmarket.co.kr/smileclub",
+    billing_cycle: "yearly"
   },
   {
     nameKo: "롯데 ON 멤버십",
@@ -417,18 +370,12 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "코스트코 이그제큐티브",
     nameEn: "Costco Executive",
-    price: 6600,
+    price: 86000,
     category: "Shopping",
     subscribe_url: "https://www.costco.co.kr",
-    cancel_url: "https://www.costco.co.kr/my-account"
-  },
-  {
-    nameKo: "아마존 프라임",
-    nameEn: "Amazon Prime",
-    price: 18000,
-    category: "Shopping",
-    subscribe_url: "https://www.amazon.com/amazonprime",
-    cancel_url: "https://www.amazon.com/mc/manage"
+    cancel_url: "https://www.costco.co.kr/my-account",
+    billing_cycle: "yearly",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "오아시스마켓",
@@ -437,14 +384,6 @@ export const SUBSCRIPTION_PRESETS = [
     category: "Shopping",
     subscribe_url: "https://www.oasis.co.kr",
     cancel_url: "https://www.oasis.co.kr/my"
-  },
-  {
-    nameKo: "GS25 우리동네클럽",
-    nameEn: "GS25 Club",
-    price: 3900,
-    category: "Shopping",
-    subscribe_url: "https://woodongs.woodongsan.com",
-    cancel_url: "https://woodongs.woodongsan.com/my"
   },
   {
     nameKo: "CU 구독 쿠폰",
@@ -457,10 +396,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "트레이더스 멤버십",
     nameEn: "Traders Membership",
-    price: 2500,
+    price: 30000,
     category: "Shopping",
     subscribe_url: "https://traders.ssg.com",
-    cancel_url: "https://traders.ssg.com/mypage"
+    cancel_url: "https://traders.ssg.com/mypage",
+    billing_cycle: "yearly"
   },
   {
     nameKo: "올리브영 멤버십",
@@ -511,14 +451,6 @@ export const SUBSCRIPTION_PRESETS = [
     cancel_url: "https://www.winenara.com/mypage"
   },
   {
-    nameKo: "컬리패스 (무료배송)",
-    nameEn: "Kurly Pass",
-    price: 4500,
-    category: "Shopping",
-    subscribe_url: "https://www.kurly.com",
-    cancel_url: "https://www.kurly.com/mypage/membership"
-  },
-  {
     nameKo: "토스 프라임",
     nameEn: "Toss Prime",
     price: 5900,
@@ -531,20 +463,13 @@ export const SUBSCRIPTION_PRESETS = [
   // 4. Work & AI
   // ==========================================
   {
-    nameKo: "구글 AI 플러스",
-    nameEn: "Google AI Plus",
-    price: 11000,
-    category: "Work",
-    subscribe_url: "https://gemini.google.com/advanced",
-    cancel_url: "https://myaccount.google.com/subscriptions"
-  },
-  {
     nameKo: "구글 AI 프로",
     nameEn: "Google AI Pro",
     price: 29000,
     category: "Work",
     subscribe_url: "https://gemini.google.com/advanced",
-    cancel_url: "https://myaccount.google.com/subscriptions"
+    cancel_url: "https://myaccount.google.com/subscriptions",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "구글 AI 울트라",
@@ -581,10 +506,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "챗GPT 고",
     nameEn: "ChatGPT Go",
-    price: 15000,
+    price: 13000,
     category: "Work",
     subscribe_url: "https://chatgpt.com",
-    cancel_url: "https://chatgpt.com/#settings/Subscription"
+    cancel_url: "https://chatgpt.com/#settings/Subscription",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "챗GPT 플러스",
@@ -592,7 +518,8 @@ export const SUBSCRIPTION_PRESETS = [
     price: 29000,
     category: "Work",
     subscribe_url: "https://chatgpt.com",
-    cancel_url: "https://chatgpt.com/#settings/Subscription"
+    cancel_url: "https://chatgpt.com/#settings/Subscription",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "챗GPT 팀",
@@ -605,10 +532,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "챗GPT 프로",
     nameEn: "ChatGPT Pro",
-    price: 299000,
+    price: 159000,
     category: "Work",
     subscribe_url: "https://chatgpt.com",
-    cancel_url: "https://chatgpt.com/#settings/Subscription"
+    cancel_url: "https://chatgpt.com/#settings/Subscription",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "클로드 프로",
@@ -930,7 +858,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "노션 플러스",
     nameEn: "Notion Plus",
-    price: 14500,
+    price: 14000,
+    verifiedAt: "2026-08-19",
     category: "Work",
     subscribe_url: "https://www.notion.so/pricing",
     cancel_url: "https://www.notion.so/settings"
@@ -947,7 +876,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "마이크로소프트 365 퍼스널",
     nameEn: "Microsoft 365 Personal",
-    price: 8900,
+    price: 12500,
+    verifiedAt: "2026-08-19",
     category: "Work",
     subscribe_url: "https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products",
     cancel_url: "https://account.microsoft.com/services"
@@ -955,7 +885,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "마이크로소프트 365 퍼스널 (연간)",
     nameEn: "Microsoft 365 Personal Yearly",
-    price: 89000,
+    price: 125000,
+    verifiedAt: "2026-08-19",
     category: "Work",
     billing_cycle: "yearly",
     subscribe_url: "https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products",
@@ -1091,7 +1022,8 @@ export const SUBSCRIPTION_PRESETS = [
     price: 2400,
     category: "Cloud",
     subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
+    cancel_url: "https://one.google.com/settings",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "구글 원 스탠다드 (200GB)",
@@ -1107,15 +1039,8 @@ export const SUBSCRIPTION_PRESETS = [
     price: 11900,
     category: "Cloud",
     subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
-  },
-  {
-    nameKo: "구글 원 5TB",
-    nameEn: "Google One 5TB",
-    price: 29900,
-    category: "Cloud",
-    subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
+    cancel_url: "https://one.google.com/settings",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "구글 원 10TB",
@@ -1147,28 +1072,32 @@ export const SUBSCRIPTION_PRESETS = [
     price: 1100,
     category: "Cloud",
     subscribe_url: "https://www.icloud.com",
-    cancel_url: "https://support.apple.com/HT202039"
+    cancel_url: "https://support.apple.com/HT202039",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "아이클라우드+ 200GB",
     nameEn: "iCloud+ 200GB",
-    price: 3300,
+    price: 4400,
     category: "Cloud",
     subscribe_url: "https://www.icloud.com",
-    cancel_url: "https://support.apple.com/HT202039"
+    cancel_url: "https://support.apple.com/HT202039",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "아이클라우드+ 2TB",
     nameEn: "iCloud+ 2TB",
-    price: 11100,
+    price: 14000,
     category: "Cloud",
     subscribe_url: "https://www.icloud.com",
-    cancel_url: "https://support.apple.com/HT202039"
+    cancel_url: "https://support.apple.com/HT202039",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "드롭박스 플러스",
     nameEn: "Dropbox Plus",
-    price: 14000,
+    price: 15000,
+    verifiedAt: "2026-08-19",
     category: "Cloud",
     subscribe_url: "https://www.dropbox.com/plans",
     cancel_url: "https://www.dropbox.com/account/plan"
@@ -1176,10 +1105,11 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "원드라이브 100GB",
     nameEn: "OneDrive 100GB",
-    price: 1900,
+    price: 2900,
     category: "Cloud",
     subscribe_url: "https://www.microsoft.com/microsoft-365/onedrive/compare-onedrive-plans",
-    cancel_url: "https://account.microsoft.com/services"
+    cancel_url: "https://account.microsoft.com/services",
+    verifiedAt: "2026-08-19"
   },
   {
     nameKo: "네이버 마이박스 80GB",
@@ -1375,7 +1305,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "닌텐도 온라인",
     nameEn: "Nintendo Online",
-    price: 4900,
+    price: 5900,
+    verifiedAt: "2026-08-19",
     category: "Etc",
     subscribe_url: "https://www.nintendo.co.kr/switch/online",
     cancel_url: "https://ec.nintendo.com/my/membership"
@@ -1383,7 +1314,8 @@ export const SUBSCRIPTION_PRESETS = [
   {
     nameKo: "닌텐도 온라인 (연간)",
     nameEn: "Nintendo Online Yearly",
-    price: 19900,
+    price: 24900,
+    verifiedAt: "2026-08-19",
     category: "Etc",
     billing_cycle: "yearly",
     subscribe_url: "https://www.nintendo.co.kr/switch/online",
@@ -1522,6 +1454,34 @@ export const SUBSCRIPTION_PRESETS = [
     cancel_url: "https://my.kakao.com"
   }
 ]
+
+/**
+ * 프리셋의 가격 기준일을 반환한다.
+ * 실제로 검증한 날짜(`verifiedAt`)가 있으면 그 값을, 없으면 카탈로그 공통 기준일
+ * (`PRICE_BASE_DATE`)을 반환한다.
+ * @param {object} preset - SUBSCRIPTION_PRESETS 의 원소
+ * @returns {string} 'YYYY-MM-DD' 형식의 기준일
+ */
+export function getPriceVerifiedAt(preset) {
+  return preset?.verifiedAt ?? PRICE_BASE_DATE
+}
+
+/**
+ * 가격 기준일이 오래된(=최근에 검증되지 않은) 프리셋 목록을 반환한다.
+ * 가격 재검증이 필요한 항목을 뽑아볼 때 쓴다.
+ * @param {number} [monthsThreshold=6] - 이 개월 수보다 기준일이 오래되면 "오래됨"으로 간주
+ * @param {Date} [now] - 기준 시각. 테스트 등에서 주입 가능하도록 선택 인자로 둔다. 기본값은 현재 시각.
+ * @returns {object[]} 임계치보다 기준일이 오래된 프리셋 배열
+ */
+export function listStalePresets(monthsThreshold = 6, now = new Date()) {
+  const threshold = new Date(now)
+  threshold.setMonth(threshold.getMonth() - monthsThreshold)
+
+  return SUBSCRIPTION_PRESETS.filter((preset) => {
+    const verifiedAt = new Date(getPriceVerifiedAt(preset))
+    return verifiedAt < threshold
+  })
+}
 
 /**
  * 서비스명 기반 공식 링크(구독 페이지, 해지/관리 페이지) 매칭 헬퍼 함수
