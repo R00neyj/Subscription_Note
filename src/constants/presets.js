@@ -511,8 +511,8 @@ const RAW_PRESETS = [
     cancel_url: "https://myaccount.google.com/subscriptions"
   },
   {
-    nameKo: "구글 AI 플러스",
-    nameEn: "Google AI Plus",
+    nameKo: "구글 AI 플러스 (400GB)",
+    nameEn: "Google AI Plus 400GB",
     price: 7500,
     verifiedAt: "2026-08-20",
     category: "Work",
@@ -1113,45 +1113,13 @@ const RAW_PRESETS = [
     verifiedAt: "2026-08-19"
   },
   {
-    nameKo: "구글 원 스탠다드 (200GB)",
-    nameEn: "Google One Standard 200GB",
-    price: 3700,
-    category: "Cloud",
-    subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
-  },
-  {
-    nameKo: "구글 원 프리미엄 (2TB)",
-    nameEn: "Google One Premium 2TB",
+    nameKo: "구글 AI 플러스 (2TB)",
+    nameEn: "Google AI Plus 2TB",
     price: 11900,
     category: "Cloud",
     subscribe_url: "https://one.google.com",
     cancel_url: "https://one.google.com/settings",
-    verifiedAt: "2026-08-19"
-  },
-  {
-    nameKo: "구글 원 10TB",
-    nameEn: "Google One 10TB",
-    price: 59900,
-    category: "Cloud",
-    subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
-  },
-  {
-    nameKo: "구글 원 20TB",
-    nameEn: "Google One 20TB",
-    price: 119900,
-    category: "Cloud",
-    subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
-  },
-  {
-    nameKo: "구글 원 30TB",
-    nameEn: "Google One 30TB",
-    price: 179900,
-    category: "Cloud",
-    subscribe_url: "https://one.google.com",
-    cancel_url: "https://one.google.com/settings"
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "아이클라우드+ 50GB",
@@ -1179,6 +1147,24 @@ const RAW_PRESETS = [
     subscribe_url: "https://www.icloud.com",
     cancel_url: "https://support.apple.com/HT202039",
     verifiedAt: "2026-08-19"
+  },
+  {
+    nameKo: "아이클라우드+ 6TB",
+    nameEn: "iCloud+ 6TB",
+    price: 44000,
+    verifiedAt: "2026-08-20",
+    category: "Cloud",
+    subscribe_url: "https://www.icloud.com",
+    cancel_url: "https://support.apple.com/HT202039"
+  },
+  {
+    nameKo: "아이클라우드+ 12TB",
+    nameEn: "iCloud+ 12TB",
+    price: 88000,
+    verifiedAt: "2026-08-20",
+    category: "Cloud",
+    subscribe_url: "https://www.icloud.com",
+    cancel_url: "https://support.apple.com/HT202039"
   },
   {
     nameKo: "드롭박스 플러스",
@@ -1365,11 +1351,39 @@ const RAW_PRESETS = [
     cancel_url: "https://class101.net/ko/mypage/subscription"
   },
   {
-    nameKo: "엑스박스 게임패스",
-    nameEn: "Xbox Game Pass",
-    price: 13500,
+    nameKo: "엑스박스 게임패스 에센셜",
+    nameEn: "Xbox Game Pass Essential",
+    price: 10800,
     category: "Etc",
     subscribe_url: "https://www.xbox.com/xbox-game-pass",
+    cancel_url: "https://account.microsoft.com/services",
+    verifiedAt: "2026-08-20"
+  },
+  {
+    nameKo: "엑스박스 게임패스 프리미엄",
+    nameEn: "Xbox Game Pass Premium",
+    price: 14900,
+    verifiedAt: "2026-08-20",
+    category: "Etc",
+    subscribe_url: "https://www.xbox.com/ko-KR/xbox-game-pass",
+    cancel_url: "https://account.microsoft.com/services"
+  },
+  {
+    nameKo: "엑스박스 게임패스 얼티밋",
+    nameEn: "Xbox Game Pass Ultimate",
+    price: 19000,
+    verifiedAt: "2026-08-20",
+    category: "Etc",
+    subscribe_url: "https://www.xbox.com/ko-KR/xbox-game-pass",
+    cancel_url: "https://account.microsoft.com/services"
+  },
+  {
+    nameKo: "엑스박스 게임패스 PC",
+    nameEn: "Xbox Game Pass PC",
+    price: 15500,
+    verifiedAt: "2026-08-20",
+    category: "Etc",
+    subscribe_url: "https://www.xbox.com/ko-KR/xbox-game-pass",
     cancel_url: "https://account.microsoft.com/services"
   },
   {
@@ -1411,10 +1425,11 @@ const RAW_PRESETS = [
   {
     nameKo: "윌라",
     nameEn: "Willa",
-    price: 9900,
+    price: 12500,
     category: "Etc",
     subscribe_url: "https://www.welaaa.com",
-    cancel_url: "https://www.welaaa.com/my/membership"
+    cancel_url: "https://www.welaaa.com/my/membership",
+    verifiedAt: "2026-08-20"
   },
   {
     nameKo: "크레마클럽",
