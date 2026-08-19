@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import useSubscriptionStore from '../store/useSubscriptionStore'
 import { cn } from '../lib/utils'
 import { X, ChevronRight, ChevronLeft, Check } from 'lucide-react'
@@ -45,6 +45,7 @@ export default function TutorialGuide() {
   const { isTutorialOpen, currentStep, setCurrentStep, completeTutorial } = useSubscriptionStore()
   const [coords, setCoords] = useState(null)
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0, placement: 'bottom' })
+  const tooltipRef = useRef(null)
 
   useEffect(() => {
     if (!isTutorialOpen) return
@@ -64,16 +65,48 @@ export default function TutorialGuide() {
             height: rect.height + (padding * 2),
           })
 
-          // Tooltip Positioning Logic
-          const isBottom = rect.bottom > window.innerHeight * 0.7 // 화면 하단부에 있으면 위로 띄움
-          const tooltipHeight = 200 // 대략적인 툴팁 높이 예상값 (여유있게)
-          
+          // Tooltip Positioning Logic (데스크톱)
+          //
+          // 툴팁 높이를 200 으로 어림잡던 이전 로직은 타깃이 화면 전체 높이를 차지할 때
+          // 무너졌다. #step-nav-bottom 은 모바일에선 하단 탭바지만 데스크톱에선
+          // md:h-screen 좌측 사이드바여서 rect.top 이 0 인데도 "하단 요소"로 판정돼
+          // 툴팁이 화면 위로 완전히 빠져나갔다.
+          //
+          // 그래서 실제로 렌더된 툴팁 크기를 재고, 위/아래에 자리가 없으면 옆에 붙인 뒤
+          // 마지막에 뷰포트 안으로 clamp 한다.
+          const gap = padding + 12
+          const margin = 16
+          const tip = tooltipRef.current
+          const tipW = tip?.offsetWidth || 320
+          const tipH = tip?.offsetHeight || 200
+
+          const spaceBelow = window.innerHeight - rect.bottom - gap - margin
+          const spaceAbove = rect.top - gap - margin
+
+          let top
+          let left = rect.left + (rect.width / 2) - (tipW / 2)
+          let placement
+
+          if (spaceBelow >= tipH) {
+            placement = 'bottom'
+            top = rect.bottom + gap
+          } else if (spaceAbove >= tipH) {
+            placement = 'top'
+            top = rect.top - gap - tipH
+          } else {
+            // 위아래 모두 부족한 세로로 긴 타깃(사이드바 등) — 옆에 세로 중앙 정렬로 붙인다
+            placement = 'side'
+            const fitsRight = window.innerWidth - rect.right - gap - margin >= tipW
+            left = fitsRight ? rect.right + gap : rect.left - gap - tipW
+            top = rect.top + (rect.height / 2) - (tipH / 2)
+          }
+
+          const clamp = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max))
+
           setTooltipPos({
-            top: isBottom 
-              ? rect.top - padding - 12 // Target 위쪽
-              : rect.bottom + padding + 12, // Target 아래쪽
-            left: rect.left + (rect.width / 2),
-            placement: isBottom ? 'top' : 'bottom'
+            top: clamp(top, margin, window.innerHeight - tipH - margin),
+            left: clamp(left, margin, window.innerWidth - tipW - margin),
+            placement
           })
 
         } else {
@@ -173,6 +206,7 @@ export default function TutorialGuide() {
 
       {/* Tooltip Content */}
       <div 
+        ref={tooltipRef}
         className={cn(
           "absolute pointer-events-auto transition-all duration-500 ease-in-out md:w-[320px] bg-white dark:bg-slate-800 rounded-2xl border border-tertiary dark:border-slate-700 p-6 shadow-xl",
           window.innerWidth < 768 ? "left-4 right-4" : (!coords && "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2")
@@ -188,11 +222,9 @@ export default function TutorialGuide() {
                 ? 'translateY(32px)' 
                 : 'translateY(-100%) translateY(-32px)')
         } : (coords ? {
+          // tooltipPos 가 이미 뷰포트 안으로 clamp 된 좌상단 좌표라 transform 보정이 없다.
           top: tooltipPos.top,
-          left: tooltipPos.left,
-          transform: (currentStep === 4 || currentStep === 5) && window.innerWidth >= 768
-            ? (tooltipPos.placement === 'top' ? 'translateY(-100%)' : '')
-            : `translateX(-50%) ${tooltipPos.placement === 'top' ? 'translateY(-100%)' : ''}`
+          left: tooltipPos.left
         } : {})}
       >
         <button 
