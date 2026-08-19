@@ -63,12 +63,16 @@ export default function Settings() {
     }
   }
 
-  const handleReset = () => {
-    if (confirmText === '초기화') {
-      resetSubscriptions()
+  const handleReset = async () => {
+    if (confirmText !== '초기화') return
+
+    const succeeded = await resetSubscriptions()
+    if (succeeded) {
       alert('초기화가 완료되었습니다.')
       setShowResetConfirm(false)
       setConfirmText('')
+    } else {
+      alert('초기화에 실패했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.')
     }
   }
 

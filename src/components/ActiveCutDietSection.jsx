@@ -18,9 +18,15 @@ export default function ActiveCutDietSection({
   }, [activeSubs])
 
   // Smart Recommendations: Low satisfaction (<=3) or non-essential items
+  // is_essential의 기본값이 false라 !is_essential 단독으로는 사실상 전체가 추천되므로,
+  // 만족도를 매긴 항목 중 4점 이상은 배너 문구("낮은 만족도/비필수")에 맞게 제외한다.
   const recommendedDietSubs = useMemo(() => {
     return actualActiveSubs
-      .filter(s => (s.satisfaction && s.satisfaction <= 3) || !s.is_essential)
+      .filter(s => {
+        const isRated = typeof s.satisfaction === 'number' && s.satisfaction > 0
+        if (isRated && s.satisfaction >= 4) return false
+        return (isRated && s.satisfaction <= 3) || !s.is_essential
+      })
       .sort((a, b) => (a.satisfaction || 3) - (b.satisfaction || 3))
   }, [actualActiveSubs])
 
@@ -47,13 +53,23 @@ export default function ActiveCutDietSection({
 
   // Batch actual deactivation
   const handleBatchDeactivate = async () => {
-    if (excludedActiveIds.length === 0) return
-    const count = excludedActiveIds.length
-    if (window.confirm(`가상 덜어내기로 선택한 ${count}개 서비스를 실제 구독 비활성화(정지) 처리하시겠습니까?`)) {
-      for (const id of excludedActiveIds) {
-        await updateSubscription(id, { status: 'disable' })
-      }
-      alert(`${count}개 구독이 비활성화 처리되었습니다.`)
+    const targetIds = [...excludedActiveIds]
+    if (targetIds.length === 0) return
+    if (!window.confirm(`가상 덜어내기로 선택한 ${targetIds.length}개 서비스를 실제 구독 비활성화(정지) 처리하시겠습니까?`)) return
+
+    const succeededIds = []
+    for (const id of targetIds) {
+      if (await updateSubscription(id, { status: 'disable' })) succeededIds.push(id)
+    }
+
+    // 실제로 비활성화된 항목은 시뮬레이션 선택에서도 해제해야 한다.
+    // 그러지 않으면 상단 총액에서 빠진 금액이 절감액으로 한 번 더 차감된다.
+    succeededIds.forEach(id => onToggleExclude(id))
+
+    if (succeededIds.length === targetIds.length) {
+      alert(`${succeededIds.length}개 구독이 비활성화 처리되었습니다.`)
+    } else {
+      alert(`${targetIds.length}개 중 ${succeededIds.length}개만 비활성화되었습니다. 잠시 후 다시 시도해 주세요.`)
     }
   }
 

@@ -4,6 +4,7 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import { CATEGORIES } from '../constants/categories'
 import { SUBSCRIPTION_PRESETS, getServiceLinks } from '../constants/presets'
 import { cn, sanitizeInput } from '../lib/utils'
+import { formatYearlyBillingDate } from '../lib/dateUtils'
 import ServiceIcon from './ServiceIcon'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
@@ -163,13 +164,9 @@ function SubscriptionModalContent({ onClose, initialData, defaultTab }) {
     
     let formattedBillingDate = ''
     if (!isWishlist && formData.billing_date) {
-      if (formData.billing_cycle === 'monthly') {
-        formattedBillingDate = `매달 ${formData.billing_date}일`
-      } else {
-        const mm = formData.billing_date.padStart(4, '0').slice(0, 2)
-        const dd = formData.billing_date.padStart(4, '0').slice(2)
-        formattedBillingDate = `매년 ${mm}월 ${dd}일`
-      }
+      formattedBillingDate = formData.billing_cycle === 'monthly'
+        ? `매달 ${formData.billing_date}일`
+        : formatYearlyBillingDate(formData.billing_date)
     }
 
     const payload = {

@@ -2,6 +2,46 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { supabase } from '../lib/supabase'
 
+// DB 컬럼 화이트리스트. 서버로 보내는 모든 경로(추가/수정/로컬 동기화)가 이 목록을 공유해야
+// 한 경로에만 필터가 빠져 스키마 에러로 데이터가 유실되는 일이 생기지 않는다.
+const CORE_DB_FIELDS = [
+  'service_name', 'categories', 'price', 'billing_date', 'payment_method',
+  'status', 'is_free_trial', 'trial_end_date', 'satisfaction', 'is_essential',
+  'billing_cycle', 'created_at', 'user_id'
+]
+
+// 마이그레이션이 아직 적용되지 않은 프로젝트가 있을 수 있는 컬럼.
+// 스키마 에러가 한 번이라도 발생하면 자동으로 제외하고 재시도한다.
+const OPTIONAL_DB_FIELDS = ['upgrade_from_id']
+
+let optionalFieldsSupported = true
+
+const pickDbFields = (source, includeOptional) => {
+  const allowed = includeOptional ? [...CORE_DB_FIELDS, ...OPTIONAL_DB_FIELDS] : CORE_DB_FIELDS
+  return Object.keys(source).reduce((acc, key) => {
+    if (allowed.includes(key)) acc[key] = source[key]
+    return acc
+  }, {})
+}
+
+// PostgREST가 존재하지 않는 컬럼을 거부했는지 판별 (PGRST204: 스키마 캐시, 42703: undefined_column)
+const isUnknownColumnError = (error) =>
+  !!error && (error.code === 'PGRST204' || error.code === '42703')
+
+// 선택 컬럼 때문에 실패한 경우 해당 컬럼을 빼고 한 번만 재시도한다.
+const withOptionalFieldFallback = async (run) => {
+  const includeOptional = optionalFieldsSupported
+  const result = await run(includeOptional)
+
+  if (!includeOptional || !isUnknownColumnError(result.error)) return result
+
+  console.warn(
+    `DB에 ${OPTIONAL_DB_FIELDS.join(', ')} 컬럼이 없어 제외하고 재시도합니다. 마이그레이션이 필요합니다.`
+  )
+  optionalFieldsSupported = false
+  return run(false)
+}
+
 const useSubscriptionStore = create(
   persist(
     (set, get) => ({
@@ -61,30 +101,29 @@ const useSubscriptionStore = create(
         // 중요: 읽어온 후 즉시 상태에서 제거하여 중복 업로드를 방지함
         const currentSubs = get().subscriptions
         const localSubs = currentSubs.filter(sub => sub.user_id === 'local-user')
-        
+
+        // 업로드에 실패한 로컬 데이터. 서버 조회 결과로 상태를 덮어쓸 때 함께 되살려
+        // 다음 동기화 기회를 남긴다 (실패해도 사용자 데이터가 사라지지 않도록).
+        let unsyncedLocalSubs = []
+
         if (localSubs.length > 0) {
           // 상태에서 먼저 제거 (낙관적 처리)
           set((state) => ({
             subscriptions: state.subscriptions.filter(sub => sub.user_id !== 'local-user')
           }))
 
-          const subsToUpload = localSubs.map(sub => {
-            // eslint-disable-next-line no-unused-vars
-            const { id, user_id, category, ...rest } = sub 
-            return {
-              ...rest,
-              user_id: currentUser.id
-            }
-          })
-          
-          const { error: uploadError } = await supabase
-            .from('subscriptions')
-            .insert(subsToUpload)
-          
+          const { error: uploadError } = await withOptionalFieldFallback((includeOptional) =>
+            supabase
+              .from('subscriptions')
+              .insert(localSubs.map(sub => ({
+                ...pickDbFields(sub, includeOptional),
+                user_id: currentUser.id
+              })))
+          )
+
           if (uploadError) {
             console.error('Failed to sync local subscriptions:', uploadError)
-            // 실패 시 다시 복구하는 로직이 이상적이나, 
-            // 현재는 콘솔 에러 후 서버 데이터를 다시 불러오는 것으로 대체
+            unsyncedLocalSubs = localSubs
           } else {
             console.log('Successfully synced local subscriptions')
           }
@@ -96,11 +135,14 @@ const useSubscriptionStore = create(
           .select('*')
           .eq('user_id', currentUser.id) // 본인의 데이터만 가져옴
           .order('created_at', { ascending: false }) // 최신순으로 가져옴
-        
+
         if (!error && data) {
-          set({ subscriptions: data, isLoading: false })
+          set({ subscriptions: [...unsyncedLocalSubs, ...data], isLoading: false })
         } else {
-          set({ isLoading: false })
+          set((state) => ({
+            subscriptions: [...unsyncedLocalSubs, ...state.subscriptions],
+            isLoading: false
+          }))
         }
       },
 
@@ -121,21 +163,13 @@ const useSubscriptionStore = create(
 
         // 로그인 상태라면 서버에 저장 (DB 컬럼 화이트리스트 필터링으로 스키마 에러 방지)
         if (currentUser) {
-          const allowedDbFields = [
-            'service_name', 'categories', 'price', 'billing_date', 'payment_method',
-            'status', 'is_free_trial', 'trial_end_date', 'satisfaction', 'is_essential',
-            'billing_cycle', 'created_at', 'user_id'
-          ]
-          const dbSubscription = Object.keys(subscription).reduce((acc, key) => {
-            if (allowedDbFields.includes(key)) acc[key] = subscription[key]
-            return acc
-          }, {})
+          const { data, error } = await withOptionalFieldFallback((includeOptional) =>
+            supabase
+              .from('subscriptions')
+              .insert([{ ...pickDbFields(subscription, includeOptional), user_id: currentUser.id }])
+              .select()
+          )
 
-          const { data, error } = await supabase
-            .from('subscriptions')
-            .insert([{ ...dbSubscription, user_id: currentUser.id }])
-            .select()
-          
           if (!error && data && data[0]) {
             // 서버에서 생성된 실제 데이터(ID 포함)와 로컬 전용 필드를 결합하여 업데이트
             set((state) => ({
@@ -166,27 +200,27 @@ const useSubscriptionStore = create(
 
         // 로그인 상태라면 서버에 업데이트 (DB 컬럼 화이트리스트 필터링)
         if (currentUser) {
-          const allowedDbFields = [
-            'service_name', 'categories', 'price', 'billing_date', 'payment_method',
-            'status', 'is_free_trial', 'trial_end_date', 'satisfaction', 'is_essential',
-            'billing_cycle', 'created_at', 'user_id'
-          ]
-          const dbUpdates = Object.keys(updates).reduce((acc, key) => {
-            if (allowedDbFields.includes(key)) acc[key] = updates[key]
-            return acc
-          }, {})
+          const { error } = await withOptionalFieldFallback((includeOptional) => {
+            const dbUpdates = pickDbFields(updates, includeOptional)
+            // 서버에 보낼 컬럼이 하나도 없으면 요청 자체를 건너뛴다 (빈 update는 에러)
+            if (Object.keys(dbUpdates).length === 0) return Promise.resolve({ error: null })
 
-          const { error } = await supabase
-            .from('subscriptions')
-            .update(dbUpdates)
-            .eq('id', id)
-          
+            return supabase
+              .from('subscriptions')
+              .update(dbUpdates)
+              .eq('id', id)
+              .eq('user_id', currentUser.id)
+          })
+
           if (error) {
             console.error('Failed to sync updateSubscription:', error)
             // 실패 시 롤백
             set({ subscriptions: previousSubs })
+            return false
           }
         }
+
+        return true
       },
 
       removeSubscription: async (id) => {
@@ -204,18 +238,23 @@ const useSubscriptionStore = create(
             .from('subscriptions')
             .delete()
             .eq('id', id)
-          
+            .eq('user_id', currentUser.id)
+
           if (error) {
             console.error('Failed to sync removeSubscription:', error)
             // 실패 시 롤백
             set({ subscriptions: previousSubs })
+            return false
           }
         }
+
+        return true
       },
-      
+
       resetSubscriptions: async () => {
         const currentUser = get().user
-        
+        const previousSubs = get().subscriptions
+
         // 로컬 상태 초기화
         set({ subscriptions: [] })
 
@@ -223,10 +262,17 @@ const useSubscriptionStore = create(
           const { error } = await supabase
             .from('subscriptions')
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
-          
-          if (error) console.error('Failed to sync resetSubscriptions:', error)
+            .eq('user_id', currentUser.id) // 반드시 본인 데이터만 삭제 (RLS에만 의존하지 않음)
+
+          if (error) {
+            console.error('Failed to sync resetSubscriptions:', error)
+            // 실패 시 롤백 — 성공했다고 잘못 안내하지 않기 위해 실패를 호출부에 알린다
+            set({ subscriptions: previousSubs })
+            return false
+          }
         }
+
+        return true
       },
 
       // Wishlist Actions

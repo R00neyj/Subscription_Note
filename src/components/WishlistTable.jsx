@@ -63,7 +63,10 @@ export default function WishlistTable({
     })
   }
 
-  const isAllSelected = data.length > 0 && selectedWishlistIds.length === data.length
+  // 카테고리 필터가 걸리면 선택 목록에는 화면 밖 항목도 남아 있으므로,
+  // 전체 선택 상태와 카운터는 모두 현재 보이는 목록(data) 기준으로 계산한다.
+  const visibleSelectedCount = data.filter(item => selectedWishlistIds.includes(item.id)).length
+  const isAllSelected = data.length > 0 && visibleSelectedCount === data.length
 
   if (data.length === 0) {
     return (
@@ -107,7 +110,7 @@ export default function WishlistTable({
               {isAllSelected && <Check className="w-3 h-3 stroke-[3px]" />}
             </div>
             <span className="text-[12px] font-bold text-slate-600 dark:text-slate-300">
-              전체 선택 ({selectedWishlistIds.length}/{data.length})
+              전체 선택 ({visibleSelectedCount}/{data.length})
             </span>
           </div>
           <span className="text-[11px] text-slate-400">시뮬레이션 반영</span>

@@ -1,5 +1,36 @@
 import { setDate, addMonths, addYears, isBefore, startOfDay, getDaysInMonth, getDate, getMonth } from 'date-fns'
 
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
+
+/**
+ * 사용자가 입력한 숫자 문자열(MMDD/MDD/DD)을 연간 구독의 표준 billing_date 문자열로 변환합니다.
+ * padStart만 사용하면 "015" 같은 입력이 "00월"이 되어 parseBillingInfo가 month를 0으로 돌려주고,
+ * 해당 구독이 캘린더/결제 브리핑에서 통째로 사라지므로 월·일을 유효 범위로 보정합니다.
+ * @param {string} rawDigits 사용자가 입력한 원본 문자열
+ * @returns {string} "매년 MM월 DD일"
+ */
+export const formatYearlyBillingDate = (rawDigits) => {
+  const digits = String(rawDigits || '').replace(/[^0-9]/g, '').slice(-4)
+
+  let month
+  let day
+  if (digits.length >= 4) {
+    month = parseInt(digits.slice(0, 2), 10)
+    day = parseInt(digits.slice(2), 10)
+  } else if (digits.length === 3) {
+    month = parseInt(digits.slice(0, 1), 10)
+    day = parseInt(digits.slice(1), 10)
+  } else {
+    month = 1
+    day = parseInt(digits, 10)
+  }
+
+  const safeMonth = clamp(month || 1, 1, 12)
+  const safeDay = clamp(day || 1, 1, 31)
+
+  return `매년 ${String(safeMonth).padStart(2, '0')}월 ${String(safeDay).padStart(2, '0')}일`
+}
+
 /**
  * 구독 객체 또는 billing_date 문자열과 billing_cycle 정보를 바탕으로
  * 결제 주기(isYearly), 결제 월(month: 1~12), 결제 일(day: 1~31)을 파싱합니다.

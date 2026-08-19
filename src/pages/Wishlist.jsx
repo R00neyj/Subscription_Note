@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Header from '../components/Header'
 import WishlistTable from '../components/WishlistTable'
 import ActiveCutDietSection from '../components/ActiveCutDietSection'
@@ -30,10 +30,35 @@ export default function Wishlist() {
     return subscriptions.filter(s => s.status === 'wishlist')
   }, [subscriptions])
 
-  // Sync default selected wishlist items on initial load or count change
+  // 차액 계산·교체 후보는 실제로 결제 중인 구독만 대상으로 한다.
+  // status !== 'wishlist' 에는 이미 해지(disable)한 구독도 섞여 있어,
+  // 그대로 쓰면 결제하지 않는 금액을 차감해 시뮬레이션 총액이 과소 계산된다.
+  const replaceableSubs = useMemo(() => {
+    return activeSubs.filter(s => s.status === 'active')
+  }, [activeSubs])
+
+  const wishlistIdsKey = wishlistSubs.map(w => w.id).join(',')
+  const knownWishlistIdsRef = useRef(null)
+
+  // 새로 추가된 항목은 기본 선택하고 삭제된 항목만 정리한다.
+  // (목록 개수만 보면 사용자가 직접 해제한 선택이 되돌아가거나, 추가/삭제가 상쇄될 때 갱신을 놓친다)
   useEffect(() => {
-    setSelectedWishlistIds(wishlistSubs.map(w => w.id))
-  }, [wishlistSubs.length])
+    const currentIds = wishlistSubs.map(w => w.id)
+    const knownIds = knownWishlistIdsRef.current
+    knownWishlistIdsRef.current = new Set(currentIds)
+
+    if (knownIds === null) {
+      setSelectedWishlistIds(currentIds)
+      return
+    }
+
+    const addedIds = currentIds.filter(id => !knownIds.has(id))
+    setSelectedWishlistIds(prev => [
+      ...prev.filter(id => knownWishlistIdsRef.current.has(id)),
+      ...addedIds
+    ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wishlistIdsKey])
 
   const handleToggleExcludeActive = (id) => {
     setExcludedActiveIds(prev => 
@@ -47,22 +72,26 @@ export default function Wishlist() {
     )
   }
 
+  // 전체 선택은 화면에 보이는(카테고리 필터가 적용된) 목록만 대상으로 하고,
+  // 필터에 가려진 다른 카테고리의 선택은 그대로 유지한다.
   const handleToggleSelectAllWish = () => {
-    if (selectedWishlistIds.length === sortedWishlist.length) {
-      setSelectedWishlistIds([])
-    } else {
-      setSelectedWishlistIds(sortedWishlist.map(w => w.id))
-    }
+    const visibleIds = sortedWishlist.map(w => w.id)
+    const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedWishlistIds.includes(id))
+
+    setSelectedWishlistIds(prev => {
+      const hiddenSelected = prev.filter(id => !visibleIds.includes(id))
+      return isAllVisibleSelected ? hiddenSelected : [...hiddenSelected, ...visibleIds]
+    })
   }
 
   // Helper to calculate net delta for a wishlist item against existing subscriptions
   const getNetDelta = (wishItem) => {
     let matchedActive = null
     if (wishItem.upgrade_from_id) {
-      matchedActive = activeSubs.find(s => s.id === wishItem.upgrade_from_id)
+      matchedActive = replaceableSubs.find(s => s.id === wishItem.upgrade_from_id)
     } else {
       const wishNorm = wishItem.service_name.trim().toLowerCase().replace(/\s+/g, '')
-      matchedActive = activeSubs.find(sub => {
+      matchedActive = replaceableSubs.find(sub => {
         const subNorm = sub.service_name.trim().toLowerCase().replace(/\s+/g, '')
         return wishNorm.includes(subNorm) || subNorm.includes(wishNorm)
       })
@@ -172,13 +201,12 @@ export default function Wishlist() {
 
   // 1. Current Active Total Monthly Cost
   const currentActiveMonthlyTotal = useMemo(() => {
-    return activeSubs
-      .filter(s => s.status === 'active')
+    return replaceableSubs
       .reduce((acc, sub) => {
         const price = sub.billing_cycle === 'yearly' ? Math.floor(sub.price / 12) : sub.price
         return acc + price
       }, 0)
-  }, [activeSubs])
+  }, [replaceableSubs])
 
   // 2. Simulated Wishlist Add Total (Selected only)
   const simulatedWishlistAdd = useMemo(() => {
@@ -188,17 +216,25 @@ export default function Wishlist() {
         const { delta } = getNetDelta(sub)
         return acc + delta
       }, 0)
-  }, [wishlistSubs, selectedWishlistIds, activeSubs])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wishlistSubs, selectedWishlistIds, replaceableSubs])
 
   // 3. Simulated Active Cut (Diet Savings)
+  // 이미 비활성화된 구독은 currentActiveMonthlyTotal에 포함되지 않으므로
+  // 여기서도 제외해야 같은 금액이 두 번 차감되지 않는다.
   const simulatedActiveCut = useMemo(() => {
-    return activeSubs
+    return replaceableSubs
       .filter(sub => excludedActiveIds.includes(sub.id))
       .reduce((acc, sub) => {
         const price = sub.billing_cycle === 'yearly' ? Math.floor(sub.price / 12) : sub.price
         return acc + price
       }, 0)
-  }, [activeSubs, excludedActiveIds])
+  }, [replaceableSubs, excludedActiveIds])
+
+  // 화면 표기는 실제로 절감액에 반영된 항목 수와 일치시킨다
+  const excludedCutCount = useMemo(() => {
+    return replaceableSubs.filter(sub => excludedActiveIds.includes(sub.id)).length
+  }, [replaceableSubs, excludedActiveIds])
 
   // 4. Simulated Net Change
   const simulatedNetChange = simulatedWishlistAdd - simulatedActiveCut
@@ -216,7 +252,7 @@ export default function Wishlist() {
         {/* Section Header with Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 w-full">
           <div className="flex flex-col">
-            <SectionHeader title="위시리스트 & 지출 시뮬레이터" className="w-auto" />
+            <SectionHeader title="구독 다이어트 시뮬레이터" className="w-auto" />
             <p className="text-[12px] md:text-[13px] text-slate-500 dark:text-slate-400 font-medium">
               새 구독 추가와 기존 구독 덜어내기를 조합하여 최적의 월 지출 균형을 찾아보세요.
             </p>
@@ -304,7 +340,7 @@ export default function Wishlist() {
               "text-[10px] md:text-[11.5px] font-medium truncate",
               simulatedActiveCut > 0 ? "text-rose-700/70 dark:text-rose-300/70" : "text-slate-400 dark:text-slate-500"
             )}>
-              {excludedActiveIds.length > 0 ? `${excludedActiveIds.length}개 해지 중` : '아래에서 선택'}
+              {excludedCutCount > 0 ? `${excludedCutCount}개 해지 중` : '아래에서 선택'}
             </span>
           </div>
 
@@ -390,9 +426,9 @@ export default function Wishlist() {
               체크박스를 끄면 시뮬레이션 총액에서 제외됩니다.
             </span>
           </div>
-          <WishlistTable 
-            data={sortedWishlist} 
-            activeSubs={activeSubs}
+          <WishlistTable
+            data={sortedWishlist}
+            activeSubs={replaceableSubs}
             selectedWishlistIds={selectedWishlistIds}
             onToggleSelectWish={handleToggleSelectWish}
             onToggleSelectAllWish={handleToggleSelectAllWish}

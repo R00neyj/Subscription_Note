@@ -4,6 +4,7 @@ import useSubscriptionStore from '../store/useSubscriptionStore'
 import ServiceIcon from './ServiceIcon'
 import { getServiceLinks } from '../constants/presets'
 import { cn, sanitizeInput } from '../lib/utils'
+import { formatYearlyBillingDate } from '../lib/dateUtils'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -11,8 +12,9 @@ function PromoteModalContent({ item, onClose }) {
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
   const promoteToActive = useSubscriptionStore((state) => state.promoteToActive)
 
+  // 이미 해지(disable)한 구독은 교체 대상이 될 수 없으므로 결제 중인 구독만 후보로 둔다
   const activeSubs = useMemo(() => {
-    return subscriptions.filter(s => s.status !== 'wishlist')
+    return subscriptions.filter(s => s.status === 'active')
   }, [subscriptions])
 
   // Detect matching target sub to replace
@@ -78,14 +80,9 @@ function PromoteModalContent({ item, onClose }) {
     e.preventDefault()
     if (!isFormValid) return
 
-    let formattedBillingDate = ''
-    if (isMonthly) {
-      formattedBillingDate = `매달 ${formData.billing_date}일`
-    } else {
-      const mm = formData.billing_date.padStart(4, '0').slice(0, 2)
-      const dd = formData.billing_date.padStart(4, '0').slice(2)
-      formattedBillingDate = `매년 ${mm}월 ${dd}일`
-    }
+    const formattedBillingDate = isMonthly
+      ? `매달 ${formData.billing_date}일`
+      : formatYearlyBillingDate(formData.billing_date)
 
     promoteToActive(item.id, {
       billing_date: formattedBillingDate,
