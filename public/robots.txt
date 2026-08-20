@@ -1,2 +1,7 @@
+# 개발 서버(vite dev)용 폴백. 프로덕션 빌드에서는
+# scripts/generate-guides.mjs 가 Sitemap 줄까지 포함해 dist/robots.txt 를 덮어쓴다.
 User-agent: *
-Allow:/
+Allow: /
+
+User-agent: Yeti
+Allow: /

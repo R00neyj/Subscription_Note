@@ -476,7 +476,9 @@ const run = async () => {
   await writeFile(path.join(DIST, 'sitemap.xml'), sitemap(services), 'utf8')
   await writeFile(
     path.join(DIST, 'robots.txt'),
-    `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`,
+    // Yeti(네이버 검색로봇)는 `User-agent: *` 로도 커버되지만,
+    // 네이버 서치어드바이저가 확실히 인식하도록 공식 가이드 예시대로 블록을 따로 둔다.
+    `User-agent: *\nAllow: /\n\nUser-agent: Yeti\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`,
     'utf8'
   )
 
